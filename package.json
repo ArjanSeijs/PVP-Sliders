@@ -1,0 +1,28 @@
+{
+  "name": "pvp-sliders",
+  "version": "1.0.0",
+  "description": "Last attempt at an pvp-sliders game",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ArjanSeijs/PVP-Sliders.git"
+  },
+  "keywords": [
+    "pvp",
+    "sliders"
+  ],
+  "author": "Arjan Seijs",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ArjanSeijs/PVP-Sliders/issues"
+  },
+  "homepage": "https://github.com/ArjanSeijs/PVP-Sliders#readme",
+  "dependencies": {
+    "body-parser": "latest",
+    "ejs": "^2.5.7",
+    "express": "^4.16.3"
+  }
+}
