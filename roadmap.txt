@@ -1,0 +1,10 @@
+Last try:
+Start with the data classes for game board & entities. (Typescript?) Entities have an id.
+Add parser classes for game & boards.
+Add an collision handler. (should check next positions and update then moves)
+Add movement for things through game class.
+Have one global game object on startup to implement the game.
+Start with continuous polling before client side prediction.
+Display standard game values on the client.
+
+Implement lobby & sockets TODO write out
