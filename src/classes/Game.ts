@@ -7,7 +7,7 @@ import Entity = require("./entities/Entity");
 import ToJson = require("../interfaces/ToJson");
 
 interface EntityMap {
-    [index: string]: Entity
+    [index: number]: Entity
 }
 
 class Game implements ToJson {

@@ -11,7 +11,7 @@ class Board implements ToJson {
         this.width = width;
         this.height = height;
         this.metadata = {};
-        this.tiles = []
+        this.tiles = [];
         this.makeBoard();
     }
 

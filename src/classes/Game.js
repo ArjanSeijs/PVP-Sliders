@@ -1,7 +1,7 @@
 "use strict";
 var CollisionManager = require("./CollisionManager");
 var GameModeStandard = require("./gamemodes/GameModeStandard");
-var Game = (function () {
+var Game = /** @class */ (function () {
     function Game(board) {
         this.board = board;
         this.entities = {};
@@ -42,3 +42,4 @@ var Game = (function () {
     return Game;
 }());
 module.exports = Game;
+//# sourceMappingURL=Game.js.map

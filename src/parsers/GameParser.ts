@@ -1,32 +1,29 @@
 import Game = require("../classes/Game");
-import Player = require("../classes/entities/Player");
 import Board = require("../classes/Board");
+import Player = require("../classes/entities/Player");
+
+interface map {
+    [p: string]: { ids: { id: number; name: string }[]; client_id: number }
+}
 
 class GameParser {
-    static create(board: Board, players: number): Game {
+    static create(board: Board, players: number, sessions: map): Game {
         //TODO improve.
         const cellSize = 100;
         let game = new Game(board);
+        let i = 0;
+        for (let key in sessions) {
+            if (!sessions.hasOwnProperty(key)) continue;
+            for (let j = 0; j < sessions[key].ids.length; j++) {
+                let pos = board.metadata.mapData[i];
+                game.entities[i] = new Player(pos.x * cellSize, pos.y * cellSize, sessions[key].ids[j].id, temp(i));
+                i++;
+            }
+        }
 
         // TODO
         function temp(i) {
             return i < players / 2 ? "red" : "yellow";
-        }
-
-        let i = 0;
-        while (i < players) {
-            //P1
-            let pos = board.metadata.mapData[i];
-            game.entities[i] = new Player(pos.x * cellSize, pos.y * cellSize, i, temp(i));
-            i++;
-            // if (i >= players) break;
-            // //P2
-            // if (UUIDs.uuid2) {
-            //     let pos = board.mapData[i];
-            //     game.entities[UUIDs.uuid2] = new Player(pos.x * cellSize, pos.y * cellSize, i, temp(i));
-            //     i++;
-            //     if (i >= players) break;
-            // }
         }
         return game;
     }

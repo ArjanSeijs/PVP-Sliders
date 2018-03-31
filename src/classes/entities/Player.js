@@ -10,7 +10,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 var Entity = require("./Entity");
-var Player = (function (_super) {
+var Player = /** @class */ (function (_super) {
     __extends(Player, _super);
     function Player(x, y, id, team) {
         return _super.call(this, x, y, id, team) || this;
@@ -24,3 +24,4 @@ var Player = (function (_super) {
     return Player;
 }(Entity));
 module.exports = Player;
+//# sourceMappingURL=Player.js.map

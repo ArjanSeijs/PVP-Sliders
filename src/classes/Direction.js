@@ -1,5 +1,5 @@
 "use strict";
-var Direction = (function () {
+var Direction = /** @class */ (function () {
     function Direction(x, y) {
         this.x = x;
         this.y = y;
@@ -42,3 +42,4 @@ var Direction = (function () {
     Direction.West.opposite = Direction.East;
 })();
 module.exports = Direction;
+//# sourceMappingURL=Direction.js.map

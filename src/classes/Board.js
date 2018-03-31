@@ -1,6 +1,6 @@
 "use strict";
 var Tile = require("./Tile");
-var Board = (function () {
+var Board = /** @class */ (function () {
     function Board(width, height) {
         this.width = width;
         this.height = height;
@@ -29,3 +29,4 @@ var Board = (function () {
     return Board;
 }());
 module.exports = Board;
+//# sourceMappingURL=Board.js.map

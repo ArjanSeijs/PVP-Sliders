@@ -6,7 +6,8 @@ var images = [
 var screen_width = window.innerWidth;
 var screen_height = window.innerHeight;
 var app, game, socket;
-var id = null;
+var ids = [];
+var session_id = null;
 window.onload = function () {
     var type = "WebGL";
     if (!PIXI.utils.isWebGLSupported()) {
@@ -34,48 +35,70 @@ var keys = {
     RIGHT: 39,
     DOWN: 40
 };
-window.onkeypress = function (e) {
-    var code = e.keyCode ? e.keyCode : e.which;
-    var data = { id: id, direction: "NONE" };
-    switch (code) {
-        case keys.W:
+document.onkeypress = function (e) {
+    if (!socket || !game)
+        return;
+    var code = e.key;
+    var data = { id: -1, direction: "NONE", session_id: session_id };
+    console.log(e);
+    switch (code.toLowerCase()) {
+        case 'w':
+            data.id = ids[0].id;
             data.direction = "NORTH";
             break;
-        case keys.A:
+        case 'a':
+            data.id = ids[0].id;
             data.direction = "WEST";
             break;
-        case keys.S:
+        case 's':
+            data.id = ids[0].id;
             data.direction = "SOUTH";
             break;
-        case keys.D:
+        case 'd':
+            data.id = ids[0].id;
             data.direction = "EAST";
             break;
-        case keys.LEFT:
+        case 'arrowleft':
+            data.id = ids[1].id;
             data.direction = "WEST";
             break;
-        case keys.UP:
+        case 'arrowup':
+            data.id = ids[1].id;
             data.direction = "NORTH";
             break;
-        case keys.RIGHT:
+        case 'arrowright':
+            data.id = ids[1].id;
             data.direction = "EAST";
             break;
-        case keys.DOWN:
+        case 'arrowdown':
+            data.id = ids[1].id;
             data.direction = "SOUTH";
             break;
     }
+    if (data.id === -1)
+        return;
     socket.emit("move", data);
 };
 function initSocket() {
+    if (socket)
+        socket.disconnect();
     socket = io("http://localhost:3000");
-    socket.on("connected", function (data) {
-        id = data.id;
+    socket.on("start", function (data) {
+        console.log("Hello?");
         game = data.game;
-        // console.log(JSON.stringify(data));
         displayGame();
     });
     socket.on("update", function (entities) {
         game.entities = entities;
         displayPlayers();
+    });
+    socket.on("failed", function (data) {
+        alert(data);
+    });
+    socket.on('joined', function (data) {
+        ids = data.ids;
+        session_id = data.session_id;
+        document.getElementById("wrapper").style.display = 'none';
     });
 }
 function init() {
@@ -83,7 +106,7 @@ function init() {
     background.width = window.innerWidth;
     background.height = window.innerHeight;
     app.stage.addChild(background);
-    initSocket();
+    // initSocket();
 }
 function loadImage(image) {
     var texture = PIXI.loader.resources["assets/" + image].texture;
@@ -111,18 +134,18 @@ function displayGame() {
     }
     app.stage.addChild(graphics);
 }
-var entities = [];
+var entitySprites = [];
 function displayPlayers() {
     var width = game.board.width;
     var height = game.board.height;
     var size = Math.min(Math.floor(screen_width / width), Math.floor(screen_height / height));
     var offsetX = (screen_width - width * size) / 2;
     var offsetY = (screen_height - height * size) / 2;
-    for (var _i = 0, entities_1 = entities; _i < entities_1.length; _i++) {
-        var entity = entities_1[_i];
+    for (var _i = 0, entitySprites_1 = entitySprites; _i < entitySprites_1.length; _i++) {
+        var entity = entitySprites_1[_i];
         app.stage.removeChild(entity);
     }
-    entities = [];
+    entitySprites = [];
     for (var _a = 0, _b = game.entities; _a < _b.length; _a++) {
         var entity = _b[_a];
         var sprite = loadImage("player_" + entity.team + ".png");
@@ -130,7 +153,15 @@ function displayPlayers() {
         sprite.width = sprite.height = size;
         sprite.x = offsetX + (entity.pos.x / 100) * size;
         sprite.y = offsetY + (entity.pos.y / 100) * size;
-        entities.push(sprite);
+        entitySprites.push(sprite);
         app.stage.addChild(sprite);
     }
 }
+function join() {
+    initSocket();
+    var username = document.getElementById("username").value;
+    var multiplayer = document.getElementById("multiplayer").checked;
+    var lobby = document.getElementById("lobby").value;
+    socket.emit('join', { username: username, multiplayer: multiplayer, lobby: lobby });
+}
+//# sourceMappingURL=client.js.map

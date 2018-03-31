@@ -1,6 +1,6 @@
 "use strict";
 var Direction = require("../Direction");
-var Entity = (function () {
+var Entity = /** @class */ (function () {
     function Entity(x, y, id, team) {
         this.pos = { x: x, y: y };
         this.direction = { curr: Direction.None, next: Direction.None };
@@ -53,3 +53,4 @@ var Entity = (function () {
     return Entity;
 }());
 module.exports = Entity;
+//# sourceMappingURL=Entity.js.map

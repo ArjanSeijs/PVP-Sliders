@@ -6,7 +6,51 @@
     <script src="../scripts/socket.io.js"></script>
     <script src="../scripts/pixi.min.js"></script>
     <script src="../scripts/client.js"></script>
+    <style>
+        .wrapper {
+            width: 100%;
+            height: 100%;
+            background: rgba(128, 128, 128, 0.3);
+            position: absolute;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .login {
+            background-color: antiquewhite;
+            border: 10px solid #ffe78e;
+            border-radius: 15px;
+            width: 20%;
+            height: 20%;
+            margin: 100px auto 100px auto;
+        }
+
+        .login > label {
+            display: block;
+            text-align: center;
+        }
+    </style>
 </head>
 <body style="margin: 0; padding: 0">
+<div id="wrapper" class="wrapper">
+    <div class="login">
+        <label>Username:<br>
+            <input id="username" type="text">
+        </label>
+        <label>Local MultiPlayer:<br>
+            <input id="multiplayer" type="checkbox">
+        </label>
+        <label>
+            Lobby id (leave empty for random):<br>
+            <input id="lobby" type="text">
+        </label>
+        <label>
+            <input type="button" value="Join lobby" onclick="join()">
+        </label>
+    </div>
+    <div class="lobby">
+
+    </div>
+</div>
 </body>
 </html>

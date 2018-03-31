@@ -2,7 +2,7 @@
 var Direction = require("./Direction");
 var Logger = require("simple-nodejs-logger");
 var logger = Logger("CollisionManager");
-var CollisionHandler = (function () {
+var CollisionHandler = /** @class */ (function () {
     function CollisionHandler(game) {
         this.game = game;
     }
@@ -176,3 +176,4 @@ var CollisionHandler = (function () {
     return CollisionHandler;
 }());
 module.exports = CollisionHandler;
+//# sourceMappingURL=CollisionManager.js.map

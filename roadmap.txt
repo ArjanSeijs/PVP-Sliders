@@ -7,4 +7,18 @@ Have one global game object on startup to implement the game.
 Start with continuous polling before client side prediction.
 Display standard game values on the client.
 
-Implement lobby & sockets TODO write out
+Implement lobby & sockets.
+   Start with login screen.
+   Choose existing lobby or create new lobby.
+     Join the lobby.
+     Get sessionId
+     Toggle ready status.
+     On leave remove clients from lobby.
+     If everyone ready start game.
+
+     If everyone dead stop game.
+        Eventually start next map.
+
+
+
+Reduce update loop & use client side prediction.

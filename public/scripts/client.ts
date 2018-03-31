@@ -1,5 +1,4 @@
 declare let io: any;
-declare let PIXI: any;
 const images = [
     "assets/block.png", "assets/background.png",
     "assets/player_blue.png", "assets/player_green.png",
@@ -9,7 +8,8 @@ let screen_width = window.innerWidth;
 let screen_height = window.innerHeight;
 
 let app, game, socket;
-let id = null;
+let ids = [];
+let session_id = null;
 window.onload = function () {
     let type = "WebGL";
     if (!PIXI.utils.isWebGLSupported()) {
@@ -40,49 +40,68 @@ let keys = {
     DOWN: 40
 };
 
-window.onkeypress = function (e) {
-    let code = e.keyCode ? e.keyCode : e.which;
-    let data = {id: id, direction: "NONE"};
-    switch (code) {
-        case keys.W :
+document.onkeypress = function (e) {
+    if (!socket || !game) return;
+    let code = e.key;
+    let data = {id: -1, direction: "NONE", session_id: session_id};
+    console.log(e);
+    switch (code.toLowerCase()) {
+        case 'w' :
+            data.id = ids[0].id;
             data.direction = "NORTH";
             break;
-        case keys.A :
+        case 'a' :
+            data.id = ids[0].id;
             data.direction = "WEST";
             break;
-        case keys.S :
+        case 's' :
+            data.id = ids[0].id;
             data.direction = "SOUTH";
             break;
-        case keys.D :
+        case 'd' :
+            data.id = ids[0].id;
             data.direction = "EAST";
             break;
-        case keys.LEFT :
+        case 'arrowleft' :
+            data.id = ids[1].id;
             data.direction = "WEST";
             break;
-        case keys.UP :
+        case 'arrowup' :
+            data.id = ids[1].id;
             data.direction = "NORTH";
             break;
-        case keys.RIGHT :
+        case 'arrowright' :
+            data.id = ids[1].id;
             data.direction = "EAST";
             break;
-        case keys.DOWN :
+        case 'arrowdown' :
+            data.id = ids[1].id;
             data.direction = "SOUTH";
             break;
     }
+    if (data.id === -1) return;
     socket.emit("move", data);
 };
 
 function initSocket() {
+    if (socket) socket.disconnect();
     socket = io("http://localhost:3000");
-    socket.on("connected", function (data) {
-        id = data.id;
+    socket.on("start", function (data) {
+        console.log("Hello?");
         game = data.game;
-        // console.log(JSON.stringify(data));
         displayGame();
     });
     socket.on("update", function (entities) {
         game.entities = entities;
         displayPlayers();
+    });
+    socket.on("failed", function (data) {
+        alert(data);
+    });
+    socket.on('joined', function (data) {
+        ids = data.ids;
+        session_id = data.session_id;
+        document.getElementById("wrapper").style.display = 'none';
     })
 }
 
@@ -91,7 +110,7 @@ function init() {
     background.width = window.innerWidth;
     background.height = window.innerHeight;
     app.stage.addChild(background);
-    initSocket();
+    // initSocket();
 }
 
 function loadImage(image: string) {
@@ -127,7 +146,7 @@ function displayGame() {
     app.stage.addChild(graphics);
 }
 
-let entities = [];
+let entitySprites = [];
 
 function displayPlayers() {
     let width = game.board.width;
@@ -137,19 +156,26 @@ function displayPlayers() {
     let offsetX = (screen_width - width * size) / 2;
     let offsetY = (screen_height - height * size) / 2;
 
-    for (let entity of entities) {
+    for (let entity of entitySprites) {
         app.stage.removeChild(entity);
     }
-    entities = [];
+    entitySprites = [];
     for (let entity of game.entities) {
         let sprite = loadImage("player_" + entity.team + ".png");
         //TODO cellSize
         sprite.width = sprite.height = size;
         sprite.x = offsetX + (entity.pos.x / 100) * size;
         sprite.y = offsetY + (entity.pos.y / 100) * size;
-
-        entities.push(sprite);
+        entitySprites.push(sprite);
 
         app.stage.addChild(sprite);
     }
+}
+
+function join() {
+    initSocket();
+    let username = (document.getElementById("username") as HTMLInputElement).value;
+    let multiplayer = (document.getElementById("multiplayer") as HTMLInputElement).checked;
+    let lobby = (document.getElementById("lobby") as HTMLInputElement).value;
+    socket.emit('join', {username: username, multiplayer: multiplayer, lobby: lobby});
 }

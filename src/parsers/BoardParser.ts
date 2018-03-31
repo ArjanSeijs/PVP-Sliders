@@ -9,12 +9,23 @@ interface BIn {
 }
 
 class BoardParser {
-    static boards: BIn;
+    static boards: BIn = {};
 
     static init(): void {
         fs.readdirSync(path.join(_global.rootDir, "/public/assets/games/boards/"), "utf8").forEach(function (file) {
-            this.boards[file] = BoardParser.fromFile(file);
-        })
+            BoardParser.boards[file] = BoardParser.fromFile(file);
+        });
+    }
+
+    static getBoard(file: string): Board {
+        if (this.boards[file]) {
+            return this.boards[file];
+        }
+        try {
+            return this.fromFile(file);
+        } catch (e) {
+            return null;
+        }
     }
 
     static fromFile(file: string): Board {
@@ -22,14 +33,30 @@ class BoardParser {
         return BoardParser.fromStrings(strings);
     }
 
-    static fromStrings(strings: string[]): Board {
-        if (strings.length === 0) {
-            throw new Error("Something went wrong");
+    static valid(strings: string[]): { valid: boolean, message?: string } {
+        if (strings.length < 4 || strings.length[0] < 4) {
+            return {valid: false, message: "Length must be at least 4 by 4"};
         }
+        for (let i = 1; i < strings.length; i++) {
+            if (strings[i].length !== strings[0].length && strings[i].length !== 0) return {
+                valid: false,
+                message: "Not all lengths are the same."
+            };
+        }
+        return {valid: true};
+    }
+
+    static fromStrings(strings: string[]): Board {
+        let valid = BoardParser.valid(strings);
+        if (!valid.valid) {
+            throw new Error(valid.message);
+        }
+
         const width = strings[0].length;
         const height = strings.length;
         const board = new Board(width, height);
-        const mapData = {playerAmount: 0};
+        const mapData = {};
+        let playerAmount = 0;
 
         for (let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {
@@ -37,8 +64,8 @@ class BoardParser {
                 if ('0123456789ABCDEF'.indexOf(c) !== -1) {
                     let player = parseInt(c, 16);
                     mapData[player] = {x: x, y: y};
-                    if (player + 1 > board.metadata.playerAmount) {
-                        board.metadata.playerAmount = player + 1;
+                    if (player + 1 > playerAmount) {
+                        playerAmount = player + 1;
                     }
                 }
                 if (c === '#') {
@@ -47,6 +74,7 @@ class BoardParser {
             }
         }
         board.metadata.mapData = mapData;
+        board.metadata.playerAmount = playerAmount;
         return board;
     }
 }

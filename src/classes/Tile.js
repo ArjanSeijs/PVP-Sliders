@@ -1,5 +1,5 @@
 "use strict";
-var Tile = (function () {
+var Tile = /** @class */ (function () {
     function Tile(x, y) {
         this.x = x;
         this.y = y;
@@ -15,3 +15,4 @@ var Tile = (function () {
     return Tile;
 }());
 module.exports = Tile;
+//# sourceMappingURL=Tile.js.map

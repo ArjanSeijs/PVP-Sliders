@@ -1,5 +1,5 @@
 "use strict";
-var GameModeStandard = (function () {
+var GameModeStandard = /** @class */ (function () {
     function GameModeStandard(game) {
         this.game = game;
     }
@@ -24,3 +24,4 @@ var GameModeStandard = (function () {
     return GameModeStandard;
 }());
 module.exports = GameModeStandard;
+//# sourceMappingURL=GameModeStandard.js.map
