@@ -8,6 +8,10 @@ var Direction = require("../classes/Direction");
 var LobbyManager = /** @class */ (function () {
     function LobbyManager() {
     }
+    /**
+     * Initializes the lobbyManager
+     * @param server The express server.
+     */
     LobbyManager.init = function (server) {
         LobbyManager.socket = io(server);
         LobbyManager.socket.on('connection', function (client) {
@@ -19,6 +23,11 @@ var LobbyManager = /** @class */ (function () {
         LobbyManager.newLobby("lobby1");
         LobbyManager.lobbies["lobby1"].setLevel("speedy.txt");
     };
+    /**
+     * Join a lobby.
+     * @param {SocketIO.Socket} client The client
+     * @param {*} data The data send on the socket.
+     */
     LobbyManager.clientJoin = function (client, data) {
         if (!LobbyManager.lobbies[data.lobby]) {
             client.emit('failed', 'lobby does not exist');
@@ -27,6 +36,11 @@ var LobbyManager = /** @class */ (function () {
             LobbyManager.lobbies[data.lobby].join(client, data);
         }
     };
+    /**
+     * Creates a new lobby.
+     * @param {string} [uuid] Optional id for the lobby.
+     * @return {string} The id of the lobby.
+     */
     LobbyManager.newLobby = function (uuid) {
         if (!uuid)
             uuid = UUID();
@@ -37,52 +51,86 @@ var LobbyManager = /** @class */ (function () {
     return LobbyManager;
 }());
 var SessionMap = /** @class */ (function () {
+    /**
+     * @constructor
+     * @param {Lobby} lobby
+     */
     function SessionMap(lobby) {
         this.sessions = {};
         this.clients = {};
         this.lobby = lobby;
-        this.nextid = 0;
+        this.nextId = 0;
+        this.joined = 0;
     }
+    /**
+     * Creates a new session.
+     * @param {SocketIO.Socket} client
+     * @param {*} data The data send over the session.
+     */
     SessionMap.prototype.newSession = function (client, data) {
         if (!data.username) {
             client.emit('failed', 'no username');
             return;
         }
         var session_id = UUID();
-        var ids = [{ name: data.username, id: this.nextid++, ready: false }];
-        if (data.multiplayer)
-            ids.push({ name: data.username + "(2)", id: this.nextid++, ready: false });
+        var ids = [{ name: data.username, id: this.nextId++, ready: false }];
+        this.joined++;
+        if (data.multiplayer) {
+            ids.push({ name: data.username + "(2)", id: this.nextId++, ready: false });
+            this.joined++;
+        }
         this.sessions[session_id] = { ids: ids };
         this.clients[client.id] = session_id;
         client.emit('joined', { ids: this.sessions[session_id].ids, session_id: session_id });
     };
+    /**
+     * On disconnect remove the client and the session.
+     * @param {SocketIO.Socket} client
+     */
     SessionMap.prototype.removeSession = function (client) {
         var uuid = this.clients[client.id];
         delete this.clients[client.id];
+        this.joined -= this.sessions[uuid].ids.length;
         delete this.sessions[uuid];
     };
+    /**
+     * On disconnect remove the client.
+     * @param {SocketIO.Socket} client
+     */
     SessionMap.prototype.removeClient = function (client) {
         delete this.clients[client.id];
     };
+    /**
+     * TODO
+     * @param {SocketIO.Socket} client
+     * @param data
+     */
     SessionMap.prototype.mapSession = function (client, data) {
         //TODO
     };
+    /**
+     * How many players joined.
+     * @return {number}
+     */
     SessionMap.prototype.calcJoined = function () {
-        var i = 0;
-        for (var key in this.sessions) {
-            if (!this.sessions.hasOwnProperty(key))
-                continue;
-            i += this.sessions[key].ids.length;
-        }
-        return i;
+        return this.joined;
     };
+    /**
+     * Verify the session with the player-id;
+     * @param {*} data The data from the client.
+     * @return {boolean}
+     */
     SessionMap.prototype.verifyId = function (data) {
         if (!data.session_id && !data.id)
             return false;
         if (!this.sessions[data.session_id])
             return false;
-        return this.sessions[data.session_id].ids.map(function (x) { return x.id; }).indexOf(data.id) !== -1;
+        return this.sessions[data.session_id].ids.filter(function (x) { return x.id === data.id; }).length !== 0;
     };
+    /**
+     * Maps the joined players to an array.
+     * @return {{id: number, name: string, ready: boolean}[]}
+     */
     SessionMap.prototype.getJoined = function () {
         var joined;
         joined = [];
@@ -95,6 +143,11 @@ var SessionMap = /** @class */ (function () {
         }
         return joined;
     };
+    /**
+     * Toggles the ready status for the players at the session.
+     * @param {string} session_id
+     * @param {boolean} ready
+     */
     SessionMap.prototype.toggleReady = function (session_id, ready) {
         if (!this.sessions[session_id])
             return;
@@ -103,6 +156,10 @@ var SessionMap = /** @class */ (function () {
             x.ready = ready;
         }
     };
+    /**
+     * Checks if all players are ready.
+     * @return {boolean}
+     */
     SessionMap.prototype.isReady = function () {
         for (var key in this.sessions) {
             if (!this.sessions.hasOwnProperty(key))
@@ -115,6 +172,9 @@ var SessionMap = /** @class */ (function () {
         }
         return true;
     };
+    SessionMap.prototype.getSessions = function () {
+        return this.sessions;
+    };
     return SessionMap;
 }());
 var State;
@@ -124,12 +184,21 @@ var State;
     State[State["Finished"] = 2] = "Finished";
 })(State || (State = {}));
 var Lobby = /** @class */ (function () {
+    /**
+     * @constructor
+     * @param {string} id
+     */
     function Lobby(id) {
         this.password = "";
         this.id = id;
         this.session_map = new SessionMap(this);
         this.state = State.Joining;
     }
+    /**
+     * Join a client
+     * @param {SocketIO.Socket} client
+     * @param data
+     */
     Lobby.prototype.join = function (client, data) {
         var that = this;
         if (this.state === State.InProgress) {
@@ -139,29 +208,11 @@ var Lobby = /** @class */ (function () {
         else {
             this.session_map.newSession(client, data);
         }
-        client.on('debug', function () {
-            //TODO SERIOUSLY REMOVE THIS IN PRODUCTION.
-            console.log(JSON.stringify(that.game.entitiesJson()));
-        });
         client.on('disconnect', function () {
-            if (that.state !== State.Joining) {
-                that.session_map.removeClient(client);
-            }
-            else {
-                that.session_map.removeSession(client);
-            }
-            console.log("Disconnected " + client.id + ", " + that.session_map.calcJoined() + "/" + that.board.metadata.playerAmount);
+            that.disconnect(client);
         });
         client.on('move', function (data) {
-            if (that.state !== State.InProgress)
-                return;
-            if (!that.session_map.verifyId(data)) {
-                client.emit('failed', "Incorrect session and id");
-                return;
-            }
-            var id = data.id;
-            var direction = Direction.from(data.direction);
-            that.game.move(id, direction);
+            that.move(client, data);
         });
         client.on('ready', function (data) {
             that.readyToggle(client, data);
@@ -171,8 +222,42 @@ var Lobby = /** @class */ (function () {
         LobbyManager.socket.in(this.id).emit('players', this.session_map.getJoined());
         that.checkReady();
     };
+    /**
+     * On client disconnect.
+     * @param {SocketIO.Socket} client
+     */
+    Lobby.prototype.disconnect = function (client) {
+        if (this.state !== State.Joining) {
+            this.session_map.removeClient(client);
+        }
+        else {
+            this.session_map.removeSession(client);
+        }
+        console.log("Disconnected " + client.id + ", " + this.session_map.calcJoined() + "/" + this.board.metadata.playerAmount);
+    };
+    /**
+     * Move a player
+     * @param {SocketIO.Socket} client
+     * @param data
+     */
+    Lobby.prototype.move = function (client, data) {
+        if (this.state !== State.InProgress)
+            return;
+        if (!this.session_map.verifyId(data)) {
+            client.emit('failed', "Incorrect session and id");
+            return;
+        }
+        var id = data.id;
+        var direction = Direction.from(data.direction);
+        this.game.move(id, direction);
+    };
+    /**
+     * On ready toggle.
+     * @param {SocketIO.Socket} client
+     * @param data
+     */
     Lobby.prototype.readyToggle = function (client, data) {
-        if (!data.session_id && !this.session_map.sessions[session_id]) {
+        if (!data.session_id && !this.session_map.getSessions()[session_id]) {
             client.emit('failed', 'invalid session_id');
             return;
         }
@@ -180,22 +265,31 @@ var Lobby = /** @class */ (function () {
         LobbyManager.socket.in(this.id).emit('players', this.session_map.getJoined());
         this.checkReady();
     };
+    /**
+     * Check if the server is full and all players are ready
+     */
     Lobby.prototype.checkReady = function () {
         if (this.session_map.calcJoined() == this.board.metadata.playerAmount && this.session_map.isReady()) {
             this.loadGame();
-            console.log(JSON.stringify(this.session_map.sessions));
+            console.log(JSON.stringify(this.session_map.getSessions()));
         }
     };
+    /**
+     * Stop the execution of the lobby.
+     */
     Lobby.prototype.stop = function () {
         clearInterval(this.interval.tick);
         clearInterval(this.interval.update);
         this.state = State.Finished;
     };
+    /**
+     * Load and start the game.
+     */
     Lobby.prototype.loadGame = function () {
         var that = this;
         if (this.session_map.calcJoined() < 2 || util_1.isNullOrUndefined(this.board))
             return;
-        this.game = GameParser.create(this.board, this.session_map.calcJoined(), this.session_map.sessions);
+        this.game = GameParser.create(this.board, this.session_map.calcJoined(), this.session_map.getSessions());
         //Game tick rate & update TODO config
         this.interval = {
             tick: setInterval(function () {
@@ -208,7 +302,13 @@ var Lobby = /** @class */ (function () {
         this.state = State.InProgress;
         LobbyManager.socket.in(this.id).emit('start', { game: this.game.toJson() });
     };
+    /**
+     * @param {string | string[]} board
+     * @param {number} players
+     * @return {{success: boolean, message?: string}}
+     */
     Lobby.prototype.setLevel = function (board, players) {
+        var oldBoard = this.board;
         if (typeof board === "string") {
             this.board = BoardParser.getBoard(board);
             if (this.board === null) {
@@ -222,10 +322,15 @@ var Lobby = /** @class */ (function () {
             }
         }
         if (!util_1.isNullOrUndefined(players) && this.board.metadata.playerAmount < players) {
+            this.board = oldBoard;
             return { success: false, message: "too many players in lobby for this level" };
         }
         return { success: true };
     };
+    /**
+     * Set a password.
+     * @param {string} password
+     */
     Lobby.prototype.setPassword = function (password) {
         this.password = password;
     };

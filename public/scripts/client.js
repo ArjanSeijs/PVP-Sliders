@@ -3,8 +3,8 @@ var images = [
     "assets/player_blue.png", "assets/player_green.png",
     "assets/player_red.png", "assets/player_yellow.png"
 ];
-var screen_width = window.innerWidth;
-var screen_height = window.innerHeight;
+var screen_width = window.innerWidth - 1;
+var screen_height = window.innerHeight - 1;
 var app, game, socket;
 var ids = [];
 var session_id = null;
@@ -20,7 +20,7 @@ window.onload = function () {
     app.renderer.view.style.position = "absolute";
     app.renderer.view.style.display = "block";
     app.renderer.autoResize = true;
-    app.renderer.resize(window.innerWidth, window.innerHeight);
+    app.renderer.resize(screen_width, screen_height);
     PIXI.loader.add(images).load(init);
     document.body.appendChild(app.view);
     //TODO https://github.com/kittykatattack/learningPixi#monitoring-load-progress
@@ -103,15 +103,14 @@ function initSocket() {
 }
 var ready = false;
 function toggleReady() {
-    socket.emit('ready', { session_id: session_id, ready: !ready });
     ready = !ready;
+    socket.emit('ready', { session_id: session_id, ready: ready });
 }
 function init() {
     var background = loadImage("background.png");
     background.width = window.innerWidth;
     background.height = window.innerHeight;
     app.stage.addChild(background);
-    // initSocket();
 }
 function loadImage(image) {
     var texture = PIXI.loader.resources["assets/" + image].texture;
