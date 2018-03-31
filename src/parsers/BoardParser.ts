@@ -24,23 +24,27 @@ class BoardParser {
         try {
             return this.fromFile(file);
         } catch (e) {
+            console.warn(e);
             return null;
         }
     }
 
     static fromFile(file: string): Board {
-        const strings = fs.readFileSync(path.join(_global.rootDir, "/public/assets/games/boards/", file), "utf8").split("\n");
+        const strings = fs.readFileSync(
+            path.join(_global.rootDir, "/public/assets/games/boards/", file), "utf8"
+        ).split(/\r?\n/);
         return BoardParser.fromStrings(strings);
     }
 
-    static valid(strings: string[]): { valid: boolean, message?: string } {
+    static valid(strings: string[]): { valid: boolean, message?: string, strings?: string[] } {
         if (strings.length < 4 || strings.length[0] < 4) {
             return {valid: false, message: "Length must be at least 4 by 4"};
         }
         for (let i = 1; i < strings.length; i++) {
             if (strings[i].length !== strings[0].length && strings[i].length !== 0) return {
                 valid: false,
-                message: "Not all lengths are the same."
+                message: "Not all lengths are the same.",
+                strings: strings
             };
         }
         return {valid: true};
@@ -49,7 +53,7 @@ class BoardParser {
     static fromStrings(strings: string[]): Board {
         let valid = BoardParser.valid(strings);
         if (!valid.valid) {
-            throw new Error(valid.message);
+            throw new Error(valid.message + "\n" + JSON.stringify(strings));
         }
 
         const width = strings[0].length;

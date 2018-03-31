@@ -40,7 +40,6 @@ document.onkeypress = function (e) {
         return;
     var code = e.key;
     var data = { id: -1, direction: "NONE", session_id: session_id };
-    console.log(e);
     switch (code.toLowerCase()) {
         case 'w':
             data.id = ids[0].id;

@@ -33,7 +33,7 @@ class LobbyManager {
         });
         // BoardParser.init();
         LobbyManager.newLobby("lobby1");
-        console.log(this.lobbies["lobby1"].setLevel("Palooza.txt").message);
+        console.log(this.lobbies["lobby1"].setLevel("speedy.txt").message);
     }
 
     static newLobby(uuid?: string): string {
@@ -147,7 +147,6 @@ class Lobby {
                 client.emit('failed', "Incorrect session and id");
                 return;
             }
-            console.log(JSON.stringify(data));
             let id = data.id;
             let direction = Direction.from(data.direction);
             that.game.move(id, direction);

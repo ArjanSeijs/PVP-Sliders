@@ -42,6 +42,16 @@ class Entity implements ToJson {
         this.dead = true;
     }
 
+    collidesNow(entity: Entity, xPos: number, yPos: number): boolean {
+        //TODO SPEED
+        let x = this.pos.x;
+        let y = this.pos.y;
+        return !(x > xPos + entity.size ||
+            y > yPos + entity.size ||
+            x < xPos - this.size ||
+            y < yPos - this.size);
+    }
+
     collides(entity: Entity, xPos: number, yPos: number): boolean {
         //TODO SPEED
         let x = this.pos.x + this.direction.curr.x * 30;

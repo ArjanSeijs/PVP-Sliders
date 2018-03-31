@@ -47,9 +47,9 @@ class CollisionHandler {
         let newY = entity.pos.y + dir.y * speed;
 
         if (other.collides(entity, newX, newY)) {
-            if (other.team === entity.team) {
+            if (other.team === entity.team && other.collidesNow(entity, newX, newY)) {
                 this.bounce(entity, other, speed);
-            } else {
+            } else if (other.team !== entity.team) {
                 this.enemyCollision(entity, other);
             }
         }
@@ -135,7 +135,7 @@ class CollisionHandler {
      * @param {Entity} entity
      * @param {Number} speed
      */
-    handleMove(entity : Entity, speed : number) {
+    handleMove(entity: Entity, speed: number) {
         entity.updateDir();
         //TODO Depends on TPS
         //TODO Binary search over speed.
@@ -146,13 +146,15 @@ class CollisionHandler {
         } else {
             entity.stop();
         }
-    }/**
+    }
+
+    /**
      * Can move
      * @param {Entity} entity
      * @param {number} speed
      * @return {boolean}
      */
-    canMove(entity : Entity, speed: number) {
+    canMove(entity: Entity, speed: number) {
         //TODO config
         const cellSize = 100;
         let dir = entity.direction.curr;
@@ -182,7 +184,7 @@ class CollisionHandler {
      * @param {Entity} entity
      * @return {boolean}
      */
-    inBounds(newX : number, newY: number, entity: Entity) {
+    inBounds(newX: number, newY: number, entity: Entity) {
         //TODO config
         const cellSize = 100;
         return newX >= 0 && newY >= 0

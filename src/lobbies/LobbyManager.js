@@ -22,7 +22,7 @@ var LobbyManager = /** @class */ (function () {
         });
         // BoardParser.init();
         LobbyManager.newLobby("lobby1");
-        console.log(this.lobbies["lobby1"].setLevel("Palooza.txt").message);
+        console.log(this.lobbies["lobby1"].setLevel("speedy.txt").message);
     };
     LobbyManager.newLobby = function (uuid) {
         if (!uuid)
@@ -124,7 +124,6 @@ var Lobby = /** @class */ (function () {
                 client.emit('failed', "Incorrect session and id");
                 return;
             }
-            console.log(JSON.stringify(data));
             var id = data.id;
             var direction = Direction.from(data.direction);
             that.game.move(id, direction);

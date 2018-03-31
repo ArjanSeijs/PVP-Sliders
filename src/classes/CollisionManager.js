@@ -38,10 +38,10 @@ var CollisionHandler = /** @class */ (function () {
         var newX = entity.pos.x + dir.x * speed;
         var newY = entity.pos.y + dir.y * speed;
         if (other.collides(entity, newX, newY)) {
-            if (other.team === entity.team) {
+            if (other.team === entity.team && other.collidesNow(entity, newX, newY)) {
                 this.bounce(entity, other, speed);
             }
-            else {
+            else if (other.team !== entity.team) {
                 this.enemyCollision(entity, other);
             }
         }
@@ -133,7 +133,8 @@ var CollisionHandler = /** @class */ (function () {
         else {
             entity.stop();
         }
-    }; /**
+    };
+    /**
      * Can move
      * @param {Entity} entity
      * @param {number} speed

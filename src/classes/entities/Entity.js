@@ -29,6 +29,15 @@ var Entity = /** @class */ (function () {
     Entity.prototype.kill = function () {
         this.dead = true;
     };
+    Entity.prototype.collidesNow = function (entity, xPos, yPos) {
+        //TODO SPEED
+        var x = this.pos.x;
+        var y = this.pos.y;
+        return !(x > xPos + entity.size ||
+            y > yPos + entity.size ||
+            x < xPos - this.size ||
+            y < yPos - this.size);
+    };
     Entity.prototype.collides = function (entity, xPos, yPos) {
         //TODO SPEED
         var x = this.pos.x + this.direction.curr.x * 30;
