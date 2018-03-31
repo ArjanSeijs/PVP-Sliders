@@ -25,16 +25,6 @@ window.onload = function () {
     document.body.appendChild(app.view);
     //TODO https://github.com/kittykatattack/learningPixi#monitoring-load-progress
 };
-var keys = {
-    W: 87,
-    A: 65,
-    S: 83,
-    D: 68,
-    LEFT: 37,
-    UP: 38,
-    RIGHT: 39,
-    DOWN: 40
-};
 document.onkeypress = function (e) {
     if (!socket || !game)
         return;
@@ -83,6 +73,7 @@ function initSocket() {
         socket.disconnect();
     socket = io("http://localhost:3000");
     socket.on("start", function (data) {
+        document.getElementById('wrapper').style.display = 'none';
         console.log("Hello?");
         game = data.game;
         displayGame();
@@ -97,8 +88,23 @@ function initSocket() {
     socket.on('joined', function (data) {
         ids = data.ids;
         session_id = data.session_id;
-        document.getElementById("wrapper").style.display = 'none';
+        document.getElementById("login").style.display = 'none';
+        document.getElementById("game-lobby").style.display = 'inherit';
     });
+    socket.on('players', function (data) {
+        console.log(JSON.stringify(data));
+        var string = "<ol>";
+        for (var i = 0; i < data.length; i++) {
+            string += "<li>" + data[i].name + ":" + data[i].ready + "</li>";
+        }
+        string += "</ol>";
+        document.getElementById("players").innerHTML = string;
+    });
+}
+var ready = false;
+function toggleReady() {
+    socket.emit('ready', { session_id: session_id, ready: !ready });
+    ready = !ready;
 }
 function init() {
     var background = loadImage("background.png");

@@ -1,9 +1,9 @@
 "use strict";
 var io = require("socket.io");
 var util_1 = require("util");
+var UUID = require("uuid/v4");
 var GameParser = require("../parsers/GameParser");
 var BoardParser = require("../parsers/BoardParser");
-var UUID = require("uuid/v4");
 var Direction = require("../classes/Direction");
 var LobbyManager = /** @class */ (function () {
     function LobbyManager() {
@@ -12,17 +12,20 @@ var LobbyManager = /** @class */ (function () {
         LobbyManager.socket = io(server);
         LobbyManager.socket.on('connection', function (client) {
             client.on('join', function (data) {
-                if (!LobbyManager.lobbies[data.lobby]) {
-                    client.emit('failed', 'lobby does not exist');
-                }
-                else {
-                    LobbyManager.lobbies[data.lobby].join(client, data);
-                }
+                LobbyManager.clientJoin(client, data);
             });
         });
-        // BoardParser.init();
+        BoardParser.init();
         LobbyManager.newLobby("lobby1");
-        console.log(this.lobbies["lobby1"].setLevel("speedy.txt").message);
+        LobbyManager.lobbies["lobby1"].setLevel("speedy.txt");
+    };
+    LobbyManager.clientJoin = function (client, data) {
+        if (!LobbyManager.lobbies[data.lobby]) {
+            client.emit('failed', 'lobby does not exist');
+        }
+        else {
+            LobbyManager.lobbies[data.lobby].join(client, data);
+        }
     };
     LobbyManager.newLobby = function (uuid) {
         if (!uuid)
@@ -46,10 +49,10 @@ var SessionMap = /** @class */ (function () {
             return;
         }
         var session_id = UUID();
-        var ids = [{ name: data.username, id: this.nextid++ }];
+        var ids = [{ name: data.username, id: this.nextid++, ready: false }];
         if (data.multiplayer)
-            ids.push({ name: data.username + "(2)", id: this.nextid++ });
-        this.sessions[session_id] = { ids: ids, client_id: client.id };
+            ids.push({ name: data.username + "(2)", id: this.nextid++, ready: false });
+        this.sessions[session_id] = { ids: ids };
         this.clients[client.id] = session_id;
         client.emit('joined', { ids: this.sessions[session_id].ids, session_id: session_id });
     };
@@ -79,6 +82,38 @@ var SessionMap = /** @class */ (function () {
         if (!this.sessions[data.session_id])
             return false;
         return this.sessions[data.session_id].ids.map(function (x) { return x.id; }).indexOf(data.id) !== -1;
+    };
+    SessionMap.prototype.getJoined = function () {
+        var joined;
+        joined = [];
+        for (var key in this.sessions) {
+            if (!this.sessions.hasOwnProperty(key))
+                continue;
+            for (var i = 0; i < this.sessions[key].ids.length; i++) {
+                joined.push(this.sessions[key].ids[i]);
+            }
+        }
+        return joined;
+    };
+    SessionMap.prototype.toggleReady = function (session_id, ready) {
+        if (!this.sessions[session_id])
+            return;
+        for (var _i = 0, _a = this.sessions[session_id].ids; _i < _a.length; _i++) {
+            var x = _a[_i];
+            x.ready = ready;
+        }
+    };
+    SessionMap.prototype.isReady = function () {
+        for (var key in this.sessions) {
+            if (!this.sessions.hasOwnProperty(key))
+                return;
+            for (var _i = 0, _a = this.sessions[key].ids; _i < _a.length; _i++) {
+                var i = _a[_i];
+                if (!i.ready)
+                    return false;
+            }
+        }
+        return true;
     };
     return SessionMap;
 }());
@@ -128,9 +163,25 @@ var Lobby = /** @class */ (function () {
             var direction = Direction.from(data.direction);
             that.game.move(id, direction);
         });
+        client.on('ready', function (data) {
+            that.readyToggle(client, data);
+        });
         client.join(this.id);
         console.log("Joined " + client.id + ", " + this.session_map.calcJoined() + "/" + this.board.metadata.playerAmount);
-        if (this.session_map.calcJoined() == this.board.metadata.playerAmount) {
+        LobbyManager.socket.in(this.id).emit('players', this.session_map.getJoined());
+        that.checkReady();
+    };
+    Lobby.prototype.readyToggle = function (client, data) {
+        if (!data.session_id && !this.session_map.sessions[session_id]) {
+            client.emit('failed', 'invalid session_id');
+            return;
+        }
+        this.session_map.toggleReady(data.session_id, data.ready === true);
+        LobbyManager.socket.in(this.id).emit('players', this.session_map.getJoined());
+        this.checkReady();
+    };
+    Lobby.prototype.checkReady = function () {
+        if (this.session_map.calcJoined() == this.board.metadata.playerAmount && this.session_map.isReady()) {
             this.loadGame();
             console.log(JSON.stringify(this.session_map.sessions));
         }
@@ -142,12 +193,8 @@ var Lobby = /** @class */ (function () {
     };
     Lobby.prototype.loadGame = function () {
         var that = this;
-        if (this.session_map.calcJoined() < 2) {
+        if (this.session_map.calcJoined() < 2 || util_1.isNullOrUndefined(this.board))
             return;
-        }
-        if (util_1.isNullOrUndefined(this.board)) {
-            return;
-        }
         this.game = GameParser.create(this.board, this.session_map.calcJoined(), this.session_map.sessions);
         //Game tick rate & update TODO config
         this.interval = {

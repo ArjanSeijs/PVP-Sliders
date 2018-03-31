@@ -33,7 +33,7 @@
 </head>
 <body style="margin: 0; padding: 0">
 <div id="wrapper" class="wrapper">
-    <div class="login">
+    <div id="login" class="login">
         <label>Username:<br>
             <input id="username" type="text">
         </label>
@@ -48,8 +48,9 @@
             <input type="button" value="Join lobby" onclick="join()">
         </label>
     </div>
-    <div class="lobby">
-
+    <div id="game-lobby" class="lobby" style="display: none">
+        <div id="players"></div>
+        <button onclick="toggleReady()">ToggleReady</button>
     </div>
 </div>
 </body>

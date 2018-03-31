@@ -3,7 +3,7 @@ import Board = require("../classes/Board");
 import Player = require("../classes/entities/Player");
 
 interface map {
-    [p: string]: { ids: { id: number; name: string }[]; client_id: number }
+    [p: string]: { ids: { id: number; name: string }[] }
 }
 
 class GameParser {
