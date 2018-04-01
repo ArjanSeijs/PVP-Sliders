@@ -221,6 +221,16 @@ var SessionMap = /** @class */ (function () {
             this.clients[key].client.disconnect();
         }
     };
+    SessionMap.prototype.restart = function () {
+        for (var key in this.sessions) {
+            if (!this.sessions.hasOwnProperty(key))
+                continue;
+            for (var _i = 0, _a = this.sessions[key].ids; _i < _a.length; _i++) {
+                var x = _a[_i];
+                x.ready = false;
+            }
+        }
+    };
     return SessionMap;
 }());
 var State;
@@ -349,10 +359,14 @@ var Lobby = /** @class */ (function () {
      * Stop the execution of the lobby.
      */
     Lobby.prototype.stop = function () {
+        var that = this;
         clearInterval(this.interval.tick);
         clearInterval(this.interval.update);
         this.state = State.Finished;
         LobbyManager.socket.in(this.id).emit('end', this.game.winners);
+        setTimeout(function () {
+            that.restart();
+        }, 5000);
     };
     /**
      * Load and start the game.
@@ -381,6 +395,14 @@ var Lobby = /** @class */ (function () {
         };
         this.state = State.InProgress;
         LobbyManager.socket.in(this.id).emit('start', { game: this.game.toJson() });
+    };
+    Lobby.prototype.restart = function () {
+        this.state = State.Joining;
+        // this.board = BoardParser.getBoard("Palooza.txt");
+        this._session_map.restart();
+        LobbyManager.socket.in(this.id).emit('restart');
+        LobbyManager.socket.in(this.id).emit('players', this._session_map.getJoined());
+        logger.log("Restart!");
     };
     Lobby.prototype.changeMap = function (client, data) {
         if (util_1.isNullOrUndefined(data) || (!util_1.isString(data) && !data.board)) {

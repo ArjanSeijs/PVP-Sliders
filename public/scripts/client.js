@@ -8,6 +8,7 @@ var screen_height = window.innerHeight - 1;
 var app, game, socket;
 var ids = [];
 var session_id = null;
+var ready = false;
 window.onload = function () {
     var type = "WebGL";
     if (!PIXI.utils.isWebGLSupported()) {
@@ -105,6 +106,14 @@ function initSocket() {
         document.getElementById('winners').style.display = '';
         document.getElementById('team').innerHTML = data;
     });
+    socket.on('restart', function () {
+        document.getElementById("login").style.display = 'none';
+        document.getElementById("game-lobby").style.display = '';
+        document.getElementById('wrapper').style.display = '';
+        document.getElementById('winners').style.display = 'none';
+        ready = false;
+        console.log('restart!');
+    });
     socket.on('players', function (data) {
         console.log(JSON.stringify(data));
         var string = "<ol>";
@@ -115,7 +124,6 @@ function initSocket() {
         document.getElementById("players").innerHTML = string;
     });
 }
-var ready = false;
 function toggleReady() {
     ready = !ready;
     socket.emit('ready', { session_id: session_id, ready: ready });

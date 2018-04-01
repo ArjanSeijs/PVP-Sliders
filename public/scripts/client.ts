@@ -11,6 +11,7 @@ let screen_height = window.innerHeight - 1;
 let app, game, socket;
 let ids = [];
 let session_id = null;
+let ready = false;
 
 window.onload = function () {
     let type = "WebGL";
@@ -101,12 +102,20 @@ function initSocket() {
     socket.on('map', function (data) {
         (document.getElementById('selected-map') as HTMLDivElement).innerHTML = 'Map: ' + data;
     });
-    socket.on('end',function (data) {
+    socket.on('end', function (data) {
         document.getElementById("login").style.display = 'none';
         document.getElementById("game-lobby").style.display = 'none';
         document.getElementById('wrapper').style.display = '';
         document.getElementById('winners').style.display = '';
         document.getElementById('team').innerHTML = data;
+    });
+    socket.on('restart', function () {
+        document.getElementById("login").style.display = 'none';
+        document.getElementById("game-lobby").style.display = '';
+        document.getElementById('wrapper').style.display = '';
+        document.getElementById('winners').style.display = 'none';
+        ready = false;
+        console.log('restart!');
     });
     socket.on('players', function (data) {
         console.log(JSON.stringify(data));
@@ -119,7 +128,6 @@ function initSocket() {
     })
 }
 
-let ready = false;
 
 function toggleReady() {
     ready = !ready;

@@ -252,6 +252,15 @@ class SessionMap {
             this.clients[key].client.disconnect();
         }
     }
+
+    restart() {
+        for (let key in this.sessions) {
+            if (!this.sessions.hasOwnProperty(key)) continue;
+            for (let x of this.sessions[key].ids) {
+                x.ready = false;
+            }
+        }
+    }
 }
 
 enum State {
@@ -395,10 +404,14 @@ class Lobby {
      * Stop the execution of the lobby.
      */
     stop(): void {
+        let that = this;
         clearInterval(this.interval.tick);
         clearInterval(this.interval.update);
         this.state = State.Finished;
         LobbyManager.socket.in(this.id).emit('end', this.game.winners);
+        setTimeout(function () {
+            that.restart();
+        }, 5000);
     }
 
     /**
@@ -428,6 +441,15 @@ class Lobby {
 
         this.state = State.InProgress;
         LobbyManager.socket.in(this.id).emit('start', {game: this.game.toJson()});
+    }
+
+    restart() {
+        this.state = State.Joining;
+        // this.board = BoardParser.getBoard("Palooza.txt");
+        this._session_map.restart();
+        LobbyManager.socket.in(this.id).emit('restart');
+        LobbyManager.socket.in(this.id).emit('players', this._session_map.getJoined());
+        logger.log("Restart!");
     }
 
     changeMap(client: Socket, data: any) {
