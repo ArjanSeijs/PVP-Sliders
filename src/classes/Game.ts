@@ -10,17 +10,23 @@ interface EntityMap {
     [index: number]: Entity
 }
 
+enum State {
+    NotStarted, InProgress, Finished
+}
+
 class Game implements ToJson {
     gameMode: GameMode;
     board: Board;
     collisionManager: CollisionManager;
     entities: EntityMap;
+    state: State;
 
     constructor(board: Board) {
         this.board = board;
         this.entities = {};
         this.collisionManager = new CollisionManager(this);
         this.gameMode = new GameModeStandard(this);
+        this.state = State.NotStarted;
     }
 
     move(id: number, direction: Direction) {
@@ -46,7 +52,7 @@ class Game implements ToJson {
     }
 
     end() {
-
+        this.state = State.Finished;
     }
 
     toJson(): any {
@@ -56,8 +62,16 @@ class Game implements ToJson {
         }
     }
 
-    entitiesJson() {
+    entitiesJson(): any {
         return Object.keys(this.entities).map(x => this.entities[x].toJson());
+    }
+
+    start(): void {
+        this.state = State.InProgress;
+    }
+
+    isFinished(): boolean {
+        return this.state === State.Finished;
     }
 }
 

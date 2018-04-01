@@ -42,14 +42,19 @@
             <input id="multiplayer" type="checkbox">
         </label>
         <label>
-            Lobby id (leave empty for random):<br>
+            Lobby id<br>
             <input id="lobby" type="text">
         </label>
         <label>
             <input type="button" value="Join lobby" onclick="join()">
         </label>
+        <label>
+            <input type="button" value="Host Lobby" onclick="host()">
+        </label>
+
     </div>
     <div id="game-lobby" class="lobby" style="display: none">
+        <div id="lobby-id"></div>
         <div id="players"></div>
         <button onclick="toggleReady()">ToggleReady</button>
     </div>

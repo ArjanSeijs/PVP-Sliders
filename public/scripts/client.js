@@ -84,10 +84,12 @@ function initSocket() {
     });
     socket.on("failed", function (data) {
         alert(data);
+        location.reload();
     });
     socket.on('joined', function (data) {
         ids = data.ids;
         session_id = data.session_id;
+        document.getElementById("lobby-id").innerHTML = "Lobby-Id:" + data.lobby_id;
         document.getElementById("login").style.display = 'none';
         document.getElementById("game-lobby").style.display = 'inherit';
     });
@@ -160,6 +162,12 @@ function displayPlayers() {
         entitySprites.push(sprite);
         app.stage.addChild(sprite);
     }
+}
+function host() {
+    initSocket();
+    var username = document.getElementById("username").value;
+    var multiplayer = document.getElementById("multiplayer").checked;
+    socket.emit('host', { username: username, multiplayer: multiplayer });
 }
 function join() {
     initSocket();
