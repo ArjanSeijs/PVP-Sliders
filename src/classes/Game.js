@@ -33,8 +33,9 @@ var Game = /** @class */ (function () {
         }
         this.collisionManager.movement(tps);
     };
-    Game.prototype.end = function () {
+    Game.prototype.end = function (winners) {
         this.state = State.Finished;
+        this.winners = winners.length > 0 ? winners[0].team : "";
     };
     Game.prototype.toJson = function () {
         var _this = this;

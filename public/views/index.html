@@ -30,6 +30,21 @@
             display: block;
             text-align: center;
         }
+
+        .winner {
+            margin: 100px auto 100px auto;
+            text-align: center;
+            font-size: 20px;
+            font-family: Arial, serif;
+            width: 20%;
+            height: 20%;
+        }
+
+        .winner > #team {
+            background-color: #ffe78e;
+            text-align: center;
+            display: block;
+        }
     </style>
 </head>
 <body style="margin: 0; padding: 0">
@@ -80,6 +95,9 @@
             </label>
         </div>
         <button onclick="toggleReady()">ToggleReady</button>
+    </div>
+    <div id="winners" class="winner" style="display: none;">
+        <div id="team"></div>
     </div>
 </div>
 </body>

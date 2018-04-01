@@ -73,8 +73,9 @@ function initSocket() {
         socket.disconnect();
     socket = io("http://localhost:3000");
     socket.on("start", function (data) {
+        document.getElementById("login").style.display = 'none';
+        document.getElementById("game-lobby").style.display = 'none';
         document.getElementById('wrapper').style.display = 'none';
-        console.log("Hello?");
         game = data.game;
         displayGame();
     });
@@ -96,6 +97,13 @@ function initSocket() {
     });
     socket.on('map', function (data) {
         document.getElementById('selected-map').innerHTML = 'Map: ' + data;
+    });
+    socket.on('end', function (data) {
+        document.getElementById("login").style.display = 'none';
+        document.getElementById("game-lobby").style.display = 'none';
+        document.getElementById('wrapper').style.display = '';
+        document.getElementById('winners').style.display = '';
+        document.getElementById('team').innerHTML = data;
     });
     socket.on('players', function (data) {
         console.log(JSON.stringify(data));

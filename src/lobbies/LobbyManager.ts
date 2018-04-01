@@ -398,6 +398,7 @@ class Lobby {
         clearInterval(this.interval.tick);
         clearInterval(this.interval.update);
         this.state = State.Finished;
+        LobbyManager.socket.in(this.id).emit('end', this.game.winners);
     }
 
     /**

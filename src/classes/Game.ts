@@ -12,6 +12,7 @@ interface EntityMap {
 
 enum State {
     NotStarted, InProgress, Finished
+
 }
 
 class Game implements ToJson {
@@ -20,6 +21,7 @@ class Game implements ToJson {
     collisionManager: CollisionManager;
     entities: EntityMap;
     state: State;
+    winners: string;
 
     constructor(board: Board) {
         this.board = board;
@@ -51,8 +53,9 @@ class Game implements ToJson {
         this.collisionManager.movement(tps);
     }
 
-    end() {
+    end(winners: Array<Entity>): void {
         this.state = State.Finished;
+        this.winners = winners.length > 0 ? winners[0].team : "";
     }
 
     toJson(): any {

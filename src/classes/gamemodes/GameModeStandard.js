@@ -11,7 +11,7 @@ var GameModeStandard = /** @class */ (function () {
         other.dead = true;
         var entities = Object.keys(this.game.entities).map(function (k) { return _this.game.entities[k]; }).filter(function (e) { return !e.dead; });
         if (entities.length === 0) {
-            this.game.end();
+            this.game.end(entities);
             return;
         }
         for (var i = 1; i < entities.length; i++) {
@@ -19,7 +19,7 @@ var GameModeStandard = /** @class */ (function () {
                 return;
             }
         }
-        this.game.end();
+        this.game.end(entities);
     };
     return GameModeStandard;
 }());

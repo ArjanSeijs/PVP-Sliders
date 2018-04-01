@@ -2,23 +2,28 @@ import GameMode = require("../../interfaces/GameMode");
 import Entity = require("../entities/Entity");
 import Game = require("../Game");
 
+interface EntityMap {
+    [index: number]: Entity
+}
+
 class GameModeStandard implements GameMode {
     game: Game;
 
-    constructor(game : Game) {
+    constructor(game: Game) {
         this.game = game;
 
     }
+
     onTeamCollision(e1: Entity, e2: Entity): boolean {
         return true;
     }
 
-    onEnemyCollision(entity: Entity, other: Entity) : void {
+    onEnemyCollision(entity: Entity, other: Entity): void {
         other.dead = true;
-        let entities = Object.keys(this.game.entities).map(k => this.game.entities[k]).filter(e => !e.dead);
+        let entities: Array<Entity> = Object.keys(this.game.entities).map(k => this.game.entities[k]).filter(e => !e.dead);
 
         if (entities.length === 0) {
-            this.game.end();
+            this.game.end(entities);
             return;
         }
 
@@ -27,7 +32,7 @@ class GameModeStandard implements GameMode {
                 return;
             }
         }
-        this.game.end();
+        this.game.end(entities);
     }
 
 }
