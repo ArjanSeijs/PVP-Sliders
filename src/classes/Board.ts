@@ -1,16 +1,25 @@
 import Tile = require("./Tile");
 import ToJson = require("../interfaces/ToJson");
 
+interface MapData {
+    [index: number]: { x: number, y: number }
+}
+
+interface MetaData {
+    playerAmount: number,
+    mapData: MapData,
+}
+
 class Board implements ToJson {
     tiles: Array<Array<Tile>>;
     width: number;
     height: number;
-    metadata: any;
+    metadata: MetaData;
 
     constructor(width: number, height: number) {
         this.width = width;
         this.height = height;
-        this.metadata = {};
+        this.metadata = {playerAmount: -1, mapData: {}};
         this.tiles = [];
         this.makeBoard();
     }

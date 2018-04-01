@@ -113,7 +113,7 @@ class CollisionHandler {
             this.game.gameMode.onEnemyCollision(other, entity);
         } else {
             // It should never reach this?
-            logger.assert(false, "This should not be reached");
+            //But ignore in the case it does.
         }
     }
 

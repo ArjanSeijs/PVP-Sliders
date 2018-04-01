@@ -103,7 +103,7 @@ var CollisionHandler = /** @class */ (function () {
         }
         else {
             // It should never reach this?
-            logger.assert(false, "This should not be reached");
+            //But ignore in the case it does.
         }
     };
     /* Movement */

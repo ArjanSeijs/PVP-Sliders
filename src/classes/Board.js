@@ -4,7 +4,7 @@ var Board = /** @class */ (function () {
     function Board(width, height) {
         this.width = width;
         this.height = height;
-        this.metadata = {};
+        this.metadata = { playerAmount: -1, mapData: {} };
         this.tiles = [];
         this.makeBoard();
     }

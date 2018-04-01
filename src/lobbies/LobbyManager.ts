@@ -1,8 +1,9 @@
 import * as io from "socket.io"
 import {Server, Socket} from "socket.io"
 import * as Logger from "simple-nodejs-logger";
-import {isNullOrUndefined} from "util";
+import {isNullOrUndefined, isString} from "util";
 import UUIDv4 = require("uuid/v4");
+
 import Game = require("../classes/Game");
 import GameParser = require("../parsers/GameParser");
 import BoardParser = require("../parsers/BoardParser");
@@ -50,7 +51,7 @@ class LobbyManager {
      * @param {*} data The data send on the socket.
      */
     static clientJoin(client: Socket, data: any) {
-        if (!LobbyManager.lobbies[data.lobby]) {
+        if (!data || !LobbyManager.lobbies[data.lobby]) {
             client.emit('failed', 'lobby does not exist');
         } else {
             LobbyManager.lobbies[data.lobby].join(client, data);
@@ -63,15 +64,16 @@ class LobbyManager {
      * @param data
      */
     static clientHost(client: Socket, data: any) {
-        if (!data.username) {
+        if (!data || !data.username) {
             client.emit('failed', 'no username provided');
             return;
         }
 
         data.lobby = LobbyManager.newLobby();
-        LobbyManager.getLobby(data.lobby).setLevel("Palooza.txt");
 
         let lobby = LobbyManager.getLobby(data.lobby);
+        if (data.password) lobby.setPassword(data.password);
+        lobby.setLevel("Palooza.txt");
         lobby.join(client, data);
 
         let session_id = lobby.getSessionMap().getSession(client.id);
@@ -122,7 +124,7 @@ class SessionMap {
      * @param {*} data The data send over the session.
      */
     newSession(client: Socket, data: any) {
-        if (!data.username) {
+        if (!data || !data.username) {
             client.emit('failed', 'no username');
             return;
         }
@@ -189,7 +191,7 @@ class SessionMap {
      * @return {boolean}
      */
     verifyId(data: any): boolean {
-        if (!data.session_id && !data.id) return false;
+        if (!data || !data.session_id || isNullOrUndefined(data.id)) return false;
         if (!this.sessions[data.session_id]) return false;
         return this.sessions[data.session_id].ids.filter(x => x.id === data.id).length !== 0;
     }
@@ -286,7 +288,14 @@ class Lobby {
      * @param data
      */
     join(client: Socket, data: any): void {
-        let that = this;
+        if (!data) {
+            client.emit('failed', "Don't you hate it when something is not defined?");
+            return;
+        }
+        if (this.password && this.password !== data.password) {
+            client.emit('failed', 'invalid password');
+            return;
+        }
         if (this._session_map.calcJoined() + (data.multiplayer ? 2 : 1) > this.board.metadata.playerAmount) {
             client.emit('failed', 'Lobby full');
             return;
@@ -297,22 +306,33 @@ class Lobby {
         } else {
             this._session_map.newSession(client, data);
         }
+        this.eventListeners(client);
 
+        logger.log(`Joined ${client.id}, ${this._session_map.calcJoined()}/${this.board ? this.board.metadata.playerAmount : 'NaN'}`);
+
+        LobbyManager.socket.in(this.id).emit('players', this._session_map.getJoined());
+        this.checkReady();
+    }
+
+    eventListeners(client: Socket) {
+        let that = this;
         client.on('disconnect', function () {
             that.disconnect(client);
         });
         client.on('move', function (data) {
+            if (!data) return;
             that.move(client, data);
         });
         client.on('ready', function (data) {
+            if (!data) return;
             that.readyToggle(client, data);
+        });
+        client.on('map', function (data) {
+            if (!data) return;
+            else that.changeMap(client, data);
         });
 
         client.join(this.id);
-        logger.log(`Joined ${client.id}, ${this._session_map.calcJoined()}/${this.board.metadata.playerAmount}`);
-
-        LobbyManager.socket.in(this.id).emit('players', this._session_map.getJoined());
-        that.checkReady();
     }
 
     /**
@@ -325,7 +345,7 @@ class Lobby {
         } else {
             this._session_map.removeSession(client)
         }
-        logger.log(`Disconnected ${client.id}, ${this._session_map.calcJoined()}/${this.board.metadata.playerAmount}`);
+        logger.log(`Disconnected ${client.id}, ${this._session_map.calcJoined()}/${this.board ? this.board.metadata.playerAmount : 'NaN'}`);
     }
 
     /**
@@ -334,7 +354,7 @@ class Lobby {
      * @param data
      */
     move(client: Socket, data: any) {
-        if (this.state !== State.InProgress) return;
+        if (!data || this.state !== State.InProgress) return;
         if (!this._session_map.verifyId(data)) {
             client.emit('failed', "Incorrect session and id");
             return;
@@ -350,7 +370,7 @@ class Lobby {
      * @param data
      */
     readyToggle(client: Socket, data: any) {
-        if (!data.session_id && !this._session_map.getSessions()[session_id]) {
+        if (!data || !data.session_id && !this._session_map.getSessions()[session_id]) {
             client.emit('failed', 'invalid session_id');
             return;
         }
@@ -366,7 +386,7 @@ class Lobby {
      * Check if the server is full and all players are ready
      */
     checkReady(): void {
-        if (this._session_map.calcJoined() == this.board.metadata.playerAmount && this._session_map.isReady()) {
+        if (this.board && this._session_map.calcJoined() == this.board.metadata.playerAmount && this._session_map.isReady()) {
             this.loadGame();
         }
     }
@@ -392,8 +412,13 @@ class Lobby {
         //Game tick rate & update TODO config
         this.interval = {
             tick: setInterval(function () {
-                if (that.game.isFinished()) that.stop();
-                that.game.gameTick(-1);
+                try {
+                    if (that.game.isFinished()) that.stop();
+                    that.game.gameTick(-1);
+                } catch (e) {
+                    LobbyManager.socket.in(that.id).emit('failed', 'something went wrong');
+                    that.stop();
+                }
             }, 15),
             update: setInterval(function () {
                 LobbyManager.socket.in(that.id).emit("update", that.game.entitiesJson());
@@ -402,6 +427,19 @@ class Lobby {
 
         this.state = State.InProgress;
         LobbyManager.socket.in(this.id).emit('start', {game: this.game.toJson()});
+    }
+
+    changeMap(client: Socket, data: any) {
+        if (isNullOrUndefined(data) || (!isString(data) && !data.board)) {
+            client.emit('failed', 'no board defined');
+            return;
+        }
+        let info = this.setLevel(isString(data) ? data + ".txt" : data.board, this._session_map.calcJoined());
+        if (!info.success) {
+            client.emit('failed', info.message)
+        } else {
+            LobbyManager.socket.in(this.id).emit('map', isString(data) ? data : data.board);
+        }
     }
 
     /**
@@ -422,8 +460,11 @@ class Lobby {
                 return {success: false, message: "Something went wrong with parsing the file"};
             }
         }
-        if (!isNullOrUndefined(players) && this.board.metadata.playerAmount < players) {
+        if (isNullOrUndefined(this.board)) {
             this.board = oldBoard;
+            return {success: false, message: 'Board was undefined'};
+        }
+        if (!isNullOrUndefined(players) && this.board.metadata.playerAmount < players) {
             return {success: false, message: "too many players in lobby for this level"}
         }
         return {success: true};

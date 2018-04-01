@@ -85,9 +85,9 @@ function initSocket() {
         game.entities = entities;
         displayPlayers();
     });
-    socket.on("failed", function (data) {
+    socket.on("failed", function (data, reload) {
         alert(data);
-        location.reload();
+        if (reload) location.reload();
     });
     socket.on('joined', function (data) {
         ids = data.ids;
@@ -95,6 +95,9 @@ function initSocket() {
         document.getElementById("lobby-id").innerHTML = "Lobby-Id:" + data.lobby_id;
         document.getElementById("login").style.display = 'none';
         document.getElementById("game-lobby").style.display = 'inherit';
+    });
+    socket.on('map', function (data) {
+        (document.getElementById('selected-map') as HTMLDivElement).innerHTML = 'Map: ' + data;
     });
     socket.on('players', function (data) {
         console.log(JSON.stringify(data));
@@ -184,7 +187,9 @@ function host() {
     initSocket();
     let username = (document.getElementById("username") as HTMLInputElement).value;
     let multiplayer = (document.getElementById("multiplayer") as HTMLInputElement).checked;
-    socket.emit('host', {username: username, multiplayer: multiplayer});
+    let password = (document.getElementById("password") as HTMLInputElement).value;
+    document.getElementById('maps').style.display = 'block';
+    socket.emit('host', {username: username, multiplayer: multiplayer, password: password});
 }
 
 function join() {
@@ -192,5 +197,10 @@ function join() {
     let username = (document.getElementById("username") as HTMLInputElement).value;
     let multiplayer = (document.getElementById("multiplayer") as HTMLInputElement).checked;
     let lobby = (document.getElementById("lobby") as HTMLInputElement).value;
-    socket.emit('join', {username: username, multiplayer: multiplayer, lobby: lobby});
+    let password = (document.getElementById("password") as HTMLInputElement).value;
+    socket.emit('join', {username: username, multiplayer: multiplayer, lobby: lobby, password: password});
+}
+
+function changeMap(elm: HTMLSelectElement) {
+    socket.emit('map', elm.value);
 }

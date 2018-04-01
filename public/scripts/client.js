@@ -82,9 +82,10 @@ function initSocket() {
         game.entities = entities;
         displayPlayers();
     });
-    socket.on("failed", function (data) {
+    socket.on("failed", function (data, reload) {
         alert(data);
-        location.reload();
+        if (reload)
+            location.reload();
     });
     socket.on('joined', function (data) {
         ids = data.ids;
@@ -92,6 +93,9 @@ function initSocket() {
         document.getElementById("lobby-id").innerHTML = "Lobby-Id:" + data.lobby_id;
         document.getElementById("login").style.display = 'none';
         document.getElementById("game-lobby").style.display = 'inherit';
+    });
+    socket.on('map', function (data) {
+        document.getElementById('selected-map').innerHTML = 'Map: ' + data;
     });
     socket.on('players', function (data) {
         console.log(JSON.stringify(data));
@@ -167,13 +171,19 @@ function host() {
     initSocket();
     var username = document.getElementById("username").value;
     var multiplayer = document.getElementById("multiplayer").checked;
-    socket.emit('host', { username: username, multiplayer: multiplayer });
+    var password = document.getElementById("password").value;
+    document.getElementById('maps').style.display = 'block';
+    socket.emit('host', { username: username, multiplayer: multiplayer, password: password });
 }
 function join() {
     initSocket();
     var username = document.getElementById("username").value;
     var multiplayer = document.getElementById("multiplayer").checked;
     var lobby = document.getElementById("lobby").value;
-    socket.emit('join', { username: username, multiplayer: multiplayer, lobby: lobby });
+    var password = document.getElementById("password").value;
+    socket.emit('join', { username: username, multiplayer: multiplayer, lobby: lobby, password: password });
+}
+function changeMap(elm) {
+    socket.emit('map', elm.value);
 }
 //# sourceMappingURL=client.js.map
