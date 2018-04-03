@@ -1,10 +1,11 @@
 import Entity = require("./Entity");
 
 class Player extends Entity {
-    name: String;
+    name: string;
 
-    constructor(x: number, y: number, id: number, team: string) {
+    constructor(x: number, y: number, id: number, team: string, name : string) {
         super(x, y, id, team);
+        this.name = name;
     }
 
 

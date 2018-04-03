@@ -321,6 +321,11 @@ class Lobby {
             if (!data) return;
             else that.changeMap(client, data);
         });
+        client.on('start', function (data) {
+            logger.log("TEST");
+            if (!data) return;
+            else that.start(client, data);
+        });
 
         client.join(this.id);
     }
@@ -392,11 +397,32 @@ class Lobby {
     }
 
     /**
-     * Load and start the game.
+     * Force start the game
+     * @param {Socket} client
+     * @param data
      */
-    loadGame(): void {
+    start(client: Socket, data: any): void {
+        logger.log("Force starting a game");
+        if (!data || !data.session_id || !this.isHost(data.session_id)) {
+            client.emit('failed', 'Only host can start');
+            return;
+        }
+        if (!this.board) {
+            client.emit('failed', 'Failed with starting: Board is not defined');
+            return;
+        }
+        if(!this.loadGame()) {
+            client.emit('failed','Something went wrong with loading.')
+        }
+    }
+
+    /**
+     * Load and start the game.
+     * @return {boolean}
+     */
+    loadGame(): boolean {
         let that = this;
-        if (this._session_map.calcJoined() < 2 || isNullOrUndefined(this.board)) return;
+        if (this._session_map.calcJoined() < 2 || isNullOrUndefined(this.board)) return false;
 
         this.game = GameParser.create(this.board, this._session_map.calcJoined(), this._session_map.getSessions());
 
@@ -418,6 +444,7 @@ class Lobby {
 
         this.state = State.InProgress;
         LobbyManager.socket.in(this.id).emit('start', {game: this.game.toJson()});
+        return true;
     }
 
     restart() {
@@ -488,7 +515,7 @@ class Lobby {
 
     close() {
         if (this.state !== State.Joining) return;
-        LobbyManager.socket.in(this.id).emit('failed', 'Host disconnected');
+        LobbyManager.socket.in(this.id).emit('failed', 'Host disconnected', true);
         this._session_map.disconnect();
         delete LobbyManager.socket.nsps[this.id];
         delete LobbyManager.lobbies[this.id];

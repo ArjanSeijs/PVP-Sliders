@@ -264,6 +264,10 @@ function join() {
     socket.emit('join', getFormData());
 }
 
+function start() {
+    socket.emit('start', {session_id: session_id});
+}
+
 /**
  * Gets the form data.
  * @return {{username: string, multiplayer: boolean, lobby: string, password: string}}

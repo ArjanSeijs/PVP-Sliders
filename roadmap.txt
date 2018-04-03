@@ -24,10 +24,12 @@ Remove old display on new game.
 -- TODO --
 Refactor client to a more structured code. (Doneish)
 Can play with less players on map.
+Choose team
 
 Reduce update loop & use client side prediction.
 Add a option for custom maps
 Add random move if you do not move in x amount of seconds.
+Map doesn't start immediately.
 
 Stopblock
 

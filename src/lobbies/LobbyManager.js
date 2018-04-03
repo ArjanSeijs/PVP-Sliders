@@ -281,6 +281,13 @@ var Lobby = /** @class */ (function () {
             else
                 that.changeMap(client, data);
         });
+        client.on('start', function (data) {
+            logger.log("TEST");
+            if (!data)
+                return;
+            else
+                that.start(client, data);
+        });
         client.join(this.id);
     };
     /**
@@ -343,12 +350,32 @@ var Lobby = /** @class */ (function () {
         }, 5000);
     };
     /**
+     * Force start the game
+     * @param {Socket} client
+     * @param data
+     */
+    Lobby.prototype.start = function (client, data) {
+        logger.log("Force starting a game");
+        if (!data || !data.session_id || !this.isHost(data.session_id)) {
+            client.emit('failed', 'Only host can start');
+            return;
+        }
+        if (!this.board) {
+            client.emit('failed', 'Failed with starting: Board is not defined');
+            return;
+        }
+        if (!this.loadGame()) {
+            client.emit('failed', 'Something went wrong with loading.');
+        }
+    };
+    /**
      * Load and start the game.
+     * @return {boolean}
      */
     Lobby.prototype.loadGame = function () {
         var that = this;
         if (this._session_map.calcJoined() < 2 || util_1.isNullOrUndefined(this.board))
-            return;
+            return false;
         this.game = GameParser.create(this.board, this._session_map.calcJoined(), this._session_map.getSessions());
         //Game tick rate & update TODO config
         this.interval = {
@@ -369,6 +396,7 @@ var Lobby = /** @class */ (function () {
         };
         this.state = State.InProgress;
         LobbyManager.socket.in(this.id).emit('start', { game: this.game.toJson() });
+        return true;
     };
     Lobby.prototype.restart = function () {
         this.state = State.Joining;
@@ -435,7 +463,7 @@ var Lobby = /** @class */ (function () {
     Lobby.prototype.close = function () {
         if (this.state !== State.Joining)
             return;
-        LobbyManager.socket.in(this.id).emit('failed', 'Host disconnected');
+        LobbyManager.socket.in(this.id).emit('failed', 'Host disconnected', true);
         this._session_map.disconnect();
         delete LobbyManager.socket.nsps[this.id];
         delete LobbyManager.lobbies[this.id];
