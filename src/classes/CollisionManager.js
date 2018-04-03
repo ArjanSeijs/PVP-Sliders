@@ -41,7 +41,7 @@ var CollisionHandler = /** @class */ (function () {
             if (other.team === entity.team && other.collidesNow(entity, newX, newY)) {
                 this.bounce(entity, other, speed);
             }
-            else if (other.team !== entity.team) {
+            else if (other.team !== entity.team && other.collidesNow(entity, newX, newY)) {
                 this.enemyCollision(entity, other);
             }
         }
@@ -96,7 +96,7 @@ var CollisionHandler = /** @class */ (function () {
             this.game.gameMode.onEnemyCollision(entity, other);
         }
         else if (diffX > diffY && (other.direction.curr === Direction.North || other.direction.curr === Direction.South)) {
-            this.game.gameMode.onEnemyCollision(other, entity);
+            this.game.gameMode.onEnemyCollision(entity, other);
         }
         else if (diffY > diffX && (other.direction.curr === Direction.West || other.direction.curr === Direction.East)) {
             this.game.gameMode.onEnemyCollision(other, entity);

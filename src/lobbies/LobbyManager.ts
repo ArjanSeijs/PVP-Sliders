@@ -161,23 +161,6 @@ class SessionMap {
     }
 
     /**
-     * On disconnect remove the client.
-     * @param {SocketIO.Socket} client
-     */
-    removeClient(client: Socket): void {
-        delete this.clients[client.id];
-    }
-
-    /**
-     * TODO
-     * @param {SocketIO.Socket} client
-     * @param data
-     */
-    mapSession(client: Socket, data: any): void {
-        //TODO
-    }
-
-    /**
      * How many players joined.
      * @return {number}
      */
@@ -309,12 +292,10 @@ class Lobby {
             client.emit('failed', 'Lobby full');
             return;
         }
-        if (this.state === State.InProgress) {
-            this._session_map.mapSession(client, data);
-            return;
-        } else {
-            this._session_map.newSession(client, data);
-        }
+
+
+        this._session_map.newSession(client, data);
+
         this.eventListeners(client);
 
         logger.log(`Joined ${client.id}, ${this._session_map.calcJoined()}/${this.board ? this.board.metadata.playerAmount : 'NaN'}`);
@@ -349,11 +330,7 @@ class Lobby {
      * @param {SocketIO.Socket} client
      */
     disconnect(client: Socket) {
-        if (this.state !== State.Joining) {
-            this._session_map.removeClient(client)
-        } else {
-            this._session_map.removeSession(client)
-        }
+        this._session_map.removeSession(client);
         logger.log(`Disconnected ${client.id}, ${this._session_map.calcJoined()}/${this.board ? this.board.metadata.playerAmount : 'NaN'}`);
     }
 

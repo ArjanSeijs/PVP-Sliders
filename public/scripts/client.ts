@@ -76,7 +76,7 @@ document.onkeypress = function (e) {
 
 function initSocket() {
     if (socket) socket.disconnect();
-    socket = io("http://localhost:3000");
+    socket = io(window.location.href);
     socket.on("start", function (data) {
         document.getElementById("login").style.display = 'none';
         document.getElementById("game-lobby").style.display = 'none';
@@ -114,6 +114,8 @@ function initSocket() {
         document.getElementById("game-lobby").style.display = '';
         document.getElementById('wrapper').style.display = '';
         document.getElementById('winners').style.display = 'none';
+        while (app.stage.children.length > 0) app.stage.removeChildAt(0);
+        app.stage.addChild(loadImage("background.png"));
         ready = false;
         console.log('restart!');
     });

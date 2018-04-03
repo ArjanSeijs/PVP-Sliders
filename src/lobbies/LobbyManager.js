@@ -130,21 +130,6 @@ var SessionMap = /** @class */ (function () {
         delete this.sessions[session_id];
     };
     /**
-     * On disconnect remove the client.
-     * @param {SocketIO.Socket} client
-     */
-    SessionMap.prototype.removeClient = function (client) {
-        delete this.clients[client.id];
-    };
-    /**
-     * TODO
-     * @param {SocketIO.Socket} client
-     * @param data
-     */
-    SessionMap.prototype.mapSession = function (client, data) {
-        //TODO
-    };
-    /**
      * How many players joined.
      * @return {number}
      */
@@ -269,13 +254,7 @@ var Lobby = /** @class */ (function () {
             client.emit('failed', 'Lobby full');
             return;
         }
-        if (this.state === State.InProgress) {
-            this._session_map.mapSession(client, data);
-            return;
-        }
-        else {
-            this._session_map.newSession(client, data);
-        }
+        this._session_map.newSession(client, data);
         this.eventListeners(client);
         logger.log("Joined " + client.id + ", " + this._session_map.calcJoined() + "/" + (this.board ? this.board.metadata.playerAmount : 'NaN'));
         LobbyManager.socket.in(this.id).emit('players', this._session_map.getJoined());
@@ -309,12 +288,7 @@ var Lobby = /** @class */ (function () {
      * @param {SocketIO.Socket} client
      */
     Lobby.prototype.disconnect = function (client) {
-        if (this.state !== State.Joining) {
-            this._session_map.removeClient(client);
-        }
-        else {
-            this._session_map.removeSession(client);
-        }
+        this._session_map.removeSession(client);
         logger.log("Disconnected " + client.id + ", " + this._session_map.calcJoined() + "/" + (this.board ? this.board.metadata.playerAmount : 'NaN'));
     };
     /**
