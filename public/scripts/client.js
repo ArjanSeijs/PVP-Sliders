@@ -26,6 +26,12 @@ window.onload = function () {
     document.body.appendChild(app.view);
     //TODO https://github.com/kittykatattack/learningPixi#monitoring-load-progress
 };
+function init() {
+    var background = loadImage("background.png");
+    background.width = window.innerWidth;
+    background.height = window.innerHeight;
+    app.stage.addChild(background);
+}
 document.onkeypress = function (e) {
     if (!socket || !game)
         return;
@@ -69,10 +75,16 @@ document.onkeypress = function (e) {
         return;
     socket.emit("move", data);
 };
+/**
+ * Initializes the socket.
+ */
 function initSocket() {
     if (socket)
         socket.disconnect();
     socket = io(window.location.href);
+    /**
+     * This event is fired when the game starts.
+     */
     socket.on("start", function (data) {
         document.getElementById("login").style.display = 'none';
         document.getElementById("game-lobby").style.display = 'none';
@@ -80,15 +92,24 @@ function initSocket() {
         game = data.game;
         displayGame();
     });
+    /**
+     * This event is fired every time an update event is send.
+     */
     socket.on("update", function (entities) {
         game.entities = entities;
         displayPlayers();
     });
+    /**
+     * This event is fired on error.
+     */
     socket.on("failed", function (data, reload) {
         alert(data);
         if (reload)
             location.reload();
     });
+    /**
+     * This is event is fired when the player succesfully joined the game.
+     */
     socket.on('joined', function (data) {
         ids = data.ids;
         session_id = data.session_id;
@@ -96,9 +117,15 @@ function initSocket() {
         document.getElementById("login").style.display = 'none';
         document.getElementById("game-lobby").style.display = 'inherit';
     });
+    /**
+     * This event is fired when the map is changed.
+     */
     socket.on('map', function (data) {
         document.getElementById('selected-map').innerHTML = 'Map: ' + data;
     });
+    /**
+     * This event is fired when the game ends.
+     */
     socket.on('end', function (data) {
         document.getElementById("login").style.display = 'none';
         document.getElementById("game-lobby").style.display = 'none';
@@ -106,6 +133,9 @@ function initSocket() {
         document.getElementById('winners').style.display = '';
         document.getElementById('team').innerHTML = data;
     });
+    /**
+     * This event is fired when the game restarts.
+     */
     socket.on('restart', function () {
         document.getElementById("login").style.display = 'none';
         document.getElementById("game-lobby").style.display = '';
@@ -117,6 +147,9 @@ function initSocket() {
         ready = false;
         console.log('restart!');
     });
+    /**
+     * This event is fired when new players joined the game or a ready status is toggled.
+     */
     socket.on('players', function (data) {
         console.log(JSON.stringify(data));
         var string = "<ol>";
@@ -131,16 +164,18 @@ function toggleReady() {
     ready = !ready;
     socket.emit('ready', { session_id: session_id, ready: ready });
 }
-function init() {
-    var background = loadImage("background.png");
-    background.width = window.innerWidth;
-    background.height = window.innerHeight;
-    app.stage.addChild(background);
-}
+/**
+ * Loads an image from the string.
+ * @param {string} image
+ * @return {PIXI.Sprite}
+ */
 function loadImage(image) {
     var texture = PIXI.loader.resources["assets/" + image].texture;
     return new PIXI.Sprite(texture);
 }
+/**
+ * Display the game board.
+ */
 function displayGame() {
     var width = game.board.width;
     var height = game.board.height;
@@ -164,6 +199,10 @@ function displayGame() {
     app.stage.addChild(graphics);
 }
 var entitySprites = [];
+/**
+ * Update the sprites
+ * TODO Update location instead of remove.
+ */
 function displayPlayers() {
     var width = game.board.width;
     var height = game.board.height;
@@ -172,7 +211,7 @@ function displayPlayers() {
     var offsetY = (screen_height - height * size) / 2;
     for (var _i = 0, entitySprites_1 = entitySprites; _i < entitySprites_1.length; _i++) {
         var entity = entitySprites_1[_i];
-        app.stage.removeChild(entity);
+        app.stage.removeChild(entity.sprite);
     }
     entitySprites = [];
     for (var _a = 0, _b = game.entities; _a < _b.length; _a++) {
@@ -182,26 +221,41 @@ function displayPlayers() {
         sprite.width = sprite.height = size;
         sprite.x = offsetX + (entity.pos.x / 100) * size;
         sprite.y = offsetY + (entity.pos.y / 100) * size;
-        entitySprites.push(sprite);
+        entitySprites.push({ sprite: sprite, entity: entity });
         app.stage.addChild(sprite);
     }
 }
+/**
+ * Host a lobby.
+ */
 function host() {
     initSocket();
-    var username = document.getElementById("username").value;
-    var multiplayer = document.getElementById("multiplayer").checked;
-    var password = document.getElementById("password").value;
     document.getElementById('maps').style.display = 'block';
-    socket.emit('host', { username: username, multiplayer: multiplayer, password: password });
+    document.getElementById('mapselect').value = "Palooza";
+    socket.emit('host', getFormData());
 }
+/**
+ * Join a lobby.
+ */
 function join() {
     initSocket();
+    socket.emit('join', getFormData());
+}
+/**
+ * Gets the form data.
+ * @return {{username: string, multiplayer: boolean, lobby: string, password: string}}
+ */
+function getFormData() {
     var username = document.getElementById("username").value;
     var multiplayer = document.getElementById("multiplayer").checked;
     var lobby = document.getElementById("lobby").value;
     var password = document.getElementById("password").value;
-    socket.emit('join', { username: username, multiplayer: multiplayer, lobby: lobby, password: password });
+    return { username: username, multiplayer: multiplayer, lobby: lobby, password: password };
 }
+/**
+ * Change a map value.
+ * @param {HTMLSelectElement} elm
+ */
 function changeMap(elm) {
     socket.emit('map', elm.value);
 }

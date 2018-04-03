@@ -32,6 +32,13 @@ window.onload = function () {
     //TODO https://github.com/kittykatattack/learningPixi#monitoring-load-progress
 };
 
+function init() {
+    let background = loadImage("background.png");
+    background.width = window.innerWidth;
+    background.height = window.innerHeight;
+    app.stage.addChild(background);
+}
+
 document.onkeypress = function (e) {
     if (!socket || !game) return;
     let code = e.key;
@@ -74,9 +81,15 @@ document.onkeypress = function (e) {
     socket.emit("move", data);
 };
 
+/**
+ * Initializes the socket.
+ */
 function initSocket() {
     if (socket) socket.disconnect();
     socket = io(window.location.href);
+    /**
+     * This event is fired when the game starts.
+     */
     socket.on("start", function (data) {
         document.getElementById("login").style.display = 'none';
         document.getElementById("game-lobby").style.display = 'none';
@@ -84,14 +97,26 @@ function initSocket() {
         game = data.game;
         displayGame();
     });
+
+    /**
+     * This event is fired every time an update event is send.
+     */
     socket.on("update", function (entities) {
         game.entities = entities;
         displayPlayers();
     });
+
+    /**
+     * This event is fired on error.
+     */
     socket.on("failed", function (data, reload) {
         alert(data);
         if (reload) location.reload();
     });
+
+    /**
+     * This is event is fired when the player succesfully joined the game.
+     */
     socket.on('joined', function (data) {
         ids = data.ids;
         session_id = data.session_id;
@@ -99,9 +124,17 @@ function initSocket() {
         document.getElementById("login").style.display = 'none';
         document.getElementById("game-lobby").style.display = 'inherit';
     });
+
+    /**
+     * This event is fired when the map is changed.
+     */
     socket.on('map', function (data) {
         (document.getElementById('selected-map') as HTMLDivElement).innerHTML = 'Map: ' + data;
     });
+
+    /**
+     * This event is fired when the game ends.
+     */
     socket.on('end', function (data) {
         document.getElementById("login").style.display = 'none';
         document.getElementById("game-lobby").style.display = 'none';
@@ -109,6 +142,10 @@ function initSocket() {
         document.getElementById('winners').style.display = '';
         document.getElementById('team').innerHTML = data;
     });
+
+    /**
+     * This event is fired when the game restarts.
+     */
     socket.on('restart', function () {
         document.getElementById("login").style.display = 'none';
         document.getElementById("game-lobby").style.display = '';
@@ -119,6 +156,10 @@ function initSocket() {
         ready = false;
         console.log('restart!');
     });
+
+    /**
+     * This event is fired when new players joined the game or a ready status is toggled.
+     */
     socket.on('players', function (data) {
         console.log(JSON.stringify(data));
         let string = "<ol>";
@@ -130,24 +171,24 @@ function initSocket() {
     })
 }
 
-
 function toggleReady() {
     ready = !ready;
     socket.emit('ready', {session_id: session_id, ready: ready});
 }
 
-function init() {
-    let background = loadImage("background.png");
-    background.width = window.innerWidth;
-    background.height = window.innerHeight;
-    app.stage.addChild(background);
-}
-
+/**
+ * Loads an image from the string.
+ * @param {string} image
+ * @return {PIXI.Sprite}
+ */
 function loadImage(image: string) {
     let texture = PIXI.loader.resources["assets/" + image].texture;
     return new PIXI.Sprite(texture);
 }
 
+/**
+ * Display the game board.
+ */
 function displayGame() {
     let width = game.board.width;
     let height = game.board.height;
@@ -162,7 +203,6 @@ function displayGame() {
     for (let x = 0; x < width; x++) {
         for (let y = 0; y < height; y++) {
             graphics.drawRect(offsetX + x * size, offsetY + y * size, size, size);
-
             if (game.board.tiles[x][y].wall) {
                 let block = loadImage("block.png");
                 block.x = offsetX + x * size;
@@ -178,6 +218,10 @@ function displayGame() {
 
 let entitySprites = [];
 
+/**
+ * Update the sprites
+ * TODO Update location instead of remove.
+ */
 function displayPlayers() {
     let width = game.board.width;
     let height = game.board.height;
@@ -187,7 +231,7 @@ function displayPlayers() {
     let offsetY = (screen_height - height * size) / 2;
 
     for (let entity of entitySprites) {
-        app.stage.removeChild(entity);
+        app.stage.removeChild(entity.sprite);
     }
     entitySprites = [];
     for (let entity of game.entities) {
@@ -196,30 +240,46 @@ function displayPlayers() {
         sprite.width = sprite.height = size;
         sprite.x = offsetX + (entity.pos.x / 100) * size;
         sprite.y = offsetY + (entity.pos.y / 100) * size;
-        entitySprites.push(sprite);
+        entitySprites.push({sprite: sprite, entity: entity});
 
         app.stage.addChild(sprite);
     }
 }
 
+/**
+ * Host a lobby.
+ */
 function host() {
     initSocket();
-    let username = (document.getElementById("username") as HTMLInputElement).value;
-    let multiplayer = (document.getElementById("multiplayer") as HTMLInputElement).checked;
-    let password = (document.getElementById("password") as HTMLInputElement).value;
     document.getElementById('maps').style.display = 'block';
-    socket.emit('host', {username: username, multiplayer: multiplayer, password: password});
+    (document.getElementById('mapselect') as HTMLSelectElement).value = "Palooza";
+    socket.emit('host', getFormData());
 }
 
+/**
+ * Join a lobby.
+ */
 function join() {
     initSocket();
-    let username = (document.getElementById("username") as HTMLInputElement).value;
-    let multiplayer = (document.getElementById("multiplayer") as HTMLInputElement).checked;
-    let lobby = (document.getElementById("lobby") as HTMLInputElement).value;
-    let password = (document.getElementById("password") as HTMLInputElement).value;
-    socket.emit('join', {username: username, multiplayer: multiplayer, lobby: lobby, password: password});
+    socket.emit('join', getFormData());
 }
 
+/**
+ * Gets the form data.
+ * @return {{username: string, multiplayer: boolean, lobby: string, password: string}}
+ */
+function getFormData() {
+    const username = (document.getElementById("username") as HTMLInputElement).value;
+    const multiplayer = (document.getElementById("multiplayer") as HTMLInputElement).checked;
+    const lobby = (document.getElementById("lobby") as HTMLInputElement).value;
+    const password = (document.getElementById("password") as HTMLInputElement).value;
+    return {username: username, multiplayer: multiplayer, lobby: lobby, password: password};
+}
+
+/**
+ * Change a map value.
+ * @param {HTMLSelectElement} elm
+ */
 function changeMap(elm: HTMLSelectElement) {
     socket.emit('map', elm.value);
 }

@@ -22,7 +22,7 @@ Implement lobby & sockets.
 Remove old display on new game.
 
 -- TODO --
-Refactor client to a more structured code.
+Refactor client to a more structured code. (Doneish)
 Can play with less players on map.
 
 Reduce update loop & use client side prediction.
@@ -31,7 +31,13 @@ Add random move if you do not move in x amount of seconds.
 
 Stopblock
 
-Update interface
+Update interface (display name)
+Host can kick a player.
 ClickableJoinLink
 
 Add singleplayer.
+
+If i ever want to do something:
+- Teleports.
+- Speed Boosts.
+- Switch locations
