@@ -11,6 +11,13 @@ class Entity implements ToJson {
     team: string;
     id: number;
 
+    /**
+     *
+     * @param {number} x
+     * @param {number} y
+     * @param {number} id
+     * @param {string} team
+     */
     constructor(x: number, y: number, id: number, team: string) {
         this.pos = {x: x, y: y};
         this.direction = {curr: Direction.None, next: Direction.None};
@@ -20,12 +27,20 @@ class Entity implements ToJson {
         this.team = team;
     }
 
+    /**
+     *
+     * @param {Direction} direction
+     */
     move(direction: Direction): void {
         if (this.direction.curr === Direction.None && this.direction.next === Direction.None) {
             this.direction = {curr: direction, next: direction};
         }
     }
 
+    /**
+     *
+     * @param {boolean} immediate
+     */
     stop(immediate?: boolean): void {
         this.direction.next = Direction.None;
         if (immediate) this.direction.curr = Direction.None;
@@ -38,10 +53,20 @@ class Entity implements ToJson {
         }
     }
 
+    /**
+     *
+     */
     kill(): void {
         this.dead = true;
     }
 
+    /**
+     *
+     * @param {Entity} entity
+     * @param {number} xPos
+     * @param {number} yPos
+     * @return {boolean}
+     */
     collidesNow(entity: Entity, xPos: number, yPos: number): boolean {
         //TODO SPEED
         let x = this.pos.x;
@@ -52,6 +77,13 @@ class Entity implements ToJson {
             y < yPos - this.size);
     }
 
+    /**
+     *
+     * @param {Entity} entity
+     * @param {number} xPos
+     * @param {number} yPos
+     * @return {boolean}
+     */
     collides(entity: Entity, xPos: number, yPos: number): boolean {
         //TODO SPEED
         let x = this.pos.x + this.direction.curr.x * 30;
@@ -63,6 +95,10 @@ class Entity implements ToJson {
     }
 
 
+    /**
+     *
+     * @return {any}
+     */
     toJson(): any {
         return {
             pos: this.pos,
@@ -73,6 +109,9 @@ class Entity implements ToJson {
         }
     }
 
+    /**
+     *
+     */
     updateDir() {
         this.direction.curr = this.direction.next;
     }

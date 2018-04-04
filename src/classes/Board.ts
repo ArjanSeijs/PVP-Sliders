@@ -16,6 +16,11 @@ class Board implements ToJson {
     height: number;
     metadata: MetaData;
 
+    /**
+     * 
+     * @param {number} width
+     * @param {number} height
+     */
     constructor(width: number, height: number) {
         this.width = width;
         this.height = height;
@@ -24,6 +29,9 @@ class Board implements ToJson {
         this.makeBoard();
     }
 
+    /**
+     * 
+     */
     private makeBoard(): void {
         for (let x = 0; x < this.width; x++) {
             this.tiles[x] = [];
@@ -33,10 +41,20 @@ class Board implements ToJson {
         }
     }
 
+    /**
+     * 
+     * @param {number} x
+     * @param {number} y
+     * @return {Tile}
+     */
     getTileAt(x: number, y: number): Tile {
         return this.tiles[x][y];
     }
 
+    /**
+     * 
+     * @return {{width: number, height: number, tiles: {x: number, y: number, wall: boolean}[][]}}
+     */
     toJson(): { width: number; height: number; tiles: { x: number; y: number; wall: boolean }[][] } {
         return {
             width: this.width,

@@ -104,16 +104,16 @@ class CollisionHandler {
         let diffY = Math.abs(entity.pos.y - other.pos.y);
 
         //TODO config
-        if (Math.abs(diffX - diffY) < 0.2) {
+        if (Math.abs(diffX - diffY) < 5) {
             this.game.gameMode.onEnemyCollision(other, entity);
             this.game.gameMode.onEnemyCollision(entity, other);
         } else if (diffX > diffY && (other.direction.curr === Direction.North || other.direction.curr === Direction.South)) {
             this.game.gameMode.onEnemyCollision(entity, other);
         } else if (diffY > diffX && (other.direction.curr === Direction.West || other.direction.curr === Direction.East)) {
-            this.game.gameMode.onEnemyCollision(other, entity);
+            this.game.gameMode.onEnemyCollision(entity, other);
         } else {
             // It should never reach this?
-            //But ignore in the case it does.
+            // But ignore in the case it does.
         }
     }
 

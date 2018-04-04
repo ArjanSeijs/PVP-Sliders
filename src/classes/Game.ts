@@ -23,6 +23,10 @@ class Game implements ToJson {
     state: State;
     winners: string;
 
+    /**
+     *
+     * @param {Board} board
+     */
     constructor(board: Board) {
         this.board = board;
         this.entities = {};
@@ -31,6 +35,11 @@ class Game implements ToJson {
         this.state = State.NotStarted;
     }
 
+    /**
+     *
+     * @param {number} id
+     * @param {Direction} direction
+     */
     move(id: number, direction: Direction) {
         let entity: Entity = this.entities[id];
         if (entity) {
@@ -38,6 +47,10 @@ class Game implements ToJson {
         }
     }
 
+    /**
+     *
+     * @param {number} tps
+     */
     gameTick(tps: number) {
         this.collisionManager.collisions(tps);
 

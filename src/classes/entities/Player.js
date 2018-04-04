@@ -12,11 +12,23 @@ var __extends = (this && this.__extends) || (function () {
 var Entity = require("./Entity");
 var Player = /** @class */ (function (_super) {
     __extends(Player, _super);
+    /**
+     *
+     * @param {number} x
+     * @param {number} y
+     * @param {number} id
+     * @param {string} team
+     * @param {string} name
+     */
     function Player(x, y, id, team, name) {
         var _this = _super.call(this, x, y, id, team) || this;
         _this.name = name;
         return _this;
     }
+    /**
+     *
+     * @return {any}
+     */
     Player.prototype.toJson = function () {
         var x = _super.prototype.toJson.call(this);
         x.name = this.name;
