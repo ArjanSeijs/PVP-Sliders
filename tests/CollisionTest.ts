@@ -3,7 +3,6 @@ import BoardParser = require("../src/parsers/BoardParser");
 import Player = require("../src/classes/entities/Player");
 import * as Test from "simple-tests-js";
 
-
 const Assert = require("assert");
 const Direction = require("../src/classes/Direction");
 
@@ -19,7 +18,7 @@ Test.run({
         let strings = ["0...", "....", "....", "...1"];
         let game = new Game(BoardParser.fromStrings(strings));
         let player1 = new Player(0, 0, 0, "red", "p1");
-        let player2 = new Player(300, 300, 0, "yellow", "p1");
+        let player2 = new Player(300, 300, 1, "yellow", "p1");
 
         game.entities[0] = player1;
         game.entities[1] = player2;
@@ -40,7 +39,7 @@ Test.run({
         let strings = ["0...", ".1..", "....", "...."];
         let game = new Game(BoardParser.fromStrings(strings));
         let player1 = new Player(0, 0, 0, "red", "p1");
-        let player2 = new Player(100, 100, 0, "yellow", "p1");
+        let player2 = new Player(100, 100, 1, "yellow", "p1");
 
         game.entities[0] = player1;
         game.entities[1] = player2;
@@ -62,7 +61,7 @@ Test.run({
         let strings = ["0...", ".1..", "....", "...."];
         let game = new Game(BoardParser.fromStrings(strings));
         let player1 = new Player(0, 0, 0, "red", "p1");
-        let player2 = new Player(100, 100, 0, "yellow", "p1");
+        let player2 = new Player(100, 100, 1, "yellow", "p1");
 
         game.entities[0] = player1;
         game.entities[1] = player2;

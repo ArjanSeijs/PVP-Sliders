@@ -17,7 +17,7 @@ Test.run({
         var strings = ["0...", "....", "....", "...1"];
         var game = new Game(BoardParser.fromStrings(strings));
         var player1 = new Player(0, 0, 0, "red", "p1");
-        var player2 = new Player(300, 300, 0, "yellow", "p1");
+        var player2 = new Player(300, 300, 1, "yellow", "p1");
         game.entities[0] = player1;
         game.entities[1] = player2;
         game.move(0, Direction.South);
@@ -33,7 +33,7 @@ Test.run({
         var strings = ["0...", ".1..", "....", "...."];
         var game = new Game(BoardParser.fromStrings(strings));
         var player1 = new Player(0, 0, 0, "red", "p1");
-        var player2 = new Player(100, 100, 0, "yellow", "p1");
+        var player2 = new Player(100, 100, 1, "yellow", "p1");
         game.entities[0] = player1;
         game.entities[1] = player2;
         game.move(0, Direction.South);
@@ -50,7 +50,7 @@ Test.run({
         var strings = ["0...", ".1..", "....", "...."];
         var game = new Game(BoardParser.fromStrings(strings));
         var player1 = new Player(0, 0, 0, "red", "p1");
-        var player2 = new Player(100, 100, 0, "yellow", "p1");
+        var player2 = new Player(100, 100, 1, "yellow", "p1");
         game.entities[0] = player1;
         game.entities[1] = player2;
         game.move(1, Direction.West);
