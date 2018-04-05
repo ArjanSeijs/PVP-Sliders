@@ -5,7 +5,7 @@ var images = [
 ];
 var screen_width = window.innerWidth - 1;
 var screen_height = window.innerHeight - 1;
-var app, game, socket;
+var app, game, socket, timer;
 var ids = [];
 var session_id = null;
 var ready = false;
@@ -92,6 +92,7 @@ function initSocket() {
         game = data.game;
         makeSprites();
         displayGame();
+        timer = setInterval(updatePos, 15);
     });
     /**
      * This event is fired every time an update event is send.
@@ -133,6 +134,8 @@ function initSocket() {
         document.getElementById('wrapper').style.display = '';
         document.getElementById('winners').style.display = '';
         document.getElementById('team').innerHTML = data;
+        if (timer)
+            clearInterval(timer);
     });
     /**
      * This event is fired when the game restarts.
@@ -236,6 +239,7 @@ function displayPlayers(entities) {
             continue;
         if (entities[key]) {
             entity.pos = entities[key].pos;
+            entity.direction = entities[key].direction;
             entity.sprite.visible = true;
             entity.text.visible = true;
             entity.sprite.x = offsetX + (entity.pos.x / 100) * size;
@@ -246,6 +250,88 @@ function displayPlayers(entities) {
         else {
             entity.sprite.visible = false;
             entity.text.visible = false;
+        }
+    }
+}
+function inBounds(newX, newY, entity) {
+    //TODO config
+    var cellSize = 100;
+    return newX >= 0 && newY >= 0
+        && newX + entity.size < game.board.width * cellSize
+        && newY + entity.size < game.board.height * cellSize;
+}
+var speed = 30;
+function canMove(entity, speed) {
+    var cellSize = 100;
+    var dir = entity.direction;
+    //TODO Depends ons TPS
+    var newX = entity.pos.x + dir.x * speed;
+    var newY = entity.pos.y + dir.y * speed;
+    var tiles = game.board ? game.board.tiles : null;
+    if (!tiles) {
+        console.log("Board or tiles undefined");
+        return false;
+    }
+    if (!inBounds(newX, newY, entity))
+        return false;
+    try {
+        switch (entity.direction.string) {
+            case "NORTH":
+            case "WEST":
+                return !tiles[Math.floor(newX / cellSize)][Math.floor(newY / cellSize)].wall;
+            case "EAST":
+                return !tiles[Math.floor((newX + entity.size) / cellSize)][Math.floor(newY / cellSize)].wall;
+            case "SOUTH":
+                return !tiles[Math.floor(newX / cellSize)][Math.floor((newY + entity.size) / cellSize)].wall;
+            default:
+                return true;
+        }
+    }
+    catch (error) {
+        console.log("x,y,dirx,diry,entity,entity.size");
+        console.log(newX);
+        console.log(newY);
+        console.log(dir.x);
+        console.log(dir.y);
+        console.log(entity);
+        console.log(entity.size);
+        console.warn(error);
+    }
+}
+function stop(entity) {
+    entity.direction = { x: 0, y: 0, string: "NONE" };
+    var cellSize = 100; //TODO config.
+    var x = Math.round(entity.pos.x / cellSize) * cellSize;
+    var y = Math.round(entity.y / cellSize) * cellSize;
+    entity.pos = {
+        x: x,
+        y: y
+    };
+}
+function updatePos() {
+    var width = game.board.width;
+    var height = game.board.height;
+    var size = Math.min(Math.floor(screen_width / width), Math.floor(screen_height / height));
+    var offsetX = (screen_width - width * size) / 2;
+    var offsetY = (screen_height - height * size) / 2;
+    for (var key in game.entities) {
+        if (!game.entities.hasOwnProperty(key))
+            continue;
+        var entity = game.entities[key];
+        if (!entity.sprite || !entity.text)
+            continue;
+        if (canMove(entity, speed)) {
+            var dir = entity.direction;
+            entity.pos.x += dir.x * speed;
+            entity.pos.y += dir.y * speed;
+            entity.sprite.width = entity.sprite.height = size;
+            entity.sprite.x = offsetX + (entity.pos.x / 100) * size;
+            entity.sprite.y = offsetY + (entity.pos.y / 100) * size;
+            entity.text.x = offsetX + (entity.pos.x / 100) * size + (0.5 * size);
+            entity.text.y = offsetY + (entity.pos.y / 100) * size;
+        }
+        else {
+            stop(entity);
         }
     }
 }

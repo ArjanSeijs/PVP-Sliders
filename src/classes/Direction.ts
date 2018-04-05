@@ -1,31 +1,34 @@
 import ToJson = require("../interfaces/ToJson");
 
 class Direction implements ToJson {
-    static None = new Direction(0, 0);
-    static North = new Direction(0, -1);
-    static South = new Direction(0, 1);
-    static West = new Direction(-1, 0);
-    static East = new Direction(1, 0);
+    static None = new Direction(0, 0, "NONE");
+    static North = new Direction(0, -1, "NORTH");
+    static South = new Direction(0, 1, "SOUTH");
+    static West = new Direction(-1, 0, "WEST");
+    static East = new Direction(1, 0, "EAST");
 
-    constructor(x: number, y: number) {
+    constructor(x: number, y: number, string: string) {
         this.x = x;
         this.y = y;
+        this.string = string;
     }
 
 
     opposite: Direction;
     x: number;
     y: number;
+    string: string;
 
     isOpposite(direction: Direction): boolean {
         return this.opposite === direction;
     }
 
 
-    toJson(): { x: number, y: number } {
+    toJson(): { x: number, y: number, string: string } {
         return {
             x: this.x,
-            y: this.y
+            y: this.y,
+            string: this.string
         }
     }
 

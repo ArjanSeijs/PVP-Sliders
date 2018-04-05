@@ -1,8 +1,9 @@
 "use strict";
 var Direction = /** @class */ (function () {
-    function Direction(x, y) {
+    function Direction(x, y, string) {
         this.x = x;
         this.y = y;
+        this.string = string;
     }
     Direction.prototype.isOpposite = function (direction) {
         return this.opposite === direction;
@@ -10,7 +11,8 @@ var Direction = /** @class */ (function () {
     Direction.prototype.toJson = function () {
         return {
             x: this.x,
-            y: this.y
+            y: this.y,
+            string: this.string
         };
     };
     Direction.from = function (direction) {
@@ -27,11 +29,11 @@ var Direction = /** @class */ (function () {
                 return Direction.None;
         }
     };
-    Direction.None = new Direction(0, 0);
-    Direction.North = new Direction(0, -1);
-    Direction.South = new Direction(0, 1);
-    Direction.West = new Direction(-1, 0);
-    Direction.East = new Direction(1, 0);
+    Direction.None = new Direction(0, 0, "NONE");
+    Direction.North = new Direction(0, -1, "NORTH");
+    Direction.South = new Direction(0, 1, "SOUTH");
+    Direction.West = new Direction(-1, 0, "WEST");
+    Direction.East = new Direction(1, 0, "EAST");
     return Direction;
 }());
 (function () {

@@ -101,6 +101,7 @@ class Entity implements ToJson {
      */
     toJson(): any {
         return {
+            size: this.size,
             pos: this.pos,
             direction: this.direction.curr.toJson(),
             id: this.id,
@@ -116,4 +117,5 @@ class Entity implements ToJson {
         this.direction.curr = this.direction.next;
     }
 }
+
 export = Entity

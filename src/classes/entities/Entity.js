@@ -85,6 +85,7 @@ var Entity = /** @class */ (function () {
      */
     Entity.prototype.toJson = function () {
         return {
+            size: this.size,
             pos: this.pos,
             direction: this.direction.curr.toJson(),
             id: this.id,
