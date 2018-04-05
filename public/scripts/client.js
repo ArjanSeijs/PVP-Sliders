@@ -90,14 +90,15 @@ function initSocket() {
         document.getElementById("game-lobby").style.display = 'none';
         document.getElementById('wrapper').style.display = 'none';
         game = data.game;
+        makeSprites();
         displayGame();
     });
     /**
      * This event is fired every time an update event is send.
      */
     socket.on("update", function (entities) {
-        game.entities = entities;
-        displayPlayers();
+        // game.entities;
+        displayPlayers(entities);
     });
     /**
      * This event is fired on error.
@@ -198,49 +199,103 @@ function displayGame() {
     }
     app.stage.addChild(graphics);
 }
-var entitySprites = [];
-var texts = [];
-/**
- * Update the sprites
- * TODO Update location instead of remove.
- */
-function displayPlayers() {
+function makeSprites() {
+    var width = game.board.width;
+    var height = game.board.height;
+    var size = Math.min(Math.floor(screen_width / width), Math.floor(screen_height / height));
+    for (var key in game.entities) {
+        if (!game.entities.hasOwnProperty(key))
+            continue;
+        var entity = game.entities[key];
+        entity.sprite = loadImage("player_" + entity.team + ".png");
+        entity.text = new PIXI.Text(entity.name, {
+            fontFamily: 'Arial',
+            fontSize: 12,
+            fill: 0xff1010,
+            align: 'center'
+        });
+        entity.sprite.width = entity.sprite.height = size;
+        entity.sprite.visible = false;
+        entity.text.visible = false;
+        entity.text.anchor.set(0.5, 1);
+        app.stage.addChild(entity.sprite);
+        app.stage.addChild(entity.text);
+    }
+}
+function displayPlayers(entities) {
     var width = game.board.width;
     var height = game.board.height;
     var size = Math.min(Math.floor(screen_width / width), Math.floor(screen_height / height));
     var offsetX = (screen_width - width * size) / 2;
     var offsetY = (screen_height - height * size) / 2;
-    for (var _i = 0, entitySprites_1 = entitySprites; _i < entitySprites_1.length; _i++) {
-        var entity = entitySprites_1[_i];
-        app.stage.removeChild(entity.sprite);
-    }
-    for (var _a = 0, texts_1 = texts; _a < texts_1.length; _a++) {
-        var text = texts_1[_a];
-        app.stage.removeChild(text);
-    }
-    entitySprites = [];
-    for (var _b = 0, _c = game.entities; _b < _c.length; _b++) {
-        var entity = _c[_b];
-        var sprite = loadImage("player_" + entity.team + ".png");
-        var text = new PIXI.Text(entity.name, {
-            fontFamily: 'Arial',
-            fontSize: Math.ceil(size * 4 / entity.name.length),
-            fill: 0xff1010,
-            align: 'center'
-        });
-        text.anchor.set(0.5, 0);
-        //TODO cellSize
-        sprite.width = sprite.height = size;
-        sprite.x = offsetX + (entity.pos.x / 100) * size;
-        sprite.y = offsetY + (entity.pos.y / 100) * size;
-        text.x = offsetX + (entity.pos.x / 100) * size + (0.5 * size);
-        text.y = offsetY + (entity.pos.y / 100) * size;
-        entitySprites.push({ sprite: sprite, entity: entity });
-        texts.push(text);
-        app.stage.addChild(text);
-        app.stage.addChild(sprite);
+    for (var key in game.entities) {
+        if (!game.entities.hasOwnProperty(key))
+            continue;
+        var entity = game.entities[key];
+        if (!entity.sprite || !entity.text)
+            continue;
+        if (entities[key]) {
+            entity.pos = entities[key].pos;
+            entity.sprite.visible = true;
+            entity.text.visible = true;
+            entity.sprite.x = offsetX + (entity.pos.x / 100) * size;
+            entity.sprite.y = offsetY + (entity.pos.y / 100) * size;
+            entity.text.x = offsetX + (entity.pos.x / 100) * size + (0.5 * size);
+            entity.text.y = offsetY + (entity.pos.y / 100) * size;
+        }
+        else {
+            entity.sprite.visible = false;
+            entity.text.visible = false;
+        }
     }
 }
+// let entitySprites = [];
+// let texts = [];
+//
+// /**
+//  * Update the sprites
+//  * TODO Update location instead of remove.
+//  */
+// function displayPlayers(entities: any) {
+//     let width = game.board.width;
+//     let height = game.board.height;
+//     let size = Math.min(Math.floor(screen_width / width), Math.floor(screen_height / height));
+//
+//     let offsetX = (screen_width - width * size) / 2;
+//     let offsetY = (screen_height - height * size) / 2;
+//
+//     for (let entity of entitySprites) {
+//         app.stage.removeChild(entity.sprite);
+//     }
+//     for (let text of texts) {
+//         app.stage.removeChild(text);
+//     }
+//     entitySprites = [];
+//     for (let entity of entities) {
+//         let sprite = loadImage("player_" + entity.team + ".png");
+//         let text = new PIXI.Text(entity.name, {
+//             fontFamily: 'Arial',
+//             fontSize: Math.ceil(size * 4 / entity.name.length),
+//             fill: 0xff1010,
+//             align: 'center'
+//         });
+//         text.anchor.set(0.5, 0);
+//         //TODO cellSize
+//         sprite.width = sprite.height = size;
+//         sprite.x = offsetX + (entity.pos.x / 100) * size;
+//         sprite.y = offsetY + (entity.pos.y / 100) * size;
+//
+//         text.x = offsetX + (entity.pos.x / 100) * size + (0.5 * size);
+//         text.y = offsetY + (entity.pos.y / 100) * size;
+//
+//
+//         entitySprites.push({sprite: sprite, entity: entity});
+//         texts.push(text);
+//
+//         app.stage.addChild(text);
+//         app.stage.addChild(sprite);
+//     }
+// }
 /**
  * Host a lobby.
  */

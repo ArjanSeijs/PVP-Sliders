@@ -9,6 +9,7 @@ import GameParser = require("../parsers/GameParser");
 import BoardParser = require("../parsers/BoardParser");
 import Board = require("../classes/Board");
 import Direction = require("../classes/Direction");
+import config = require("../lib/config");
 import Timer = NodeJS.Timer;
 
 const UUID: () => string = UUIDv4;
@@ -468,6 +469,8 @@ class Lobby {
 
         this.game = GameParser.create(this.board, this._session_map.calcJoined(), this._session_map.getSessions());
 
+        let tickRate: number = config.get("tickRate");
+        let updateRate: number = config.get("updateRate");
         //Game tick rate & update TODO config
         this.interval = {
             tick: setInterval(function () {
@@ -478,10 +481,10 @@ class Lobby {
                     LobbyManager.socket.in(that.id).emit('failed', 'something went wrong');
                     that.stop();
                 }
-            }, 15),
+            }, tickRate),
             update: setInterval(function () {
                 LobbyManager.socket.in(that.id).emit("update", that.game.entitiesJson());
-            }, 15)
+            }, updateRate)
         };
 
         this.state = State.InProgress;

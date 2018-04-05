@@ -6,6 +6,7 @@ var UUIDv4 = require("uuid/v4");
 var GameParser = require("../parsers/GameParser");
 var BoardParser = require("../parsers/BoardParser");
 var Direction = require("../classes/Direction");
+var config = require("../lib/config");
 var UUID = UUIDv4;
 var logger = Logger("LobbyManager");
 var LobbyManager = /** @class */ (function () {
@@ -420,6 +421,8 @@ var Lobby = /** @class */ (function () {
         if (this._session_map.calcJoined() < 2 || util_1.isNullOrUndefined(this.board))
             return false;
         this.game = GameParser.create(this.board, this._session_map.calcJoined(), this._session_map.getSessions());
+        var tickRate = config.get("tickRate");
+        var updateRate = config.get("updateRate");
         //Game tick rate & update TODO config
         this.interval = {
             tick: setInterval(function () {
@@ -432,10 +435,10 @@ var Lobby = /** @class */ (function () {
                     LobbyManager.socket.in(that.id).emit('failed', 'something went wrong');
                     that.stop();
                 }
-            }, 15),
+            }, tickRate),
             update: setInterval(function () {
                 LobbyManager.socket.in(that.id).emit("update", that.game.entitiesJson());
-            }, 15)
+            }, updateRate)
         };
         this.state = State.InProgress;
         LobbyManager.socket.in(this.id).emit('start', { game: this.game.toJson() });

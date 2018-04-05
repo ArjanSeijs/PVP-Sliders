@@ -24,11 +24,12 @@ Remove old display on new game.
 -- TODO --
 Refactor client to a more structured code. (Doneish)
 Can play with less players on map. (Done)
-Choose team
+Choose team (Doneish)
 
 Reduce update loop & use client side prediction.
     Update positions of entity instead of removing and adding elements.
 
+List of joined players (while tab is press or something)
 Add a option for custom maps
 Add random move if you do not move in x amount of seconds.
 Map doesn't start immediately.

@@ -1,0 +1,8 @@
+{
+  "entitySize": 99,
+  "cellSize": 100,
+  "speed": 30,
+  "EPSILON": 2,
+  "tickRate": 15,
+  "updateRate": 15
+}
