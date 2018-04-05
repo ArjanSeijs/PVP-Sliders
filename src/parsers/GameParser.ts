@@ -3,7 +3,7 @@ import Board = require("../classes/Board");
 import Player = require("../classes/entities/Player");
 
 interface map {
-    [p: string]: { ids: { id: number; name: string }[] }
+    [p: string]: { ids: { id: number, name: string, ready: boolean, team: string }[] }
 }
 
 class GameParser {
@@ -16,14 +16,16 @@ class GameParser {
             if (!sessions.hasOwnProperty(key)) continue;
             for (let j = 0; j < sessions[key].ids.length; j++) {
                 let pos = board.metadata.mapData[i];
-                game.entities[i] = new Player(pos.x * cellSize, pos.y * cellSize, sessions[key].ids[j].id, temp(i), sessions[key].ids[j].name);
+                let entity = sessions[key].ids[j];
+                game.entities[i] = new Player(pos.x * cellSize, pos.y * cellSize, entity.id, temp(entity.team), entity.name);
                 i++;
             }
         }
 
         // TODO
-        function temp(i) {
-            return i < players / 2 ? "red" : "yellow";
+        function temp(i: string) {
+            if (i == null) return 'yellow';
+            return i;
         }
 
         return game;

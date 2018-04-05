@@ -97,7 +97,7 @@ class LobbyManager {
 }
 
 interface Sessions {
-    [index: string]: { ids: { id: number, name: string, ready: boolean }[] }
+    [index: string]: { ids: { id: number, name: string, ready: boolean, team: string }[] }
 }
 
 class SessionMap {
@@ -130,11 +130,11 @@ class SessionMap {
         }
         let session_id = UUID();
         if (this.joined === 0) this.lobby.setHost(session_id);
-        let ids = [{name: data.username, id: this.nextId++, ready: false}];
+        let ids = [{name: data.username, id: this.nextId++, ready: false, team: null}];
         this.joined++;
 
         if (data.multiplayer) {
-            ids.push({name: data.username + "(2)", id: this.nextId++, ready: false});
+            ids.push({name: data.username + "(2)", id: this.nextId++, ready: false, team: null});
             this.joined++;
         }
 
@@ -183,8 +183,8 @@ class SessionMap {
      * Maps the joined players to an array.
      * @return {{id: number, name: string, ready: boolean}[]}
      */
-    getJoined(): { id: number, name: string, ready: boolean }[] {
-        let joined: { id: number, name: string, ready: boolean } [];
+    getJoined(): { id: number, name: string, ready: boolean, team: string }[] {
+        let joined: { id: number, name: string, ready: boolean, team: string } [];
         joined = [];
         for (let key in this.sessions) {
             if (!this.sessions.hasOwnProperty(key)) continue;
@@ -205,6 +205,18 @@ class SessionMap {
         for (let x of this.sessions[session_id].ids) {
             x.ready = ready;
         }
+    }
+
+    /**
+     * Sets the team of a player.
+     * @param {string} session_id
+     * @param {string} team
+     * @param {number} player
+     */
+    setTeam(session_id: string, team: string, player: number): void {
+        if (!this.sessions[session_id]) return;
+        //TODO check valid team.
+        this.sessions[session_id].ids[player].team = team;
     }
 
     /**
@@ -317,6 +329,10 @@ class Lobby {
             if (!data) return;
             that.readyToggle(client, data);
         });
+        client.on('team', function (data) {
+            if (!data) return;
+            that.teamChange(client, data);
+        });
         client.on('map', function (data) {
             if (!data) return;
             else that.changeMap(client, data);
@@ -361,7 +377,7 @@ class Lobby {
      * @param data
      */
     readyToggle(client: Socket, data: any) {
-        if (!data || !data.session_id && !this._session_map.getSessions()[session_id]) {
+        if (!data || !data.session_id || !this._session_map.getSessions()[data.session_id]) {
             client.emit('failed', 'invalid session_id');
             return;
         }
@@ -371,6 +387,27 @@ class Lobby {
         LobbyManager.socket.in(this.id).emit('players', this._session_map.getJoined());
 
         this.checkReady();
+    }
+
+    /**
+     * On ready toggle.
+     * @param {SocketIO.Socket} client
+     * @param data
+     */
+    teamChange(client: Socket, data: any) {
+        if (!data || !data.session_id || !this._session_map.getSessions()[data.session_id]) {
+            client.emit('failed', 'invalid session_id');
+            return;
+        }
+        // noinspection SuspiciousTypeOfGuard
+        if (typeof(data.team) !== "string") {
+            client.emit('failed', 'invalid team');
+            return;
+        }
+        logger.log("Team changed!");
+        this._session_map.setTeam(data.session_id, data.team, data.player === 0 ? 0 : 1);
+
+        LobbyManager.socket.in(this.id).emit('players', this._session_map.getJoined());
     }
 
     /**
@@ -411,8 +448,8 @@ class Lobby {
             client.emit('failed', 'Failed with starting: Board is not defined');
             return;
         }
-        if(!this.loadGame()) {
-            client.emit('failed','Something went wrong with loading.')
+        if (!this.loadGame()) {
+            client.emit('failed', 'Something went wrong with loading.')
         }
     }
 
@@ -457,6 +494,7 @@ class Lobby {
     }
 
     changeMap(client: Socket, data: any) {
+        //TODO verify session.....
         if (isNullOrUndefined(data) || (!isString(data) && !data.board)) {
             client.emit('failed', 'no board defined');
             return;

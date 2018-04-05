@@ -103,10 +103,10 @@ var SessionMap = /** @class */ (function () {
         var session_id = UUID();
         if (this.joined === 0)
             this.lobby.setHost(session_id);
-        var ids = [{ name: data.username, id: this.nextId++, ready: false }];
+        var ids = [{ name: data.username, id: this.nextId++, ready: false, team: null }];
         this.joined++;
         if (data.multiplayer) {
-            ids.push({ name: data.username + "(2)", id: this.nextId++, ready: false });
+            ids.push({ name: data.username + "(2)", id: this.nextId++, ready: false, team: null });
             this.joined++;
         }
         this.sessions[session_id] = { ids: ids };
@@ -176,6 +176,18 @@ var SessionMap = /** @class */ (function () {
             var x = _a[_i];
             x.ready = ready;
         }
+    };
+    /**
+     * Sets the team of a player.
+     * @param {string} session_id
+     * @param {string} team
+     * @param {number} player
+     */
+    SessionMap.prototype.setTeam = function (session_id, team, player) {
+        if (!this.sessions[session_id])
+            return;
+        //TODO check valid team.
+        this.sessions[session_id].ids[player].team = team;
     };
     /**
      * Checks if all players are ready.
@@ -275,6 +287,11 @@ var Lobby = /** @class */ (function () {
                 return;
             that.readyToggle(client, data);
         });
+        client.on('team', function (data) {
+            if (!data)
+                return;
+            that.teamChange(client, data);
+        });
         client.on('map', function (data) {
             if (!data)
                 return;
@@ -320,13 +337,32 @@ var Lobby = /** @class */ (function () {
      * @param data
      */
     Lobby.prototype.readyToggle = function (client, data) {
-        if (!data || !data.session_id && !this._session_map.getSessions()[session_id]) {
+        if (!data || !data.session_id || !this._session_map.getSessions()[data.session_id]) {
             client.emit('failed', 'invalid session_id');
             return;
         }
         this._session_map.toggleReady(data.session_id, data.ready === true);
         LobbyManager.socket.in(this.id).emit('players', this._session_map.getJoined());
         this.checkReady();
+    };
+    /**
+     * On ready toggle.
+     * @param {SocketIO.Socket} client
+     * @param data
+     */
+    Lobby.prototype.teamChange = function (client, data) {
+        if (!data || !data.session_id || !this._session_map.getSessions()[data.session_id]) {
+            client.emit('failed', 'invalid session_id');
+            return;
+        }
+        // noinspection SuspiciousTypeOfGuard
+        if (typeof (data.team) !== "string") {
+            client.emit('failed', 'invalid team');
+            return;
+        }
+        logger.log("Team changed!");
+        this._session_map.setTeam(data.session_id, data.team, data.player === 0 ? 0 : 1);
+        LobbyManager.socket.in(this.id).emit('players', this._session_map.getJoined());
     };
     /**
      * Check if the server is full and all players are ready
@@ -407,6 +443,7 @@ var Lobby = /** @class */ (function () {
         logger.log("Restart!");
     };
     Lobby.prototype.changeMap = function (client, data) {
+        //TODO verify session.....
         if (util_1.isNullOrUndefined(data) || (!util_1.isString(data) && !data.board)) {
             client.emit('failed', 'no board defined');
             return;

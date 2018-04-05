@@ -154,7 +154,7 @@ function initSocket() {
         console.log(JSON.stringify(data));
         var string = "<ol>";
         for (var i = 0; i < data.length; i++) {
-            string += "<li>" + data[i].name + ":" + data[i].ready + "</li>";
+            string += "<li>" + data[i].name + ":" + data[i].ready + ":" + data[i].team + "</li>";
         }
         string += "</ol>";
         document.getElementById("players").innerHTML = string;
@@ -243,6 +243,9 @@ function join() {
 }
 function start() {
     socket.emit('start', { session_id: session_id });
+}
+function setTeam(elm, i) {
+    socket.emit('team', { session_id: session_id, team: elm.value, player: i });
 }
 /**
  * Gets the form data.

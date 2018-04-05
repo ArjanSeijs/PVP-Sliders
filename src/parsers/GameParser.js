@@ -14,13 +14,16 @@ var GameParser = /** @class */ (function () {
                 continue;
             for (var j = 0; j < sessions[key].ids.length; j++) {
                 var pos = board.metadata.mapData[i];
-                game.entities[i] = new Player(pos.x * cellSize, pos.y * cellSize, sessions[key].ids[j].id, temp(i), sessions[key].ids[j].name);
+                var entity = sessions[key].ids[j];
+                game.entities[i] = new Player(pos.x * cellSize, pos.y * cellSize, entity.id, temp(entity.team), entity.name);
                 i++;
             }
         }
         // TODO
         function temp(i) {
-            return i < players / 2 ? "red" : "yellow";
+            if (i == null)
+                return 'yellow';
+            return i;
         }
         return game;
     };
