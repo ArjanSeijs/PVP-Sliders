@@ -217,6 +217,7 @@ function displayGame() {
 }
 
 let entitySprites = [];
+let texts = [];
 
 /**
  * Update the sprites
@@ -233,15 +234,32 @@ function displayPlayers() {
     for (let entity of entitySprites) {
         app.stage.removeChild(entity.sprite);
     }
+    for (let text of texts) {
+        app.stage.removeChild(text);
+    }
     entitySprites = [];
     for (let entity of game.entities) {
         let sprite = loadImage("player_" + entity.team + ".png");
+        let text = new PIXI.Text(entity.name, {
+            fontFamily: 'Arial',
+            fontSize: Math.ceil(size * 4 / entity.name.length),
+            fill: 0xff1010,
+            align: 'center'
+        });
+        text.anchor.set(0.5, 0);
         //TODO cellSize
         sprite.width = sprite.height = size;
         sprite.x = offsetX + (entity.pos.x / 100) * size;
         sprite.y = offsetY + (entity.pos.y / 100) * size;
-        entitySprites.push({sprite: sprite, entity: entity});
 
+        text.x = offsetX + (entity.pos.x / 100) * size + (0.5 * size);
+        text.y = offsetY + (entity.pos.y / 100) * size;
+
+
+        entitySprites.push({sprite: sprite, entity: entity});
+        texts.push(text);
+
+        app.stage.addChild(text);
         app.stage.addChild(sprite);
     }
 }

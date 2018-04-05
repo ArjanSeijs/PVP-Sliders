@@ -186,6 +186,8 @@ var SessionMap = /** @class */ (function () {
     SessionMap.prototype.setTeam = function (session_id, team, player) {
         if (!this.sessions[session_id])
             return;
+        if (!this.sessions[session_id].ids[player])
+            player = 0;
         //TODO check valid team.
         this.sessions[session_id].ids[player].team = team;
     };
@@ -232,9 +234,10 @@ var SessionMap = /** @class */ (function () {
 }());
 var State;
 (function (State) {
-    State[State["Joining"] = 0] = "Joining";
-    State[State["InProgress"] = 1] = "InProgress";
-    State[State["Finished"] = 2] = "Finished";
+    State[State["Starting"] = 0] = "Starting";
+    State[State["Joining"] = 1] = "Joining";
+    State[State["InProgress"] = 2] = "InProgress";
+    State[State["Finished"] = 3] = "Finished";
 })(State || (State = {}));
 var Lobby = /** @class */ (function () {
     /**
@@ -299,9 +302,10 @@ var Lobby = /** @class */ (function () {
                 that.changeMap(client, data);
         });
         client.on('start', function (data) {
-            logger.log("TEST");
-            if (!data)
+            if (!data || that.state === State.InProgress || that.state === State.Starting) {
+                client.emit('failed', 'game already started');
                 return;
+            }
             else
                 that.start(client, data);
         });
@@ -376,6 +380,8 @@ var Lobby = /** @class */ (function () {
      * Stop the execution of the lobby.
      */
     Lobby.prototype.stop = function () {
+        if (this.state == State.Finished)
+            return;
         var that = this;
         clearInterval(this.interval.tick);
         clearInterval(this.interval.update);
@@ -391,6 +397,7 @@ var Lobby = /** @class */ (function () {
      * @param data
      */
     Lobby.prototype.start = function (client, data) {
+        this.state = State.Starting;
         logger.log("Force starting a game");
         if (!data || !data.session_id || !this.isHost(data.session_id)) {
             client.emit('failed', 'Only host can start');
@@ -435,6 +442,8 @@ var Lobby = /** @class */ (function () {
         return true;
     };
     Lobby.prototype.restart = function () {
+        if (this.state == State.Joining)
+            return;
         this.state = State.Joining;
         // this.board = BoardParser.getBoard("Palooza.txt");
         this._session_map.restart();

@@ -215,6 +215,7 @@ class SessionMap {
      */
     setTeam(session_id: string, team: string, player: number): void {
         if (!this.sessions[session_id]) return;
+        if (!this.sessions[session_id].ids[player]) player = 0;
         //TODO check valid team.
         this.sessions[session_id].ids[player].team = team;
     }
@@ -259,7 +260,7 @@ class SessionMap {
 }
 
 enum State {
-    Joining, InProgress, Finished
+    Starting, Joining, InProgress, Finished
 }
 
 class Lobby {
@@ -338,8 +339,10 @@ class Lobby {
             else that.changeMap(client, data);
         });
         client.on('start', function (data) {
-            logger.log("TEST");
-            if (!data) return;
+            if (!data || that.state === State.InProgress || that.state === State.Starting) {
+                client.emit('failed', 'game already started');
+                return;
+            }
             else that.start(client, data);
         });
 
@@ -423,6 +426,7 @@ class Lobby {
      * Stop the execution of the lobby.
      */
     stop(): void {
+        if (this.state == State.Finished) return;
         let that = this;
         clearInterval(this.interval.tick);
         clearInterval(this.interval.update);
@@ -439,6 +443,7 @@ class Lobby {
      * @param data
      */
     start(client: Socket, data: any): void {
+        this.state = State.Starting;
         logger.log("Force starting a game");
         if (!data || !data.session_id || !this.isHost(data.session_id)) {
             client.emit('failed', 'Only host can start');
@@ -485,6 +490,7 @@ class Lobby {
     }
 
     restart() {
+        if (this.state == State.Joining) return;
         this.state = State.Joining;
         // this.board = BoardParser.getBoard("Palooza.txt");
         this._session_map.restart();

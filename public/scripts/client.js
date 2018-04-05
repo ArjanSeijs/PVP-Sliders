@@ -199,6 +199,7 @@ function displayGame() {
     app.stage.addChild(graphics);
 }
 var entitySprites = [];
+var texts = [];
 /**
  * Update the sprites
  * TODO Update location instead of remove.
@@ -213,15 +214,30 @@ function displayPlayers() {
         var entity = entitySprites_1[_i];
         app.stage.removeChild(entity.sprite);
     }
+    for (var _a = 0, texts_1 = texts; _a < texts_1.length; _a++) {
+        var text = texts_1[_a];
+        app.stage.removeChild(text);
+    }
     entitySprites = [];
-    for (var _a = 0, _b = game.entities; _a < _b.length; _a++) {
-        var entity = _b[_a];
+    for (var _b = 0, _c = game.entities; _b < _c.length; _b++) {
+        var entity = _c[_b];
         var sprite = loadImage("player_" + entity.team + ".png");
+        var text = new PIXI.Text(entity.name, {
+            fontFamily: 'Arial',
+            fontSize: Math.ceil(size * 4 / entity.name.length),
+            fill: 0xff1010,
+            align: 'center'
+        });
+        text.anchor.set(0.5, 0);
         //TODO cellSize
         sprite.width = sprite.height = size;
         sprite.x = offsetX + (entity.pos.x / 100) * size;
         sprite.y = offsetY + (entity.pos.y / 100) * size;
+        text.x = offsetX + (entity.pos.x / 100) * size + (0.5 * size);
+        text.y = offsetY + (entity.pos.y / 100) * size;
         entitySprites.push({ sprite: sprite, entity: entity });
+        texts.push(text);
+        app.stage.addChild(text);
         app.stage.addChild(sprite);
     }
 }
