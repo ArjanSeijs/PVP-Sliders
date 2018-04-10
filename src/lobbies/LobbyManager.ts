@@ -456,7 +456,7 @@ class Lobby {
         if (!this.loadGame()) {
             client.emit('failed', 'Something went wrong with loading.')
         }
-        this.state = State.Starting;
+
     }
 
     /**

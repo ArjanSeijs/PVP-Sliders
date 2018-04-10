@@ -309,7 +309,6 @@ var Lobby = (function () {
         if (!this.loadGame()) {
             client.emit('failed', 'Something went wrong with loading.');
         }
-        this.state = State.Starting;
     };
     Lobby.prototype.loadGame = function () {
         var that = this;

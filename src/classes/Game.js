@@ -16,7 +16,7 @@ var Game = (function () {
         this.state = State.NotStarted;
     }
     Game.prototype.move = function (id, direction) {
-        var entity = this.entities[id];
+        var entity = this.entities[id.toString()];
         if (entity) {
             entity.move(direction);
         }
@@ -38,15 +38,19 @@ var Game = (function () {
         this.winners = winners.length > 0 ? winners[0].team : "";
     };
     Game.prototype.toJson = function () {
-        var _this = this;
         return {
             board: this.board,
-            entities: Object.keys(this.entities).map(function (x) { return _this.entities[x].toJson(); })
+            entities: this.entitiesJson()
         };
     };
     Game.prototype.entitiesJson = function () {
-        var _this = this;
-        return Object.keys(this.entities).map(function (x) { return _this.entities[x].toJson(); });
+        var x = {};
+        for (var key in this.entities) {
+            if (!this.entities.hasOwnProperty(key))
+                continue;
+            x[key] = this.entities[key].toJson();
+        }
+        return x;
     };
     Game.prototype.start = function () {
         this.state = State.InProgress;

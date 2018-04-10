@@ -41,7 +41,7 @@ class Game implements ToJson {
      * @param {Direction} direction
      */
     move(id: number, direction: Direction) {
-        let entity: Entity = this.entities[id];
+        let entity: Entity = this.entities[id.toString()];
         if (entity) {
             entity.move(direction)
         }
@@ -74,12 +74,18 @@ class Game implements ToJson {
     toJson(): any {
         return {
             board: this.board,
-            entities: Object.keys(this.entities).map(x => this.entities[x].toJson())
+            entities: this.entitiesJson()
         }
     }
 
     entitiesJson(): any {
-        return Object.keys(this.entities).map(x => this.entities[x].toJson());
+        let x = {};
+        for (let key in this.entities) {
+            if (!this.entities.hasOwnProperty(key)) continue;
+            x[key] = this.entities[key].toJson();
+        }
+        return x;
+        // return Object.keys(this.entities).map(x => this.entities[x].toJson());
     }
 
     start(): void {
