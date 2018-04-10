@@ -1,26 +1,11 @@
 "use strict";
-var GameModeStandard = /** @class */ (function () {
-    /**
-     *
-     * @param {Game} game
-     */
+var GameModeStandard = (function () {
     function GameModeStandard(game) {
         this.game = game;
     }
-    /**
-     *
-     * @param {Entity} e1
-     * @param {Entity} e2
-     * @return {boolean}
-     */
     GameModeStandard.prototype.onTeamCollision = function (e1, e2) {
         return true;
     };
-    /**
-     *
-     * @param {Entity} entity
-     * @param {Entity} other
-     */
     GameModeStandard.prototype.onEnemyCollision = function (entity, other) {
         var _this = this;
         other.dead = true;

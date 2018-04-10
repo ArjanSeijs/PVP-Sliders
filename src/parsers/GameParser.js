@@ -1,11 +1,10 @@
 "use strict";
 var Game = require("../classes/Game");
 var Player = require("../classes/entities/Player");
-var GameParser = /** @class */ (function () {
+var GameParser = (function () {
     function GameParser() {
     }
     GameParser.create = function (board, players, sessions) {
-        //TODO improve.
         var cellSize = 100;
         var game = new Game(board);
         var i = 0;
@@ -19,7 +18,6 @@ var GameParser = /** @class */ (function () {
                 i++;
             }
         }
-        // TODO
         function temp(i) {
             if (i == null)
                 return 'yellow';

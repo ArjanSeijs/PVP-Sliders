@@ -7,11 +7,7 @@ var State;
     State[State["InProgress"] = 1] = "InProgress";
     State[State["Finished"] = 2] = "Finished";
 })(State || (State = {}));
-var Game = /** @class */ (function () {
-    /**
-     *
-     * @param {Board} board
-     */
+var Game = (function () {
     function Game(board) {
         this.board = board;
         this.entities = {};
@@ -19,21 +15,12 @@ var Game = /** @class */ (function () {
         this.gameMode = new GameModeStandard(this);
         this.state = State.NotStarted;
     }
-    /**
-     *
-     * @param {number} id
-     * @param {Direction} direction
-     */
     Game.prototype.move = function (id, direction) {
         var entity = this.entities[id];
         if (entity) {
             entity.move(direction);
         }
     };
-    /**
-     *
-     * @param {number} tps
-     */
     Game.prototype.gameTick = function (tps) {
         this.collisionManager.collisions(tps);
         for (var key in this.entities) {

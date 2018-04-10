@@ -1,5 +1,5 @@
 "use strict";
-var Direction = /** @class */ (function () {
+var Direction = (function () {
     function Direction(x, y, string) {
         this.x = x;
         this.y = y;

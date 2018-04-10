@@ -3,7 +3,7 @@ var fs = require("fs");
 var path = require("path");
 var Board = require("../classes/Board");
 var _global = global;
-var BoardParser = /** @class */ (function () {
+var BoardParser = (function () {
     function BoardParser() {
     }
     BoardParser.init = function () {

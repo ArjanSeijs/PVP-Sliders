@@ -15,7 +15,6 @@ window.onload = function () {
         type = "canvas";
     }
     PIXI.utils.sayHello(type);
-    //Setup app
     app = new PIXI.Application({ width: 1024, height: 512 });
     app.renderer.backgroundColor = 0x061639;
     app.renderer.view.style.position = "absolute";
@@ -24,7 +23,6 @@ window.onload = function () {
     app.renderer.resize(screen_width, screen_height);
     PIXI.loader.add(images).load(init);
     document.body.appendChild(app.view);
-    //TODO https://github.com/kittykatattack/learningPixi#monitoring-load-progress
 };
 function init() {
     var background = loadImage("background.png");
@@ -75,16 +73,10 @@ document.onkeypress = function (e) {
         return;
     socket.emit("move", data);
 };
-/**
- * Initializes the socket.
- */
 function initSocket() {
     if (socket)
         socket.disconnect();
     socket = io(window.location.href);
-    /**
-     * This event is fired when the game starts.
-     */
     socket.on("start", function (data) {
         document.getElementById("login").style.display = 'none';
         document.getElementById("game-lobby").style.display = 'none';
@@ -94,24 +86,14 @@ function initSocket() {
         displayGame();
         timer = setInterval(updatePos, 15);
     });
-    /**
-     * This event is fired every time an update event is send.
-     */
     socket.on("update", function (entities) {
-        // game.entities;
         displayPlayers(entities);
     });
-    /**
-     * This event is fired on error.
-     */
     socket.on("failed", function (data, reload) {
         alert(data);
         if (reload)
             location.reload();
     });
-    /**
-     * This is event is fired when the player succesfully joined the game.
-     */
     socket.on('joined', function (data) {
         ids = data.ids;
         session_id = data.session_id;
@@ -119,15 +101,9 @@ function initSocket() {
         document.getElementById("login").style.display = 'none';
         document.getElementById("game-lobby").style.display = 'inherit';
     });
-    /**
-     * This event is fired when the map is changed.
-     */
     socket.on('map', function (data) {
         document.getElementById('selected-map').innerHTML = 'Map: ' + data;
     });
-    /**
-     * This event is fired when the game ends.
-     */
     socket.on('end', function (data) {
         document.getElementById("login").style.display = 'none';
         document.getElementById("game-lobby").style.display = 'none';
@@ -137,23 +113,17 @@ function initSocket() {
         if (timer)
             clearInterval(timer);
     });
-    /**
-     * This event is fired when the game restarts.
-     */
     socket.on('restart', function () {
         document.getElementById("login").style.display = 'none';
         document.getElementById("game-lobby").style.display = '';
         document.getElementById('wrapper').style.display = '';
         document.getElementById('winners').style.display = 'none';
         while (app.stage.children.length > 0)
-            app.stage.removeChildAt(0);
+            app.stage.removeChildAt(app.stage.children.length - 1);
         app.stage.addChild(loadImage("background.png"));
         ready = false;
         console.log('restart!');
     });
-    /**
-     * This event is fired when new players joined the game or a ready status is toggled.
-     */
     socket.on('players', function (data) {
         console.log(JSON.stringify(data));
         var string = "<ol>";
@@ -168,18 +138,10 @@ function toggleReady() {
     ready = !ready;
     socket.emit('ready', { session_id: session_id, ready: ready });
 }
-/**
- * Loads an image from the string.
- * @param {string} image
- * @return {PIXI.Sprite}
- */
 function loadImage(image) {
     var texture = PIXI.loader.resources["assets/" + image].texture;
     return new PIXI.Sprite(texture);
 }
-/**
- * Display the game board.
- */
 function displayGame() {
     var width = game.board.width;
     var height = game.board.height;
@@ -254,7 +216,6 @@ function displayPlayers(entities) {
     }
 }
 function inBounds(newX, newY, entity) {
-    //TODO config
     var cellSize = 100;
     return newX >= 0 && newY >= 0
         && newX + entity.size < game.board.width * cellSize
@@ -264,7 +225,6 @@ var speed = 30;
 function canMove(entity, speed) {
     var cellSize = 100;
     var dir = entity.direction;
-    //TODO Depends ons TPS
     var newX = entity.pos.x + dir.x * speed;
     var newY = entity.pos.y + dir.y * speed;
     var tiles = game.board ? game.board.tiles : null;
@@ -300,7 +260,7 @@ function canMove(entity, speed) {
 }
 function stop(entity) {
     entity.direction = { x: 0, y: 0, string: "NONE" };
-    var cellSize = 100; //TODO config.
+    var cellSize = 100;
     var x = Math.round(entity.pos.x / cellSize) * cellSize;
     var y = Math.round(entity.y / cellSize) * cellSize;
     entity.pos = {
@@ -335,65 +295,12 @@ function updatePos() {
         }
     }
 }
-// let entitySprites = [];
-// let texts = [];
-//
-// /**
-//  * Update the sprites
-//  * TODO Update location instead of remove.
-//  */
-// function displayPlayers(entities: any) {
-//     let width = game.board.width;
-//     let height = game.board.height;
-//     let size = Math.min(Math.floor(screen_width / width), Math.floor(screen_height / height));
-//
-//     let offsetX = (screen_width - width * size) / 2;
-//     let offsetY = (screen_height - height * size) / 2;
-//
-//     for (let entity of entitySprites) {
-//         app.stage.removeChild(entity.sprite);
-//     }
-//     for (let text of texts) {
-//         app.stage.removeChild(text);
-//     }
-//     entitySprites = [];
-//     for (let entity of entities) {
-//         let sprite = loadImage("player_" + entity.team + ".png");
-//         let text = new PIXI.Text(entity.name, {
-//             fontFamily: 'Arial',
-//             fontSize: Math.ceil(size * 4 / entity.name.length),
-//             fill: 0xff1010,
-//             align: 'center'
-//         });
-//         text.anchor.set(0.5, 0);
-//         //TODO cellSize
-//         sprite.width = sprite.height = size;
-//         sprite.x = offsetX + (entity.pos.x / 100) * size;
-//         sprite.y = offsetY + (entity.pos.y / 100) * size;
-//
-//         text.x = offsetX + (entity.pos.x / 100) * size + (0.5 * size);
-//         text.y = offsetY + (entity.pos.y / 100) * size;
-//
-//
-//         entitySprites.push({sprite: sprite, entity: entity});
-//         texts.push(text);
-//
-//         app.stage.addChild(text);
-//         app.stage.addChild(sprite);
-//     }
-// }
-/**
- * Host a lobby.
- */
 function host() {
     initSocket();
     document.getElementById('maps').style.display = 'block';
     document.getElementById('mapselect').value = "Palooza";
     socket.emit('host', getFormData());
 }
-/**
- * Join a lobby.
- */
 function join() {
     initSocket();
     socket.emit('join', getFormData());
@@ -404,10 +311,6 @@ function start() {
 function setTeam(elm, i) {
     socket.emit('team', { session_id: session_id, team: elm.value, player: i });
 }
-/**
- * Gets the form data.
- * @return {{username: string, multiplayer: boolean, lobby: string, password: string}}
- */
 function getFormData() {
     var username = document.getElementById("username").value;
     var multiplayer = document.getElementById("multiplayer").checked;
@@ -415,10 +318,6 @@ function getFormData() {
     var password = document.getElementById("password").value;
     return { username: username, multiplayer: multiplayer, lobby: lobby, password: password };
 }
-/**
- * Change a map value.
- * @param {HTMLSelectElement} elm
- */
 function changeMap(elm) {
     socket.emit('map', elm.value);
 }

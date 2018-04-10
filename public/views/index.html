@@ -45,6 +45,21 @@
             text-align: center;
             display: block;
         }
+        .green {
+            background-color: lawngreen;
+        }
+
+        .red {
+            background-color: red;
+        }
+
+        .yellow {
+            background-color: yellow;
+        }
+
+        .blue {
+            background-color: #00B7FF;
+        }
     </style>
 </head>
 <body style="margin: 0; padding: 0">
@@ -96,17 +111,17 @@
         </div>
         <label for="teamselect">Team:</label>
         <select id="teamselect" onclick="setTeam(this,0)" onchange="setTeam(this,0)">
-            <option value="red">Red</option>
-            <option value="green">Green</option>
-            <option value="yellow">Yellow</option>
-            <option value="blue">Blue</option>
+            <option value="red" class="red">Red</option>
+            <option value="green" class="green">Green</option>
+            <option value="yellow" class="yellow">Yellow</option>
+            <option value="blue" class="blue">Blue</option>
         </select>
         <label for="teamselect2">Team:</label>
         <select id="teamselect2" onclick="setTeam(this,1)" onchange="setTeam(this,1)">
-            <option value="red">Red</option>
-            <option value="green">Green</option>
-            <option value="yellow">Yellow</option>
-            <option value="blue">Blue</option>
+            <option value="red" class="red">Red</option>
+            <option value="green" class="green">Green</option>
+            <option value="yellow" class="yellow">Yellow</option>
+            <option value="blue" class="blue">Blue</option>
         </select>
         <button onclick="toggleReady()">ToggleReady</button>
         <button onclick="start()">Start</button>

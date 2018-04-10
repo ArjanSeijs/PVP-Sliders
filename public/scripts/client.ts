@@ -5,12 +5,13 @@ const images = [
     "assets/player_blue.png", "assets/player_green.png",
     "assets/player_red.png", "assets/player_yellow.png"
 ];
+
 let screen_width = window.innerWidth - 1;
 let screen_height = window.innerHeight - 1;
 
-let app, game, socket, timer;
-let ids = [];
-let session_id = null;
+let app: any, game: any, socket: any, timer: any;
+let ids: { id: number, ready: boolean }[] = [];
+let session_id: string = null;
 let ready = false;
 
 window.onload = function () {
@@ -29,7 +30,6 @@ window.onload = function () {
     app.renderer.resize(screen_width, screen_height);
     PIXI.loader.add(images).load(init);
     document.body.appendChild(app.view);
-    //TODO https://github.com/kittykatattack/learningPixi#monitoring-load-progress
 };
 
 function init() {
@@ -90,7 +90,7 @@ function initSocket() {
     /**
      * This event is fired when the game starts.
      */
-    socket.on("start", function (data) {
+    socket.on("start", function (data: any) {
         document.getElementById("login").style.display = 'none';
         document.getElementById("game-lobby").style.display = 'none';
         document.getElementById('wrapper').style.display = 'none';
@@ -103,7 +103,7 @@ function initSocket() {
     /**
      * This event is fired every time an update event is send.
      */
-    socket.on("update", function (entities) {
+    socket.on("update", function (entities: any) {
         // game.entities;
         displayPlayers(entities);
     });
@@ -111,7 +111,7 @@ function initSocket() {
     /**
      * This event is fired on error.
      */
-    socket.on("failed", function (data, reload) {
+    socket.on("failed", function (data: any, reload: any) {
         alert(data);
         if (reload) location.reload();
     });
@@ -119,7 +119,7 @@ function initSocket() {
     /**
      * This is event is fired when the player succesfully joined the game.
      */
-    socket.on('joined', function (data) {
+    socket.on('joined', function (data: any) {
         ids = data.ids;
         session_id = data.session_id;
         document.getElementById("lobby-id").innerHTML = "Lobby-Id:" + data.lobby_id;
@@ -130,14 +130,14 @@ function initSocket() {
     /**
      * This event is fired when the map is changed.
      */
-    socket.on('map', function (data) {
+    socket.on('map', function (data: any) {
         (document.getElementById('selected-map') as HTMLDivElement).innerHTML = 'Map: ' + data;
     });
 
     /**
      * This event is fired when the game ends.
      */
-    socket.on('end', function (data) {
+    socket.on('end', function (data: any) {
         document.getElementById("login").style.display = 'none';
         document.getElementById("game-lobby").style.display = 'none';
         document.getElementById('wrapper').style.display = '';
@@ -154,7 +154,7 @@ function initSocket() {
         document.getElementById("game-lobby").style.display = '';
         document.getElementById('wrapper').style.display = '';
         document.getElementById('winners').style.display = 'none';
-        while (app.stage.children.length > 0) app.stage.removeChildAt(0);
+        while (app.stage.children.length > 0) app.stage.removeChildAt(app.stage.children.length - 1);
         app.stage.addChild(loadImage("background.png"));
         ready = false;
         console.log('restart!');
@@ -163,7 +163,7 @@ function initSocket() {
     /**
      * This event is fired when new players joined the game or a ready status is toggled.
      */
-    socket.on('players', function (data) {
+    socket.on('players', function (data: any) {
         console.log(JSON.stringify(data));
         let string = "<ol>";
         for (let i = 0; i < data.length; i++) {
@@ -174,7 +174,7 @@ function initSocket() {
     })
 }
 
-function toggleReady() {
+function toggleReady(): void {
     ready = !ready;
     socket.emit('ready', {session_id: session_id, ready: ready});
 }
@@ -275,7 +275,7 @@ function displayPlayers(entities: any) {
     }
 }
 
-function inBounds(newX: number, newY: number, entity) {
+function inBounds(newX: number, newY: number, entity: any) {
     //TODO config
     const cellSize = 100;
     return newX >= 0 && newY >= 0
@@ -285,7 +285,7 @@ function inBounds(newX: number, newY: number, entity) {
 
 const speed = 30;
 
-function canMove(entity, speed) {
+function canMove(entity: any, speed: any) {
     const cellSize = 100;
     let dir = entity.direction;
 
@@ -323,7 +323,7 @@ function canMove(entity, speed) {
     }
 }
 
-function stop(entity) {
+function stop(entity: any) {
     entity.direction = {x: 0, y: 0, string: "NONE"};
     let cellSize = 100; //TODO config.
     let x = Math.round(entity.pos.x / cellSize) * cellSize;
@@ -362,54 +362,6 @@ function updatePos() {
         }
     }
 }
-
-// let entitySprites = [];
-// let texts = [];
-//
-// /**
-//  * Update the sprites
-//  * TODO Update location instead of remove.
-//  */
-// function displayPlayers(entities: any) {
-//     let width = game.board.width;
-//     let height = game.board.height;
-//     let size = Math.min(Math.floor(screen_width / width), Math.floor(screen_height / height));
-//
-//     let offsetX = (screen_width - width * size) / 2;
-//     let offsetY = (screen_height - height * size) / 2;
-//
-//     for (let entity of entitySprites) {
-//         app.stage.removeChild(entity.sprite);
-//     }
-//     for (let text of texts) {
-//         app.stage.removeChild(text);
-//     }
-//     entitySprites = [];
-//     for (let entity of entities) {
-//         let sprite = loadImage("player_" + entity.team + ".png");
-//         let text = new PIXI.Text(entity.name, {
-//             fontFamily: 'Arial',
-//             fontSize: Math.ceil(size * 4 / entity.name.length),
-//             fill: 0xff1010,
-//             align: 'center'
-//         });
-//         text.anchor.set(0.5, 0);
-//         //TODO cellSize
-//         sprite.width = sprite.height = size;
-//         sprite.x = offsetX + (entity.pos.x / 100) * size;
-//         sprite.y = offsetY + (entity.pos.y / 100) * size;
-//
-//         text.x = offsetX + (entity.pos.x / 100) * size + (0.5 * size);
-//         text.y = offsetY + (entity.pos.y / 100) * size;
-//
-//
-//         entitySprites.push({sprite: sprite, entity: entity});
-//         texts.push(text);
-//
-//         app.stage.addChild(text);
-//         app.stage.addChild(sprite);
-//     }
-// }
 
 /**
  * Host a lobby.

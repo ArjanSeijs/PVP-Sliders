@@ -2,7 +2,7 @@
 var Direction = require("./Direction");
 var Logger = require("simple-nodejs-logger");
 var logger = Logger("CollisionManager");
-var CollisionHandler = /** @class */ (function () {
+var CollisionHandler = (function () {
     function CollisionHandler(game) {
         this.game = game;
     }
@@ -10,9 +10,7 @@ var CollisionHandler = /** @class */ (function () {
         var entities = this.game.entities;
         for (var key in entities) {
             if (entities.hasOwnProperty(key)) {
-                /** @type Entity */
                 var entity = entities[key];
-                //TODO Speed
                 this.handleCollisions(entity, 30);
             }
         }
@@ -24,7 +22,6 @@ var CollisionHandler = /** @class */ (function () {
             return;
         for (var key in entities) {
             if (entities.hasOwnProperty(key)) {
-                /** @type Entity */
                 var other = entities[key];
                 this.collisionCheck(entity, other, speed);
             }
@@ -34,7 +31,6 @@ var CollisionHandler = /** @class */ (function () {
         if (entity === other)
             return;
         var dir = entity.direction.curr;
-        //TODO Depends ons TPS
         var newX = entity.pos.x + dir.x * speed;
         var newY = entity.pos.y + dir.y * speed;
         if (other.collides(entity, newX, newY)) {
@@ -54,7 +50,6 @@ var CollisionHandler = /** @class */ (function () {
         if (entity.direction.curr !== other.direction.curr.opposite) {
             var diffX = Math.abs(entity.pos.x - other.pos.x);
             var diffY = Math.abs(entity.pos.y - other.pos.y);
-            //TODO config
             if (!(Math.abs(diffX - diffY) < 0.2)) {
                 if (diffX > diffY) {
                     other.pos.y = entity.pos.y;
@@ -79,7 +74,6 @@ var CollisionHandler = /** @class */ (function () {
         }
         if (entity.direction === other.direction) {
             var dir = entity.direction.curr;
-            //This only happens when speeds are not equal.
             if (dir.x * entity.pos.x < dir.x * other.pos.x || dir.y * entity.pos.y < dir.y * other.pos.y) {
                 this.game.gameMode.onEnemyCollision(other, entity);
             }
@@ -90,7 +84,6 @@ var CollisionHandler = /** @class */ (function () {
         }
         var diffX = Math.abs(entity.pos.x - other.pos.x);
         var diffY = Math.abs(entity.pos.y - other.pos.y);
-        //TODO config
         if (Math.abs(diffX - diffY) < 5) {
             this.game.gameMode.onEnemyCollision(other, entity);
             this.game.gameMode.onEnemyCollision(entity, other);
@@ -102,29 +95,19 @@ var CollisionHandler = /** @class */ (function () {
             this.game.gameMode.onEnemyCollision(entity, other);
         }
         else {
-            // It should never reach this?
-            // But ignore in the case it does.
         }
     };
-    /* Movement */
     CollisionHandler.prototype.movement = function (tps) {
         var entities = this.game.entities;
         for (var key in entities) {
             if (entities.hasOwnProperty(key)) {
                 var entity = entities[key];
-                //TODO config
                 this.handleMove(entity, 30);
             }
         }
     };
-    /**
-     * @param {Entity} entity
-     * @param {Number} speed
-     */
     CollisionHandler.prototype.handleMove = function (entity, speed) {
         entity.updateDir();
-        //TODO Depends on TPS
-        //TODO Binary search over speed.
         if (this.canMove(entity, speed)) {
             var dir = entity.direction.curr;
             entity.pos.x += dir.x * speed;
@@ -134,17 +117,9 @@ var CollisionHandler = /** @class */ (function () {
             entity.stop();
         }
     };
-    /**
-     * Can move
-     * @param {Entity} entity
-     * @param {number} speed
-     * @return {boolean}
-     */
     CollisionHandler.prototype.canMove = function (entity, speed) {
-        //TODO config
         var cellSize = 100;
         var dir = entity.direction.curr;
-        //TODO Depends ons TPS
         var newX = entity.pos.x + dir.x * speed;
         var newY = entity.pos.y + dir.y * speed;
         if (!this.inBounds(newX, newY, entity))
@@ -161,14 +136,7 @@ var CollisionHandler = /** @class */ (function () {
                 return true;
         }
     };
-    /**
-     * @param {int} newX
-     * @param {int} newY
-     * @param {Entity} entity
-     * @return {boolean}
-     */
     CollisionHandler.prototype.inBounds = function (newX, newY, entity) {
-        //TODO config
         var cellSize = 100;
         return newX >= 0 && newY >= 0
             && newX + entity.size < this.game.board.width * cellSize

@@ -444,7 +444,6 @@ class Lobby {
      * @param data
      */
     start(client: Socket, data: any): void {
-        this.state = State.Starting;
         logger.log("Force starting a game");
         if (!data || !data.session_id || !this.isHost(data.session_id)) {
             client.emit('failed', 'Only host can start');
@@ -457,6 +456,7 @@ class Lobby {
         if (!this.loadGame()) {
             client.emit('failed', 'Something went wrong with loading.')
         }
+        this.state = State.Starting;
     }
 
     /**

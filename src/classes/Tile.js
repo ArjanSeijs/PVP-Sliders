@@ -1,5 +1,5 @@
 "use strict";
-var Tile = /** @class */ (function () {
+var Tile = (function () {
     function Tile(x, y) {
         this.x = x;
         this.y = y;

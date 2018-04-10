@@ -26,14 +26,19 @@ Refactor client to a more structured code. (Doneish)
 Can play with less players on map. (Done)
 Choose team (Doneish)
 
-Reduce update loop & use client side prediction.
-    Update positions of entity instead of removing and adding elements.
+Reduce update loop & use client side prediction. (Done)
+    Update positions of entity instead of removing and adding elements. (Done)
 
-List of joined players (while tab is press or something)
+Bugs:
+Colour changes on kill
+Force start does not always work
+
+On end update positions
+
 Add a option for custom maps
+List of joined players (while tab is press or something)
 Add random move if you do not move in x amount of seconds.
 Map doesn't start immediately.
-
 
 Stopblock
 

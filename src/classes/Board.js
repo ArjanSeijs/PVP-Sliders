@@ -1,11 +1,6 @@
 "use strict";
 var Tile = require("./Tile");
-var Board = /** @class */ (function () {
-    /**
-     *
-     * @param {number} width
-     * @param {number} height
-     */
+var Board = (function () {
     function Board(width, height) {
         this.width = width;
         this.height = height;
@@ -13,9 +8,6 @@ var Board = /** @class */ (function () {
         this.tiles = [];
         this.makeBoard();
     }
-    /**
-     *
-     */
     Board.prototype.makeBoard = function () {
         for (var x = 0; x < this.width; x++) {
             this.tiles[x] = [];
@@ -24,19 +16,9 @@ var Board = /** @class */ (function () {
             }
         }
     };
-    /**
-     *
-     * @param {number} x
-     * @param {number} y
-     * @return {Tile}
-     */
     Board.prototype.getTileAt = function (x, y) {
         return this.tiles[x][y];
     };
-    /**
-     *
-     * @return {{width: number, height: number, tiles: {x: number, y: number, wall: boolean}[][]}}
-     */
     Board.prototype.toJson = function () {
         return {
             width: this.width,
