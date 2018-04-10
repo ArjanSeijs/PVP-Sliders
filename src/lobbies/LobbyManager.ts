@@ -432,7 +432,7 @@ class Lobby {
         clearInterval(this.interval.tick);
         clearInterval(this.interval.update);
         this.state = State.Finished;
-        LobbyManager.socket.in(this.id).emit('end', this.game.winners);
+        LobbyManager.socket.in(this.id).emit('end', {entities: this.game.entitiesJson(), winners: this.game.winners});
         setTimeout(function () {
             that.restart();
         }, 5000);

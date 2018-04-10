@@ -142,7 +142,8 @@ function initSocket() {
         document.getElementById("game-lobby").style.display = 'none';
         document.getElementById('wrapper').style.display = '';
         document.getElementById('winners').style.display = '';
-        document.getElementById('team').innerHTML = data;
+        document.getElementById('team').innerHTML = data.winners;
+        displayPlayers(data.entities);
         if (timer) clearInterval(timer);
     });
 
