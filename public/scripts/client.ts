@@ -409,3 +409,21 @@ function getFormData() {
 function changeMap(elm: HTMLSelectElement) {
     socket.emit('map', elm.value);
 }
+
+/**
+ * Resize
+ */
+function resize() {
+    screen_width = window.innerWidth - 1;
+    screen_height = window.innerHeight - 1;
+
+    while (app.stage.children.length > 0) app.stage.removeChildAt(app.stage.children.length - 1);
+
+    app.renderer.resize(screen_width, screen_height);
+
+    init();
+    if (!game) return;
+    makeSprites();
+    displayGame();
+    displayPlayers(game.entities);
+}

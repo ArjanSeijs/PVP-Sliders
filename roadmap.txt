@@ -30,13 +30,13 @@ Reduce update loop & use client side prediction. (Done)
     Update positions of entity instead of removing and adding elements. (Done)
 
 Bugs:
-Colour changes on kill
-Force start does not always work
+Colour changes on kill (done)
+Force start does not always work (done)
+On end update positions (done)
 
-On end update positions
-
-Add a option for custom maps
-List of joined players (while tab is press or something)
+Add a option for custom maps.
+Improve client side updating.
+List of joined players (while tab is press or something).
 Add random move if you do not move in x amount of seconds.
 Map doesn't start immediately.
 
