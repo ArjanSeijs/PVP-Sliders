@@ -3,7 +3,8 @@ declare let io: any;
 const images = [
     "assets/block.png", "assets/background.png",
     "assets/player_blue.png", "assets/player_green.png",
-    "assets/player_red.png", "assets/player_yellow.png"
+    "assets/player_red.png", "assets/player_yellow.png",
+    "assets/board_background.png"
 ];
 
 let screen_width = window.innerWidth - 1;
@@ -53,7 +54,7 @@ function init() {
     background.height = window.innerHeight;
     app.stage.addChild(background);
 
-    let lobby = getParameterByName("id",window.location.href);
+    let lobby = getParameterByName("id", window.location.href);
     (document.getElementById('lobby') as HTMLInputElement).value = lobby ? lobby : "";
 }
 
@@ -114,8 +115,8 @@ function initSocket() {
         document.getElementById("game-lobby").style.display = 'none';
         document.getElementById('wrapper').style.display = 'none';
         game = data.game;
-        makeSprites();
         displayGame();
+        makeSprites();
         timer = setInterval(updatePos, 15);
     });
 
@@ -220,10 +221,18 @@ function loadImage(image: string) {
 function displayGame() {
     let width = game.board.width;
     let height = game.board.height;
+
     let size = Math.min(Math.floor(screen_width / width), Math.floor(screen_height / height));
 
     let offsetX = (screen_width - width * size) / 2;
     let offsetY = (screen_height - height * size) / 2;
+
+    let image = loadImage("board_background.png");
+    image.x = offsetX;
+    image.y = offsetY;
+    image.width = size * width;
+    image.height = size * height;
+    app.stage.addChild(image);
 
     let graphics = new PIXI.Graphics();
     graphics.lineStyle(2, 0x8B4513);
@@ -240,7 +249,6 @@ function displayGame() {
             }
         }
     }
-
     app.stage.addChild(graphics);
 }
 

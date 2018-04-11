@@ -1,7 +1,8 @@
 var images = [
     "assets/block.png", "assets/background.png",
     "assets/player_blue.png", "assets/player_green.png",
-    "assets/player_red.png", "assets/player_yellow.png"
+    "assets/player_red.png", "assets/player_yellow.png",
+    "assets/board_background.png"
 ];
 var screen_width = window.innerWidth - 1;
 var screen_height = window.innerHeight - 1;
@@ -100,8 +101,8 @@ function initSocket() {
         document.getElementById("game-lobby").style.display = 'none';
         document.getElementById('wrapper').style.display = 'none';
         game = data.game;
-        makeSprites();
         displayGame();
+        makeSprites();
         timer = setInterval(updatePos, 15);
     });
     socket.on("update", function (entities) {
@@ -172,6 +173,12 @@ function displayGame() {
     var size = Math.min(Math.floor(screen_width / width), Math.floor(screen_height / height));
     var offsetX = (screen_width - width * size) / 2;
     var offsetY = (screen_height - height * size) / 2;
+    var image = loadImage("board_background.png");
+    image.x = offsetX;
+    image.y = offsetY;
+    image.width = size * width;
+    image.height = size * height;
+    app.stage.addChild(image);
     var graphics = new PIXI.Graphics();
     graphics.lineStyle(2, 0x8B4513);
     for (var x = 0; x < width; x++) {

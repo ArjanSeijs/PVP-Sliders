@@ -34,16 +34,19 @@ Colour changes on kill (done)
 Force start does not always work (done)
 On end update positions (done)
 
+Update Interface
+Stopblock
 Add a option for custom maps.
+
 Improve client side updating.
 List of joined players (while tab is press or something).
 Add random move if you do not move in x amount of seconds.
 Map doesn't start immediately.
 
-Stopblock
+
 
 Host can kick a player.
-ClickableJoinLink
+ClickableJoinLink (done)
 
 Add singleplayer.
 
