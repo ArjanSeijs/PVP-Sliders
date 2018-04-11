@@ -1,6 +1,7 @@
 "use strict";
 var io = require("socket.io");
 var Logger = require("simple-nodejs-logger");
+var crypto = require("crypto");
 var util_1 = require("util");
 var UUIDv4 = require("uuid/v4");
 var GameParser = require("../parsers/GameParser");
@@ -25,6 +26,13 @@ var LobbyManager = (function () {
         BoardParser.init();
         LobbyManager.newLobby("lobby1");
         LobbyManager.getLobby("lobby1").setLevel("speedy.txt");
+    };
+    LobbyManager.newId = function () {
+        var id;
+        do {
+            id = new Buffer(crypto.randomBytes(6)).toString("base64");
+        } while (this.lobbies[id]);
+        return id;
     };
     LobbyManager.clientJoin = function (client, data) {
         if (!data || !LobbyManager.lobbies[data.lobby]) {

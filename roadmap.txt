@@ -42,7 +42,6 @@ Map doesn't start immediately.
 
 Stopblock
 
-Update interface (display name)
 Host can kick a player.
 ClickableJoinLink
 

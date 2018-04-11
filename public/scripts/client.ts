@@ -121,6 +121,10 @@ function initSocket() {
      */
     socket.on('joined', function (data: any) {
         ids = data.ids;
+
+        if (data.ids.length === 1) document.getElementById("team2").style.display = 'none';
+        else document.getElementById("team2").style.display = 'inherit';
+
         session_id = data.session_id;
         document.getElementById("lobby-id").innerHTML = "Lobby-Id:" + data.lobby_id;
         document.getElementById("login").style.display = 'none';

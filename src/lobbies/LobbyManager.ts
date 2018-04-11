@@ -1,8 +1,10 @@
 import * as io from "socket.io"
 import {Server, Socket} from "socket.io"
 import * as Logger from "simple-nodejs-logger";
+import * as crypto from "crypto"
 import {isNullOrUndefined, isString} from "util";
 import UUIDv4 = require("uuid/v4");
+
 
 import Game = require("../classes/Game");
 import GameParser = require("../parsers/GameParser");
@@ -10,6 +12,7 @@ import BoardParser = require("../parsers/BoardParser");
 import Board = require("../classes/Board");
 import Direction = require("../classes/Direction");
 import config = require("../lib/config");
+
 import Timer = NodeJS.Timer;
 
 const UUID: () => string = UUIDv4;
@@ -44,6 +47,14 @@ class LobbyManager {
 
         LobbyManager.newLobby("lobby1");
         LobbyManager.getLobby("lobby1").setLevel("speedy.txt");
+    }
+
+    static newId(): string {
+        let id;
+        do {
+            id = new Buffer(crypto.randomBytes(6)).toString("base64");
+        } while (this.lobbies[id]);
+        return id;
     }
 
     /**
