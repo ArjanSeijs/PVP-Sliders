@@ -14,6 +14,16 @@ let ids: { id: number, ready: boolean }[] = [];
 let session_id: string = null;
 let ready = false;
 
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    const regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
 window.onload = function () {
     let type = "WebGL";
     if (!PIXI.utils.isWebGLSupported()) {
@@ -32,11 +42,19 @@ window.onload = function () {
     document.body.appendChild(app.view);
 };
 
+function getUrl() {
+    let index = window.location.href.indexOf('/', 'http://'.length);
+    return window.location.href.substr(0, index > -1 ? index : window.location.href.length);
+}
+
 function init() {
     let background = loadImage("background.png");
     background.width = window.innerWidth;
     background.height = window.innerHeight;
     app.stage.addChild(background);
+
+    let lobby = getParameterByName("id",window.location.href);
+    (document.getElementById('lobby') as HTMLInputElement).value = lobby ? lobby : "";
 }
 
 document.onkeypress = function (e) {
@@ -86,7 +104,8 @@ document.onkeypress = function (e) {
  */
 function initSocket() {
     if (socket) socket.disconnect();
-    socket = io(window.location.href);
+    console.log(getUrl());
+    socket = io(getUrl());
     /**
      * This event is fired when the game starts.
      */
@@ -126,7 +145,8 @@ function initSocket() {
         else document.getElementById("team2").style.display = 'inherit';
 
         session_id = data.session_id;
-        document.getElementById("lobby-id").innerHTML = "Lobby-Id:" + data.lobby_id;
+        let link = getUrl() + "?id=" + data.lobby_id;
+        document.getElementById("lobby-id").innerHTML = "Join: <a href='" + link + "'>" + data.lobby_id + "</a>";
         document.getElementById("login").style.display = 'none';
         document.getElementById("game-lobby").style.display = 'inherit';
     });
