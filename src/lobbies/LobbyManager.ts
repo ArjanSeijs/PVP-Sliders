@@ -98,7 +98,7 @@ class LobbyManager {
      * @return {string} The id of the lobby.
      */
     static newLobby(uuid?: string): string {
-        if (!uuid) uuid = UUID();
+        if (!uuid) uuid = this.newId();
         LobbyManager.lobbies[uuid] = new Lobby(uuid);
         return uuid;
     }

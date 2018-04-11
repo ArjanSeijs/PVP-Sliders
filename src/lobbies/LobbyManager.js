@@ -58,7 +58,7 @@ var LobbyManager = (function () {
     };
     LobbyManager.newLobby = function (uuid) {
         if (!uuid)
-            uuid = UUID();
+            uuid = this.newId();
         LobbyManager.lobbies[uuid] = new Lobby(uuid);
         return uuid;
     };
