@@ -39,12 +39,7 @@ class Util {
      */
     static getParameterByName(name, url): string {
         if (!url) url = window.location.href;
-        name = name.replace(/[\[\]]/g, "\\$&");
-        const regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-            results = regex.exec(url);
-        if (!results) return null;
-        if (!results[2]) return '';
-        return decodeURIComponent(results[2].replace(/\+/g, " "));
+        return new URL(url).searchParams.get(name);
     }
 }
 
@@ -61,13 +56,12 @@ class SocketHandler {
         this.socket.on('joined', (data) => this.onJoined(data));
         this.socket.on('restart', (data) => this.onRestart(data));
         this.socket.on('players', (data) => this.onPlayers(data));
+        this.socket.on('map', (data) => this.onMapChange(data));
         this.socket.on('end', (data) => this.onEnd(data));
     }
 
     onStart(data: any): void {
-        document.getElementById("login").style.display = 'none';
-        document.getElementById("game-lobby").style.display = 'none';
-        document.getElementById('wrapper').style.display = 'none';
+        view.hideAll();
         client.start(data);
         view.resize();
     }
@@ -83,16 +77,17 @@ class SocketHandler {
 
     onJoined(data: any): void {
         client.id_p1.id = data.ids[0].id;
-        client.id_p2.id = data.ids[1].id;
+        if (data.ids[1]) client.id_p2.id = data.ids[1].id;
         this.session_id = data.session_id;
 
-        if (data.ids.length === 1) document.getElementById("team2").style.display = 'none';
-        else document.getElementById("team2").style.display = 'inherit';
 
-        let link = Util.getUrl() + "?id=" + data.lobby_id;
+        let link = Util.getUrl() + "?id=" + data.lobby_id.replace("+", "%2B").replace("=", "%3D");
         document.getElementById("lobby-id").innerHTML = "Join: <a href='" + link + "'>" + data.lobby_id + "</a>";
-        document.getElementById("login").style.display = 'none';
-        document.getElementById("game-lobby").style.display = 'inherit';
+        if (data.isHost) {
+            view.showHost(data.ids.length > 1);
+        } else {
+            view.showLobby(data.ids.length > 1);
+        }
     }
 
     onMapChange(data: any): void {
@@ -100,10 +95,7 @@ class SocketHandler {
     }
 
     onRestart(data: any): void {
-        document.getElementById("login").style.display = 'none';
-        document.getElementById("game-lobby").style.display = '';
-        document.getElementById('wrapper').style.display = '';
-        document.getElementById('winners').style.display = 'none';
+        view.showLobby(client.id_p2.id !== -1);
         while (view.canvas.stage.children.length > 0) view.canvas.stage.removeChildAt(view.canvas.stage.children.length - 1);
         view.canvas.stage.addChild(Util.loadImage("background.png"));
         client.id_p1.ready = false;
@@ -112,21 +104,12 @@ class SocketHandler {
     }
 
     onPlayers(data: any): void {
-        console.log(JSON.stringify(data));
-        let string = "<ol>";
-        for (let i = 0; i < data.length; i++) {
-            if (data[i].id === client.id_p1.id) client.id_p1.ready = client.id_p2.ready = data[i].ready;
-            string += "<li>" + data[i].name + ":" + data[i].ready + ":" + data[i].team + "</li>";
-        }
-        string += "</ol>";
-        document.getElementById("players").innerHTML = string;
+        // console.log(JSON.stringify(data));
+        view.showPlayers(data);
     }
 
     onEnd(data: any): void {
-        document.getElementById("login").style.display = 'none';
-        document.getElementById("game-lobby").style.display = 'none';
-        document.getElementById('wrapper').style.display = '';
-        document.getElementById('winners').style.display = '';
+        view.showWin();
         document.getElementById('team').innerHTML = data.winners;
         view.displayPlayers(data.entities);
         if (client.timer) clearInterval(client.timer);
@@ -170,6 +153,8 @@ class View {
     screen_width: number;
     screen_height: number;
     size: number;
+    paddingX: number;
+    paddingY: number;
     offsetX: number;
     offsetY: number;
     canvas: any;
@@ -206,32 +191,34 @@ class View {
     }
 
     resize() {
+        if (!client.game) return;
+
         let width = client.game.board.width;
         let height = client.game.board.height;
 
         this.screen_width = window.innerWidth;
         this.screen_height = window.innerHeight;
-        this.size = Math.min(Math.floor(this.screen_width / client.game.board.width), Math.floor(this.screen_height / client.game.board.height));
-        this.offsetX = (this.screen_width - width * this.size) / 2;
-        this.offsetY = (this.screen_height - height * this.size) / 2;
+        //44 of 1080 pixel is width of border.
+        this.paddingX = 44 / 1080 * Math.min(this.screen_width, this.screen_height);
+        this.paddingY = 44 / 1080 * Math.min(this.screen_width, this.screen_height);
+        this.size = Math.min(
+            (this.screen_width - 2 * this.paddingX) / client.game.board.width,
+            (this.screen_height - 2 * this.paddingY) / client.game.board.height
+        );
+        this.offsetX = ((this.screen_width - 2 * this.paddingX) - width * this.size) / 2 + this.paddingX;
+        this.offsetY = ((this.screen_height - 2 * this.paddingY) - height * this.size) / 2 + this.paddingY;
 
         while (this.canvas.stage.children.length > 0) this.canvas.stage.removeChildAt(this.canvas.stage.children.length - 1);
 
         this.canvas.renderer.resize(this.screen_width, this.screen_height);
 
         this.load();
-        if (!client.game) return;
         this.displayGame();
         this.makeSprites();
         this.displayPlayers(client.game.entities);
     }
 
     displayPlayers(entities: any) {
-        // let width = client.game.board.width;
-        // let height = client.game.board.height;
-
-        // let offsetX = (this.screen_width - width * this.size) / 2;
-        // let offsetY = (this.screen_height - height * this.size) / 2;
         for (let key in client.game.entities) {
             if (!client.game.entities.hasOwnProperty(key)) continue;
             let entity = client.game.entities[key];
@@ -258,15 +245,12 @@ class View {
     displayGame() {
         let width = client.game.board.width;
         let height = client.game.board.height;
-
-        // let offsetX = (this.screen_width - width * this.size) / 2;
-        // let offsetY = (this.screen_height - height * this.size) / 2;
-
         let image = Util.loadImage("board_background.png");
-        image.x = this.offsetX;
-        image.y = this.offsetY;
-        image.width = this.size * width;
-        image.height = this.size * height;
+
+        image.x = this.offsetX - this.paddingX;
+        image.y = this.offsetY - this.paddingY;
+        image.width = this.size * width + 2 * this.paddingX;
+        image.height = this.size * height + 2 * this.paddingY;
         this.canvas.stage.addChild(image);
 
         let graphics = new PIXI.Graphics();
@@ -316,9 +300,6 @@ class View {
         let width = client.game.board.width;
         let height = client.game.board.height;
 
-        // let offsetX = (this.screen_width - width * this.size) / 2;
-        // let offsetY = (this.screen_height - height * this.size) / 2;
-
         for (let key in client.game.entities) {
             if (!client.game.entities.hasOwnProperty(key)) continue;
             let entity = client.game.entities[key];
@@ -338,6 +319,44 @@ class View {
                 client.stop(entity);
             }
         }
+    }
+
+    hideAll() {
+        document.getElementById("login").style.display = 'none';
+        document.getElementById("game-lobby").style.display = 'none';
+        document.getElementById('wrapper').style.display = 'none';
+        document.getElementById('winners').style.display = 'none';
+    }
+
+    showHost(multi: boolean) {
+        this.hideAll();
+        this.showLobby(multi);
+        document.getElementById('maps').style.display = '';
+    }
+
+    showLobby(multi: boolean) {
+        this.hideAll();
+        if (multi) document.getElementById("team2").style.display = '';
+        else document.getElementById("team2").style.display = 'none';
+
+        document.getElementById("game-lobby").style.display = '';
+        document.getElementById('wrapper').style.display = '';
+    }
+
+    showWin() {
+        this.hideAll();
+        document.getElementById('winners').style.display = '';
+        document.getElementById('wrapper').style.display = '';
+    }
+
+    showPlayers(data: any) {
+        let string = "<ol>";
+        for (let i = 0; i < data.length; i++) {
+            if (data[i].id === client.id_p1.id) client.id_p1.ready = client.id_p2.ready = data[i].ready;
+            string += "<li>" + data[i].name + ":" + data[i].ready + ":" + data[i].team + "</li>";
+        }
+        string += "</ol>";
+        document.getElementById("players").innerHTML = string;
     }
 }
 

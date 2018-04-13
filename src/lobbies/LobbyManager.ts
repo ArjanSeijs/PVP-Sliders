@@ -86,7 +86,7 @@ class LobbyManager {
         let lobby = LobbyManager.getLobby(data.lobby);
         if (data.password) lobby.setPassword(data.password);
         lobby.setLevel("Palooza.txt");
-        lobby.join(client, data);
+        lobby.join(client, data, true);
 
         let session_id = lobby.getSessionMap().getSession(client.id);
         lobby.setHost(session_id);
@@ -134,8 +134,9 @@ class SessionMap {
      * Creates a new session.
      * @param {SocketIO.Socket} client
      * @param {*} data The data send over the session.
+     * @param {boolean} isHost
      */
-    newSession(client: Socket, data: any) {
+    newSession(client: Socket, data: any, isHost?: boolean) {
         if (!data || !data.username) {
             client.emit('failed', 'no username');
             return;
@@ -156,7 +157,8 @@ class SessionMap {
         client.emit('joined', {
             ids: this.sessions[session_id].ids,
             session_id: session_id,
-            lobby_id: this.lobby.getId()
+            lobby_id: this.lobby.getId(),
+            isHost: !!isHost
         });
     }
 
@@ -303,8 +305,9 @@ class Lobby {
      * Join a client
      * @param {SocketIO.Socket} client
      * @param data
+     * @param {boolean} [isHost]
      */
-    join(client: Socket, data: any): void {
+    join(client: Socket, data: any, isHost?: boolean): void {
         if (!data) {
             client.emit('failed', "Don't you hate it when something is not defined?");
             return;
@@ -319,7 +322,7 @@ class Lobby {
         }
 
 
-        this._session_map.newSession(client, data);
+        this._session_map.newSession(client, data, isHost);
 
         this.eventListeners(client);
 

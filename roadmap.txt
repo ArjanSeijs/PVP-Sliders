@@ -38,11 +38,13 @@ Update Interface
 Stopblock
 Add a option for custom maps.
 
+
+Map doesn't start immediately.
+On game end remove all disconnected players
+Add chat box.
 Improve client side updating.
 List of joined players (while tab is press or something).
 Add random move if you do not move in x amount of seconds.
-Map doesn't start immediately.
-
 
 
 Host can kick a player.

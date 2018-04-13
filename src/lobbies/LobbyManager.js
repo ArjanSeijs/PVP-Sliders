@@ -52,7 +52,7 @@ var LobbyManager = (function () {
         if (data.password)
             lobby.setPassword(data.password);
         lobby.setLevel("Palooza.txt");
-        lobby.join(client, data);
+        lobby.join(client, data, true);
         var session_id = lobby.getSessionMap().getSession(client.id);
         lobby.setHost(session_id);
     };
@@ -76,7 +76,7 @@ var SessionMap = (function () {
         this.nextId = 0;
         this.joined = 0;
     }
-    SessionMap.prototype.newSession = function (client, data) {
+    SessionMap.prototype.newSession = function (client, data, isHost) {
         if (!data || !data.username) {
             client.emit('failed', 'no username');
             return;
@@ -95,7 +95,8 @@ var SessionMap = (function () {
         client.emit('joined', {
             ids: this.sessions[session_id].ids,
             session_id: session_id,
-            lobby_id: this.lobby.getId()
+            lobby_id: this.lobby.getId(),
+            isHost: !!isHost
         });
     };
     SessionMap.prototype.removeSession = function (client) {
@@ -195,7 +196,7 @@ var Lobby = (function () {
         this._session_map = new SessionMap(this);
         this.state = State.Joining;
     }
-    Lobby.prototype.join = function (client, data) {
+    Lobby.prototype.join = function (client, data, isHost) {
         if (!data) {
             client.emit('failed', "Don't you hate it when something is not defined?");
             return;
@@ -208,7 +209,7 @@ var Lobby = (function () {
             client.emit('failed', 'Lobby full');
             return;
         }
-        this._session_map.newSession(client, data);
+        this._session_map.newSession(client, data, isHost);
         this.eventListeners(client);
         logger.log("Joined " + client.id + ", " + this._session_map.calcJoined() + "/" + (this.board ? this.board.metadata.playerAmount : 'NaN'));
         LobbyManager.socket.in(this.id).emit('players', this._session_map.getJoined());

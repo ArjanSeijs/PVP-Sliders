@@ -37,13 +37,7 @@ var Util = /** @class */ (function () {
     Util.getParameterByName = function (name, url) {
         if (!url)
             url = window.location.href;
-        name = name.replace(/[\[\]]/g, "\\$&");
-        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"), results = regex.exec(url);
-        if (!results)
-            return null;
-        if (!results[2])
-            return '';
-        return decodeURIComponent(results[2].replace(/\+/g, " "));
+        return new URL(url).searchParams.get(name);
     };
     return Util;
 }());
@@ -57,12 +51,11 @@ var SocketHandler = /** @class */ (function () {
         this.socket.on('joined', function (data) { return _this.onJoined(data); });
         this.socket.on('restart', function (data) { return _this.onRestart(data); });
         this.socket.on('players', function (data) { return _this.onPlayers(data); });
+        this.socket.on('map', function (data) { return _this.onMapChange(data); });
         this.socket.on('end', function (data) { return _this.onEnd(data); });
     }
     SocketHandler.prototype.onStart = function (data) {
-        document.getElementById("login").style.display = 'none';
-        document.getElementById("game-lobby").style.display = 'none';
-        document.getElementById('wrapper').style.display = 'none';
+        view.hideAll();
         client.start(data);
         view.resize();
     };
@@ -76,25 +69,23 @@ var SocketHandler = /** @class */ (function () {
     };
     SocketHandler.prototype.onJoined = function (data) {
         client.id_p1.id = data.ids[0].id;
-        client.id_p2.id = data.ids[1].id;
+        if (data.ids[1])
+            client.id_p2.id = data.ids[1].id;
         this.session_id = data.session_id;
-        if (data.ids.length === 1)
-            document.getElementById("team2").style.display = 'none';
-        else
-            document.getElementById("team2").style.display = 'inherit';
-        var link = Util.getUrl() + "?id=" + data.lobby_id;
+        var link = Util.getUrl() + "?id=" + data.lobby_id.replace("+", "%2B").replace("=", "%3D");
         document.getElementById("lobby-id").innerHTML = "Join: <a href='" + link + "'>" + data.lobby_id + "</a>";
-        document.getElementById("login").style.display = 'none';
-        document.getElementById("game-lobby").style.display = 'inherit';
+        if (data.isHost) {
+            view.showHost(data.ids.length > 1);
+        }
+        else {
+            view.showLobby(data.ids.length > 1);
+        }
     };
     SocketHandler.prototype.onMapChange = function (data) {
         document.getElementById('selected-map').innerHTML = 'Map: ' + data;
     };
     SocketHandler.prototype.onRestart = function (data) {
-        document.getElementById("login").style.display = 'none';
-        document.getElementById("game-lobby").style.display = '';
-        document.getElementById('wrapper').style.display = '';
-        document.getElementById('winners').style.display = 'none';
+        view.showLobby(client.id_p2.id !== -1);
         while (view.canvas.stage.children.length > 0)
             view.canvas.stage.removeChildAt(view.canvas.stage.children.length - 1);
         view.canvas.stage.addChild(Util.loadImage("background.png"));
@@ -103,21 +94,11 @@ var SocketHandler = /** @class */ (function () {
         console.log('restart!');
     };
     SocketHandler.prototype.onPlayers = function (data) {
-        console.log(JSON.stringify(data));
-        var string = "<ol>";
-        for (var i = 0; i < data.length; i++) {
-            if (data[i].id === client.id_p1.id)
-                client.id_p1.ready = client.id_p2.ready = data[i].ready;
-            string += "<li>" + data[i].name + ":" + data[i].ready + ":" + data[i].team + "</li>";
-        }
-        string += "</ol>";
-        document.getElementById("players").innerHTML = string;
+        // console.log(JSON.stringify(data));
+        view.showPlayers(data);
     };
     SocketHandler.prototype.onEnd = function (data) {
-        document.getElementById("login").style.display = 'none';
-        document.getElementById("game-lobby").style.display = 'none';
-        document.getElementById('wrapper').style.display = '';
-        document.getElementById('winners').style.display = '';
+        view.showWin();
         document.getElementById('team').innerHTML = data.winners;
         view.displayPlayers(data.entities);
         if (client.timer)
@@ -183,28 +164,27 @@ var View = /** @class */ (function () {
         document.getElementById('lobby').value = lobby ? lobby : "";
     };
     View.prototype.resize = function () {
+        if (!client.game)
+            return;
         var width = client.game.board.width;
         var height = client.game.board.height;
         this.screen_width = window.innerWidth;
         this.screen_height = window.innerHeight;
-        this.size = Math.min(Math.floor(this.screen_width / client.game.board.width), Math.floor(this.screen_height / client.game.board.height));
-        this.offsetX = (this.screen_width - width * this.size) / 2;
-        this.offsetY = (this.screen_height - height * this.size) / 2;
+        //44 of 1080 pixel is width of border.
+        this.paddingX = 44 / 1080 * Math.min(this.screen_width, this.screen_height);
+        this.paddingY = 44 / 1080 * Math.min(this.screen_width, this.screen_height);
+        this.size = Math.min((this.screen_width - 2 * this.paddingX) / client.game.board.width, (this.screen_height - 2 * this.paddingY) / client.game.board.height);
+        this.offsetX = ((this.screen_width - 2 * this.paddingX) - width * this.size) / 2 + this.paddingX;
+        this.offsetY = ((this.screen_height - 2 * this.paddingY) - height * this.size) / 2 + this.paddingY;
         while (this.canvas.stage.children.length > 0)
             this.canvas.stage.removeChildAt(this.canvas.stage.children.length - 1);
         this.canvas.renderer.resize(this.screen_width, this.screen_height);
         this.load();
-        if (!client.game)
-            return;
         this.displayGame();
         this.makeSprites();
         this.displayPlayers(client.game.entities);
     };
     View.prototype.displayPlayers = function (entities) {
-        // let width = client.game.board.width;
-        // let height = client.game.board.height;
-        // let offsetX = (this.screen_width - width * this.size) / 2;
-        // let offsetY = (this.screen_height - height * this.size) / 2;
         for (var key in client.game.entities) {
             if (!client.game.entities.hasOwnProperty(key))
                 continue;
@@ -230,13 +210,11 @@ var View = /** @class */ (function () {
     View.prototype.displayGame = function () {
         var width = client.game.board.width;
         var height = client.game.board.height;
-        // let offsetX = (this.screen_width - width * this.size) / 2;
-        // let offsetY = (this.screen_height - height * this.size) / 2;
         var image = Util.loadImage("board_background.png");
-        image.x = this.offsetX;
-        image.y = this.offsetY;
-        image.width = this.size * width;
-        image.height = this.size * height;
+        image.x = this.offsetX - this.paddingX;
+        image.y = this.offsetY - this.paddingY;
+        image.width = this.size * width + 2 * this.paddingX;
+        image.height = this.size * height + 2 * this.paddingY;
         this.canvas.stage.addChild(image);
         var graphics = new PIXI.Graphics();
         graphics.lineStyle(2, 0x8B4513);
@@ -280,8 +258,6 @@ var View = /** @class */ (function () {
         var speed = 30;
         var width = client.game.board.width;
         var height = client.game.board.height;
-        // let offsetX = (this.screen_width - width * this.size) / 2;
-        // let offsetY = (this.screen_height - height * this.size) / 2;
         for (var key in client.game.entities) {
             if (!client.game.entities.hasOwnProperty(key))
                 continue;
@@ -302,6 +278,41 @@ var View = /** @class */ (function () {
                 client.stop(entity);
             }
         }
+    };
+    View.prototype.hideAll = function () {
+        document.getElementById("login").style.display = 'none';
+        document.getElementById("game-lobby").style.display = 'none';
+        document.getElementById('wrapper').style.display = 'none';
+        document.getElementById('winners').style.display = 'none';
+    };
+    View.prototype.showHost = function (multi) {
+        this.hideAll();
+        this.showLobby(multi);
+        document.getElementById('maps').style.display = '';
+    };
+    View.prototype.showLobby = function (multi) {
+        this.hideAll();
+        if (multi)
+            document.getElementById("team2").style.display = '';
+        else
+            document.getElementById("team2").style.display = 'none';
+        document.getElementById("game-lobby").style.display = '';
+        document.getElementById('wrapper').style.display = '';
+    };
+    View.prototype.showWin = function () {
+        this.hideAll();
+        document.getElementById('winners').style.display = '';
+        document.getElementById('wrapper').style.display = '';
+    };
+    View.prototype.showPlayers = function (data) {
+        var string = "<ol>";
+        for (var i = 0; i < data.length; i++) {
+            if (data[i].id === client.id_p1.id)
+                client.id_p1.ready = client.id_p2.ready = data[i].ready;
+            string += "<li>" + data[i].name + ":" + data[i].ready + ":" + data[i].team + "</li>";
+        }
+        string += "</ol>";
+        document.getElementById("players").innerHTML = string;
     };
     return View;
 }());
