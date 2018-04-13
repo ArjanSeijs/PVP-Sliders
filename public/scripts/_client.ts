@@ -170,6 +170,8 @@ class View {
     screen_width: number;
     screen_height: number;
     size: number;
+    offsetX: number;
+    offsetY: number;
     canvas: any;
     images: string[];
 
@@ -204,9 +206,14 @@ class View {
     }
 
     resize() {
+        let width = client.game.board.width;
+        let height = client.game.board.height;
+
         this.screen_width = window.innerWidth;
         this.screen_height = window.innerHeight;
         this.size = Math.min(Math.floor(this.screen_width / client.game.board.width), Math.floor(this.screen_height / client.game.board.height));
+        this.offsetX = (this.screen_width - width * this.size) / 2;
+        this.offsetY = (this.screen_height - height * this.size) / 2;
 
         while (this.canvas.stage.children.length > 0) this.canvas.stage.removeChildAt(this.canvas.stage.children.length - 1);
 
@@ -220,11 +227,11 @@ class View {
     }
 
     displayPlayers(entities: any) {
-        let width = client.game.board.width;
-        let height = client.game.board.height;
+        // let width = client.game.board.width;
+        // let height = client.game.board.height;
 
-        let offsetX = (this.screen_width - width * this.size) / 2;
-        let offsetY = (this.screen_height - height * this.size) / 2;
+        // let offsetX = (this.screen_width - width * this.size) / 2;
+        // let offsetY = (this.screen_height - height * this.size) / 2;
         for (let key in client.game.entities) {
             if (!client.game.entities.hasOwnProperty(key)) continue;
             let entity = client.game.entities[key];
@@ -236,11 +243,11 @@ class View {
                 entity.sprite.visible = true;
                 entity.text.visible = true;
 
-                entity.sprite.x = offsetX + (entity.pos.x / 100) * this.size;
-                entity.sprite.y = offsetY + (entity.pos.y / 100) * this.size;
+                entity.sprite.x = this.offsetX + (entity.pos.x / 100) * this.size;
+                entity.sprite.y = this.offsetY + (entity.pos.y / 100) * this.size;
 
-                entity.text.x = offsetX + (entity.pos.x / 100) * this.size + (0.5 * this.size);
-                entity.text.y = offsetY + (entity.pos.y / 100) * this.size;
+                entity.text.x = this.offsetX + (entity.pos.x / 100) * this.size + (0.5 * this.size);
+                entity.text.y = this.offsetY + (entity.pos.y / 100) * this.size;
             } else {
                 entity.sprite.visible = false;
                 entity.text.visible = false;
@@ -252,26 +259,26 @@ class View {
         let width = client.game.board.width;
         let height = client.game.board.height;
 
-        let offsetX = (this.screen_width - width * this.size) / 2;
-        let offsetY = (this.screen_height - height * this.size) / 2;
+        // let offsetX = (this.screen_width - width * this.size) / 2;
+        // let offsetY = (this.screen_height - height * this.size) / 2;
 
-        // let image = Util.loadImage("board_background.png");
-        // image.x = offsetX;
-        // image.y = offsetY;
-        // image.width = this.size * width;
-        // image.height = this.size * height;
-        // this.canvas.stage.addChild(image);
+        let image = Util.loadImage("board_background.png");
+        image.x = this.offsetX;
+        image.y = this.offsetY;
+        image.width = this.size * width;
+        image.height = this.size * height;
+        this.canvas.stage.addChild(image);
 
         let graphics = new PIXI.Graphics();
         graphics.lineStyle(2, 0x8B4513);
 
         for (let x = 0; x < width; x++) {
             for (let y = 0; y < height; y++) {
-                graphics.drawRect(offsetX + x * this.size, offsetY + y * this.size, this.size, this.size);
+                graphics.drawRect(this.offsetX + x * this.size, this.offsetY + y * this.size, this.size, this.size);
                 if (client.game.board.tiles[x][y].wall) {
                     let block = Util.loadImage("block.png");
-                    block.x = offsetX + x * this.size;
-                    block.y = offsetY + y * this.size;
+                    block.x = this.offsetX + x * this.size;
+                    block.y = this.offsetY + y * this.size;
                     block.width = block.height = this.size;
                     this.canvas.stage.addChild(block);
                 }
@@ -309,8 +316,8 @@ class View {
         let width = client.game.board.width;
         let height = client.game.board.height;
 
-        let offsetX = (this.screen_width - width * this.size) / 2;
-        let offsetY = (this.screen_height - height * this.size) / 2;
+        // let offsetX = (this.screen_width - width * this.size) / 2;
+        // let offsetY = (this.screen_height - height * this.size) / 2;
 
         for (let key in client.game.entities) {
             if (!client.game.entities.hasOwnProperty(key)) continue;
@@ -322,11 +329,11 @@ class View {
                 entity.pos.y += dir.y * speed;
 
                 entity.sprite.width = entity.sprite.height = this.size;
-                entity.sprite.x = offsetX + (entity.pos.x / 100) * this.size;
-                entity.sprite.y = offsetY + (entity.pos.y / 100) * this.size;
+                entity.sprite.x = this.offsetX + (entity.pos.x / 100) * this.size;
+                entity.sprite.y = this.offsetY + (entity.pos.y / 100) * this.size;
 
-                entity.text.x = offsetX + (entity.pos.x / 100) * this.size + (0.5 * this.size);
-                entity.text.y = offsetY + (entity.pos.y / 100) * this.size;
+                entity.text.x = this.offsetX + (entity.pos.x / 100) * this.size + (0.5 * this.size);
+                entity.text.y = this.offsetY + (entity.pos.y / 100) * this.size;
             } else {
                 client.stop(entity);
             }
@@ -390,13 +397,6 @@ class Client {
                     return true;
             }
         } catch (error) {
-            console.log("x,y,dirx,diry,entity,entity.size");
-            console.log(newX);
-            console.log(newY);
-            console.log(dir.x);
-            console.log(dir.y);
-            console.log(entity);
-            console.log(entity.size);
             console.warn(error);
         }
     }
