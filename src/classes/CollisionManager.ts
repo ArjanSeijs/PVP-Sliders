@@ -59,9 +59,9 @@ class CollisionHandler {
         let bounce = this.game.gameMode.onTeamCollision(entity, other);
         if (!bounce) return;
 
-        entity.direction.next = entity.direction.curr.opposite;
 
         if (entity.direction.curr !== other.direction.curr.opposite) {
+            entity.stop();
             let diffX = Math.abs(entity.pos.x - other.pos.x);
             let diffY = Math.abs(entity.pos.y - other.pos.y);
             //TODO config
@@ -73,6 +73,8 @@ class CollisionHandler {
                 }
                 other.direction.next = entity.direction.curr;
             }
+        } else {
+            entity.direction.next = entity.direction.curr.opposite;
         }
     }
 

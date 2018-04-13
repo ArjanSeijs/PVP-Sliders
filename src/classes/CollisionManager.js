@@ -46,8 +46,8 @@ var CollisionHandler = (function () {
         var bounce = this.game.gameMode.onTeamCollision(entity, other);
         if (!bounce)
             return;
-        entity.direction.next = entity.direction.curr.opposite;
         if (entity.direction.curr !== other.direction.curr.opposite) {
+            entity.stop();
             var diffX = Math.abs(entity.pos.x - other.pos.x);
             var diffY = Math.abs(entity.pos.y - other.pos.y);
             if (!(Math.abs(diffX - diffY) < 0.2)) {
@@ -59,6 +59,9 @@ var CollisionHandler = (function () {
                 }
                 other.direction.next = entity.direction.curr;
             }
+        }
+        else {
+            entity.direction.next = entity.direction.curr.opposite;
         }
     };
     CollisionHandler.prototype.enemyCollision = function (entity, other) {
