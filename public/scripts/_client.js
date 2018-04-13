@@ -1,0 +1,428 @@
+var Sprite = PIXI.Sprite;
+var socketListener;
+var view;
+var client;
+var Util = /** @class */ (function () {
+    function Util() {
+    }
+    /**
+     * Gets the url with the path removed
+     * @return {string}
+     */
+    Util.getUrl = function () {
+        var index = window.location.href.indexOf('/', 'http://'.length);
+        return window.location.href.substr(0, index > -1 ? index : window.location.href.length);
+    };
+    Util.loadImage = function (image) {
+        var texture = PIXI.loader.resources["assets/" + image].texture;
+        return new PIXI.Sprite(texture);
+    };
+    /**
+     * Gets the data of the user form.
+     * @return {{username: string, multiplayer: boolean, lobby: string, password: string}}
+     */
+    Util.getFormData = function () {
+        var username = document.getElementById("username").value;
+        var multiplayer = document.getElementById("multiplayer").checked;
+        var lobby = document.getElementById("lobby").value;
+        var password = document.getElementById("password").value;
+        return { username: username, multiplayer: multiplayer, lobby: lobby, password: password };
+    };
+    /**
+     * Parses a paramater from the query string.
+     * @param {string} name The parameter name.
+     * @param {string} [url] The url.
+     * @return {string}
+     */
+    Util.getParameterByName = function (name, url) {
+        if (!url)
+            url = window.location.href;
+        name = name.replace(/[\[\]]/g, "\\$&");
+        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"), results = regex.exec(url);
+        if (!results)
+            return null;
+        if (!results[2])
+            return '';
+        return decodeURIComponent(results[2].replace(/\+/g, " "));
+    };
+    return Util;
+}());
+var SocketHandler = /** @class */ (function () {
+    function SocketHandler() {
+        var _this = this;
+        this.socket = io(Util.getUrl());
+        this.socket.on('start', function (data) { return _this.onStart(data); });
+        this.socket.on('update', function (data) { return _this.onUpdate(data); });
+        this.socket.on('failed', function (data, refresh) { return _this.onFailed(data, refresh); });
+        this.socket.on('joined', function (data) { return _this.onJoined(data); });
+        this.socket.on('restart', function (data) { return _this.onRestart(data); });
+        this.socket.on('players', function (data) { return _this.onPlayers(data); });
+        this.socket.on('end', function (data) { return _this.onEnd(data); });
+    }
+    SocketHandler.prototype.onStart = function (data) {
+        document.getElementById("login").style.display = 'none';
+        document.getElementById("game-lobby").style.display = 'none';
+        document.getElementById('wrapper').style.display = 'none';
+        client.start(data);
+        view.resize();
+    };
+    SocketHandler.prototype.onUpdate = function (entities) {
+        view.displayPlayers(entities);
+    };
+    SocketHandler.prototype.onFailed = function (data, refresh) {
+        alert(data);
+        if (refresh)
+            location.reload();
+    };
+    SocketHandler.prototype.onJoined = function (data) {
+        client.id_p1.id = data.ids[0].id;
+        client.id_p2.id = data.ids[1].id;
+        this.session_id = data.session_id;
+        if (data.ids.length === 1)
+            document.getElementById("team2").style.display = 'none';
+        else
+            document.getElementById("team2").style.display = 'inherit';
+        var link = Util.getUrl() + "?id=" + data.lobby_id;
+        document.getElementById("lobby-id").innerHTML = "Join: <a href='" + link + "'>" + data.lobby_id + "</a>";
+        document.getElementById("login").style.display = 'none';
+        document.getElementById("game-lobby").style.display = 'inherit';
+    };
+    SocketHandler.prototype.onMapChange = function (data) {
+        document.getElementById('selected-map').innerHTML = 'Map: ' + data;
+    };
+    SocketHandler.prototype.onRestart = function (data) {
+        document.getElementById("login").style.display = 'none';
+        document.getElementById("game-lobby").style.display = '';
+        document.getElementById('wrapper').style.display = '';
+        document.getElementById('winners').style.display = 'none';
+        while (view.canvas.stage.children.length > 0)
+            view.canvas.stage.removeChildAt(view.canvas.stage.children.length - 1);
+        view.canvas.stage.addChild(Util.loadImage("background.png"));
+        client.id_p1.ready = false;
+        client.id_p2.ready = false;
+        console.log('restart!');
+    };
+    SocketHandler.prototype.onPlayers = function (data) {
+        console.log(JSON.stringify(data));
+        var string = "<ol>";
+        for (var i = 0; i < data.length; i++) {
+            if (data[i].id === client.id_p1.id)
+                client.id_p1.ready = client.id_p2.ready = data[i].ready;
+            string += "<li>" + data[i].name + ":" + data[i].ready + ":" + data[i].team + "</li>";
+        }
+        string += "</ol>";
+        document.getElementById("players").innerHTML = string;
+    };
+    SocketHandler.prototype.onEnd = function (data) {
+        document.getElementById("login").style.display = 'none';
+        document.getElementById("game-lobby").style.display = 'none';
+        document.getElementById('wrapper').style.display = '';
+        document.getElementById('winners').style.display = '';
+        document.getElementById('team').innerHTML = data.winners;
+        view.displayPlayers(data.entities);
+        if (client.timer)
+            clearInterval(client.timer);
+    };
+    SocketHandler.prototype.sendReady = function (ready) {
+        this.socket.emit('ready', { session_id: this.session_id, ready: ready });
+    };
+    SocketHandler.prototype.sendJoin = function (data) {
+        this.socket.emit('join', data);
+    };
+    SocketHandler.prototype.sendHost = function (data) {
+        this.socket.emit('host', data);
+    };
+    SocketHandler.prototype.sendMap = function (data) {
+        this.socket.emit('map', data);
+    };
+    SocketHandler.prototype.sendStart = function () {
+        this.socket.emit('start', { session_id: this.session_id });
+    };
+    SocketHandler.prototype.sendTeam = function (team, player) {
+        this.socket.emit('team', { session_id: this.session_id, team: team, player: player });
+    };
+    SocketHandler.prototype.sendMove = function (id, direction) {
+        this.socket.emit('move', { session_id: this.session_id, id: id, direction: direction });
+    };
+    SocketHandler.prototype.close = function () {
+        if (this.socket)
+            this.socket.disconnect();
+    };
+    return SocketHandler;
+}());
+var View = /** @class */ (function () {
+    function View() {
+        var images = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            images[_i] = arguments[_i];
+        }
+        var _this = this;
+        this.screen_width = window.innerWidth;
+        this.screen_height = window.innerHeight;
+        var type = "WebGL";
+        if (!PIXI.utils.isWebGLSupported()) {
+            type = "canvas";
+        }
+        PIXI.utils.sayHello(type);
+        //Setup app
+        this.canvas = new PIXI.Application({ width: 1024, height: 512 });
+        this.canvas.renderer.backgroundColor = 0x061639;
+        this.canvas.renderer.view.style.position = "absolute";
+        this.canvas.renderer.view.style.display = "block";
+        this.canvas.renderer.autoResize = true;
+        this.canvas.renderer.resize(this.screen_width, this.screen_height);
+        PIXI.loader.add(images).load(function () { return _this.load(); });
+        document.body.appendChild(this.canvas.view);
+    }
+    View.prototype.load = function () {
+        var background = Util.loadImage("background.png");
+        background.width = this.screen_width;
+        background.height = this.screen_height;
+        this.canvas.stage.addChild(background);
+        var lobby = Util.getParameterByName("id", window.location.href);
+        document.getElementById('lobby').value = lobby ? lobby : "";
+    };
+    View.prototype.resize = function () {
+        this.screen_width = window.innerWidth;
+        this.screen_height = window.innerHeight;
+        this.size = Math.min(Math.floor(this.screen_width / client.game.board.width), Math.floor(this.screen_height / client.game.board.height));
+        while (this.canvas.stage.children.length > 0)
+            this.canvas.stage.removeChildAt(this.canvas.stage.children.length - 1);
+        this.canvas.renderer.resize(this.screen_width, this.screen_height);
+        this.load();
+        if (!client.game)
+            return;
+        this.displayGame();
+        this.makeSprites();
+        this.displayPlayers(client.game.entities);
+    };
+    View.prototype.displayPlayers = function (entities) {
+        var width = client.game.board.width;
+        var height = client.game.board.height;
+        var offsetX = (this.screen_width - width * this.size) / 2;
+        var offsetY = (this.screen_height - height * this.size) / 2;
+        for (var key in client.game.entities) {
+            if (!client.game.entities.hasOwnProperty(key))
+                continue;
+            var entity = client.game.entities[key];
+            if (!entity.sprite || !entity.text)
+                continue;
+            if (entities[key]) {
+                entity.pos = entities[key].pos;
+                entity.direction = entities[key].direction;
+                entity.sprite.visible = true;
+                entity.text.visible = true;
+                entity.sprite.x = offsetX + (entity.pos.x / 100) * this.size;
+                entity.sprite.y = offsetY + (entity.pos.y / 100) * this.size;
+                entity.text.x = offsetX + (entity.pos.x / 100) * this.size + (0.5 * this.size);
+                entity.text.y = offsetY + (entity.pos.y / 100) * this.size;
+            }
+            else {
+                entity.sprite.visible = false;
+                entity.text.visible = false;
+            }
+        }
+    };
+    View.prototype.displayGame = function () {
+        var width = client.game.board.width;
+        var height = client.game.board.height;
+        var offsetX = (this.screen_width - width * this.size) / 2;
+        var offsetY = (this.screen_height - height * this.size) / 2;
+        // let image = Util.loadImage("board_background.png");
+        // image.x = offsetX;
+        // image.y = offsetY;
+        // image.width = this.size * width;
+        // image.height = this.size * height;
+        // this.canvas.stage.addChild(image);
+        var graphics = new PIXI.Graphics();
+        graphics.lineStyle(2, 0x8B4513);
+        for (var x = 0; x < width; x++) {
+            for (var y = 0; y < height; y++) {
+                graphics.drawRect(offsetX + x * this.size, offsetY + y * this.size, this.size, this.size);
+                if (client.game.board.tiles[x][y].wall) {
+                    var block = Util.loadImage("block.png");
+                    block.x = offsetX + x * this.size;
+                    block.y = offsetY + y * this.size;
+                    block.width = block.height = this.size;
+                    this.canvas.stage.addChild(block);
+                }
+            }
+        }
+        this.canvas.stage.addChild(graphics);
+    };
+    View.prototype.makeSprites = function () {
+        var width = client.game.board.width;
+        var height = client.game.board.height;
+        for (var key in client.game.entities) {
+            if (!client.game.entities.hasOwnProperty(key))
+                continue;
+            var entity = client.game.entities[key];
+            entity.sprite = Util.loadImage("player_" + entity.team + ".png");
+            entity.text = new PIXI.Text(entity.name, {
+                fontFamily: 'Arial',
+                fontSize: 12,
+                fill: 0xff1010,
+                align: 'center'
+            });
+            entity.sprite.width = entity.sprite.height = this.size;
+            entity.sprite.visible = false;
+            entity.text.visible = false;
+            entity.text.anchor.set(0.5, 1);
+            this.canvas.stage.addChild(entity.sprite);
+            this.canvas.stage.addChild(entity.text);
+        }
+    };
+    View.prototype.updatePos = function () {
+        var speed = 30;
+        var width = client.game.board.width;
+        var height = client.game.board.height;
+        var offsetX = (this.screen_width - width * this.size) / 2;
+        var offsetY = (this.screen_height - height * this.size) / 2;
+        for (var key in client.game.entities) {
+            if (!client.game.entities.hasOwnProperty(key))
+                continue;
+            var entity = client.game.entities[key];
+            if (!entity.sprite || !entity.text)
+                continue;
+            if (client.canMove(entity, speed)) {
+                var dir = entity.direction;
+                entity.pos.x += dir.x * speed;
+                entity.pos.y += dir.y * speed;
+                entity.sprite.width = entity.sprite.height = this.size;
+                entity.sprite.x = offsetX + (entity.pos.x / 100) * this.size;
+                entity.sprite.y = offsetY + (entity.pos.y / 100) * this.size;
+                entity.text.x = offsetX + (entity.pos.x / 100) * this.size + (0.5 * this.size);
+                entity.text.y = offsetY + (entity.pos.y / 100) * this.size;
+            }
+            else {
+                client.stop(entity);
+            }
+        }
+    };
+    return View;
+}());
+var Client = /** @class */ (function () {
+    function Client() {
+        this.id_p1 = { id: -1, ready: false };
+        this.id_p2 = { id: -1, ready: false };
+    }
+    Client.prototype.start = function (data) {
+        client.game = data.game;
+        view.displayGame();
+        view.makeSprites();
+        this.timer = setInterval(function () { return view.updatePos(); }, 15);
+    };
+    Client.prototype.stop = function (entity) {
+        entity.direction = { x: 0, y: 0, string: "NONE" };
+        var cellSize = 100; //TODO config.
+        var x = Math.round(entity.pos.x / cellSize) * cellSize;
+        var y = Math.round(entity.y / cellSize) * cellSize;
+        entity.pos = {
+            x: x,
+            y: y
+        };
+    };
+    Client.prototype.canMove = function (entity, speed) {
+        var cellSize = 100;
+        var dir = entity.direction;
+        //TODO Depends ons TPS
+        var newX = entity.pos.x + dir.x * speed;
+        var newY = entity.pos.y + dir.y * speed;
+        var tiles = this.game.board ? this.game.board.tiles : null;
+        if (!tiles) {
+            console.log("Board or tiles undefined");
+            return false;
+        }
+        if (!this.inBounds(newX, newY, entity))
+            return false;
+        try {
+            switch (entity.direction.string) {
+                case "NORTH":
+                case "WEST":
+                    return !tiles[Math.floor(newX / cellSize)][Math.floor(newY / cellSize)].wall;
+                case "EAST":
+                    return !tiles[Math.floor((newX + entity.size) / cellSize)][Math.floor(newY / cellSize)].wall;
+                case "SOUTH":
+                    return !tiles[Math.floor(newX / cellSize)][Math.floor((newY + entity.size) / cellSize)].wall;
+                default:
+                    return true;
+            }
+        }
+        catch (error) {
+            console.log("x,y,dirx,diry,entity,entity.size");
+            console.log(newX);
+            console.log(newY);
+            console.log(dir.x);
+            console.log(dir.y);
+            console.log(entity);
+            console.log(entity.size);
+            console.warn(error);
+        }
+    };
+    Client.prototype.inBounds = function (newX, newY, entity) {
+        //TODO config
+        var cellSize = 100;
+        return newX >= 0 && newY >= 0
+            && newX + entity.size < this.game.board.width * cellSize
+            && newY + entity.size < this.game.board.height * cellSize;
+    };
+    return Client;
+}());
+window.onload = function () {
+    socketListener = new SocketHandler();
+    client = new Client();
+    view = new View("assets/block.png", "assets/background.png", "assets/player_blue.png", "assets/player_green.png", "assets/player_red.png", "assets/player_yellow.png", "assets/board_background.png");
+};
+window.onkeypress = function (e) {
+    if (!client || !client.game || !socketListener || !socketListener.socket)
+        return;
+    var idMap = {
+        "w": client.id_p1.id,
+        "a": client.id_p1.id,
+        "s": client.id_p1.id,
+        "d": client.id_p1.id,
+        "arrowleft": client.id_p2.id,
+        "arrowright": client.id_p2.id,
+        "arrowup": client.id_p2.id,
+        "arrowdown": client.id_p2.id,
+    };
+    var dirMap = {
+        "w": "NORTH",
+        "a": "WEST",
+        "s": "SOUTH",
+        "d": "EAST",
+        "arrowleft": "WEST",
+        "arrowright": "EAST",
+        "arrowup": "NORTH",
+        "arrowdown": "SOUTH",
+    };
+    var key = e.key.toLowerCase();
+    if (idMap[key] === null || idMap[key] === undefined)
+        return;
+    socketListener.sendMove(idMap[key], dirMap[key]);
+};
+function _map(elm) {
+    socketListener.sendMap(elm.value);
+}
+function _join() {
+    socketListener.sendJoin(Util.getFormData());
+}
+function _host() {
+    socketListener.sendHost(Util.getFormData());
+}
+function _ready() {
+    client.id_p1.ready = client.id_p2.ready = !client.id_p1.ready;
+    socketListener.sendReady(client.id_p1.ready);
+}
+function _setTeam(elm, i) {
+    socketListener.sendTeam(elm.value, i);
+}
+function _start() {
+    socketListener.sendStart();
+}
+function _resize() {
+    if (!view)
+        return;
+    view.resize();
+}
+//# sourceMappingURL=_client.js.map

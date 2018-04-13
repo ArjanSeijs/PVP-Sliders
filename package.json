@@ -23,6 +23,7 @@
   "dependencies": {
     "@types/node": "^7.0.5",
     "@types/socket.io": "^1.4.32",
+    "@types/socket.io-client": "^1.4.32",
     "body-parser": "latest",
     "ejs": "^2.5.8",
     "express": "^4.16.3",
@@ -32,6 +33,7 @@
     "uuid": "^3.2.1"
   },
   "devDependencies": {
-    "simple-tests-js": "^1.1.1"
+    "simple-tests-js": "^1.1.1",
+    "typescript": "^2.8.1"
   }
 }

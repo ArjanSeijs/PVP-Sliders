@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
-    "removeComments": true,
+    "removeComments": false,
     "module": "commonjs",
     "target": "es5",
+    "sourceRoot": "./",
     "sourceMap": true
   },
   "exclude": [

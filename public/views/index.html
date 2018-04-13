@@ -5,7 +5,7 @@
     <title>PVP-Sliders</title>
     <script src="../scripts/socket.io.js"></script>
     <script src="../scripts/pixi.min.js"></script>
-    <script src="../scripts/client.js"></script>
+    <script src="../scripts/_client.js"></script>
     <style>
         .wrapper {
             width: 100%;
@@ -62,7 +62,7 @@
         }
     </style>
 </head>
-<body style="margin: 0; padding: 0" onresize="resize()">
+<body style="margin: 0; padding: 0" onresize="_resize()">
 <div id="wrapper" class="wrapper">
     <div id="login" class="login">
         <label>Username:<br>
@@ -80,10 +80,10 @@
             <input id="password" type="text">
         </label>
         <label>
-            <input type="button" value="Join lobby" onclick="join()">
+            <input type="button" value="Join lobby" onclick="_join()">
         </label>
         <label>
-            <input type="button" value="Host Lobby" onclick="host()">
+            <input type="button" value="Host Lobby" onclick="_host()">
         </label>
 
     </div>
@@ -93,7 +93,7 @@
         <div id="players"></div>
         <div id="maps" style="display: none;">
             <label>
-                <select id="mapselect" onchange="changeMap(this)">
+                <select id="mapselect" onchange="_map(this)">
                     <option value="anothermaze">Anothermaze</option>
                     <option value="horizontal">Horizontal</option>
                     <option value="largetest">LargeTest</option>
@@ -110,7 +110,7 @@
             </label>
         </div>
         <label for="teamselect">Team:</label>
-        <select id="teamselect" onclick="setTeam(this,0)" onchange="setTeam(this,0)">
+        <select id="teamselect" onclick="_setTeam(this,0)" onchange="_setTeam(this,0)">
             <option value="red" class="red">Red</option>
             <option value="green" class="green">Green</option>
             <option value="yellow" class="yellow">Yellow</option>
@@ -118,14 +118,14 @@
         </select>
         <span id="team2">
         <label for="teamselect2">Team:</label>
-        <select id="teamselect2" onclick="setTeam(this,1)" onchange="setTeam(this,1)">
+        <select id="teamselect2" onclick="_setTeam(this,1)" onchange="_setTeam(this,1)">
             <option value="red" class="red">Red</option>
             <option value="green" class="green">Green</option>
             <option value="yellow" class="yellow">Yellow</option>
             <option value="blue" class="blue">Blue</option>
         </select></span>
-        <button onclick="toggleReady()">ToggleReady</button>
-        <button onclick="start()">Start</button>
+        <button onclick="_ready()">ToggleReady</button>
+        <button onclick="_start()">Start</button>
     </div>
     <div id="winners" class="winner" style="display: none;">
         <div id="team"></div>
