@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from "path";
 import Board = require("../classes/Board");
+import Types = require("../classes/Types");
 
 const _global: any = global;
 
@@ -73,7 +74,9 @@ class BoardParser {
                     }
                 }
                 if (c === '#') {
-                    board.getTileAt(x, y).wall = true;
+                    board.getTileAt(x, y).tile_type = Types.Wall;
+                } else if (c === '+') {
+                    board.getTileAt(x, y).tile_type = Types.Stop;
                 }
             }
         }

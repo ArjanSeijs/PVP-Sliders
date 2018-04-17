@@ -1,22 +1,25 @@
 import ToJson = require("../interfaces/ToJson");
+import Types = require("./Types");
 
 class Tile implements ToJson {
 
-    wall: boolean;
+    tile_type: Types;
     y: number;
     x: number;
+    pos: { x: number, y: number };
 
     constructor(x: number, y: number) {
         this.x = x;
         this.y = y;
-        this.wall = false;
+        this.tile_type = Types.None;
+        this.pos = {x: 100 * x, y: 100 * y};
     }
 
-    toJson(): { x: number, y: number, wall: boolean } {
+    toJson(): { x: number, y: number, tile_type: string } {
         return {
             x: this.x,
             y: this.y,
-            wall: this.wall
+            tile_type: this.tile_type.toJson()
         }
     }
 }

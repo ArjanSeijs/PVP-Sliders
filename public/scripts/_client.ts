@@ -263,8 +263,14 @@ class View {
         for (let x = 0; x < width; x++) {
             for (let y = 0; y < height; y++) {
                 graphics.drawRect(this.offsetX + x * this.size, this.offsetY + y * this.size, this.size, this.size);
-                if (client.game.board.tiles[x][y].wall) {
-                    let block = Util.loadImage("block.png");
+                let block = null;
+                if (client.game.board.tiles[x][y].tile_type === "wall") {
+                    block = Util.loadImage("block.png");
+                }
+                if (client.game.board.tiles[x][y].tile_type === "stop") {
+                    block = Util.loadImage("stop.png");
+                }
+                if (block != null) {
                     block.x = this.offsetX + x * this.size;
                     block.y = this.offsetY + y * this.size;
                     block.width = block.height = this.size;
@@ -411,11 +417,11 @@ class Client {
             switch (entity.direction.string) {
                 case "NORTH":
                 case "WEST":
-                    return !tiles[Math.floor(newX / cellSize)][Math.floor(newY / cellSize)].wall;
+                    return tiles[Math.floor(newX / cellSize)][Math.floor(newY / cellSize)].tile_type !== "wall";
                 case "EAST":
-                    return !tiles[Math.floor((newX + entity.size) / cellSize)][Math.floor(newY / cellSize)].wall;
+                    return tiles[Math.floor((newX + entity.size) / cellSize)][Math.floor(newY / cellSize)].tile_type !== "wall";
                 case "SOUTH":
-                    return !tiles[Math.floor(newX / cellSize)][Math.floor((newY + entity.size) / cellSize)].wall;
+                    return tiles[Math.floor(newX / cellSize)][Math.floor((newY + entity.size) / cellSize)].tile_type !== "wall";
                 default:
                     return true;
             }
@@ -442,7 +448,8 @@ window.onload = function () {
         "assets/player_green.png",
         "assets/player_red.png",
         "assets/player_yellow.png",
-        "assets/board_background.png");
+        "assets/board_background.png",
+        "assets/stop.png");
 };
 
 window.onkeypress = function (e) {

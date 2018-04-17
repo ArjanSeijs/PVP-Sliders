@@ -503,6 +503,7 @@ class Lobby {
                     that.game.gameTick(-1);
                 } catch (e) {
                     LobbyManager.socket.in(that.id).emit('failed', 'something went wrong');
+                    console.warn(e);
                     that.stop();
                 }
             }, tickRate),

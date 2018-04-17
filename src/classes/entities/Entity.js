@@ -12,6 +12,8 @@ var Entity = (function () {
     Entity.prototype.move = function (direction) {
         if (this.direction.curr === Direction.None && this.direction.next === Direction.None) {
             this.direction = { curr: direction, next: direction };
+            this.pos.x += this.direction.curr.x;
+            this.pos.y += this.direction.curr.y;
         }
     };
     Entity.prototype.stop = function (immediate) {

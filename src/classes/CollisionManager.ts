@@ -1,6 +1,8 @@
 import Game = require("./Game");
 import Entity = require("./entities/Entity");
 import Direction = require("./Direction");
+import Types = require("./Types");
+import Tile = require("./Tile");
 import * as Logger from 'simple-nodejs-logger';
 
 const logger = Logger("CollisionManager");
@@ -141,7 +143,7 @@ class CollisionHandler {
         entity.updateDir();
         //TODO Depends on TPS
         //TODO Binary search over speed.
-        if (this.canMove(entity, speed)) {
+        if (this.isFree(entity, speed) && !this.isStop(entity, speed)) {
             let dir = entity.direction.curr;
             entity.pos.x += dir.x * speed;
             entity.pos.y += dir.y * speed;
@@ -156,8 +158,35 @@ class CollisionHandler {
      * @param {number} speed
      * @return {boolean}
      */
-    canMove(entity: Entity, speed: number) {
+    isFree(entity: Entity, speed: number): boolean {
         //TODO config
+        let dir = entity.direction.curr;
+
+        //TODO Depends ons TPS
+        let newX = entity.pos.x + dir.x * speed;
+        let newY = entity.pos.y + dir.y * speed;
+
+        if (!this.inBounds(newX, newY, entity)) return false;
+        return this.isFreeAt(entity, speed, newX, newY);
+
+    }
+
+    isFreeAt(entity: Entity, speed: number, newX: number, newY: number): boolean {
+        const cellSize = 100;
+        switch (entity.direction.curr) {
+            case Direction.North:
+            case Direction.West:
+                return this.game.board.getTileAt(Math.floor(newX / cellSize), Math.floor(newY / cellSize)).tile_type !== Types.Wall;
+            case Direction.East:
+                return this.game.board.getTileAt(Math.floor((newX + entity.size) / cellSize), Math.floor(newY / cellSize)).tile_type !== Types.Wall;
+            case Direction.South:
+                return this.game.board.getTileAt(Math.floor(newX / cellSize), Math.floor((newY + entity.size) / cellSize)).tile_type !== Types.Wall;
+            default:
+                return true;
+        }
+    }
+
+    private isStop(entity: Entity, speed: number): boolean {
         const cellSize = 100;
         let dir = entity.direction.curr;
 
@@ -166,18 +195,38 @@ class CollisionHandler {
         let newY = entity.pos.y + dir.y * speed;
 
         if (!this.inBounds(newX, newY, entity)) return false;
-
+        let tile: Tile = null;
         switch (entity.direction.curr) {
-            case Direction.North:
-            case Direction.West:
-                return !this.game.board.getTileAt(Math.floor(newX / cellSize), Math.floor(newY / cellSize)).wall;
-            case Direction.East:
-                return !this.game.board.getTileAt(Math.floor((newX + entity.size) / cellSize), Math.floor(newY / cellSize)).wall;
-            case Direction.South:
-                return !this.game.board.getTileAt(Math.floor(newX / cellSize), Math.floor((newY + entity.size) / cellSize)).wall;
-            default:
-                return true;
+            case Direction.North: {
+                let x = Math.floor(newX / cellSize);
+                let y = Math.floor(newY / cellSize) + 1;
+                if (!this.indexInBounds(x, y)) return false;
+                tile = this.game.board.getTileAt(x, y);
+                return tile.tile_type === Types.Stop && tile.pos.y <= entity.pos.y;
+            }
+            case Direction.West: {
+                let x = Math.floor(newX / cellSize) + 1;
+                let y = Math.floor(newY / cellSize);
+                if (!this.indexInBounds(x, y)) return false;
+                tile = this.game.board.getTileAt(x, y);
+                return tile.tile_type === Types.Stop && tile.pos.x <= entity.pos.x;
+            }
+            case Direction.East: {
+                let x = Math.floor((newX + entity.size) / cellSize) - 1;
+                let y = Math.floor(newY / cellSize);
+                if (!this.indexInBounds(x, y)) return false;
+                tile = this.game.board.getTileAt(x, y);
+                return tile.tile_type === Types.Stop && tile.pos.x >= entity.pos.x;
+            }
+            case Direction.South: {
+                let x = Math.floor(newX / cellSize);
+                let y = Math.floor((newY + entity.size) / cellSize) - 1;
+                if (!this.indexInBounds(x, y)) return false;
+                tile = this.game.board.getTileAt(x, y);
+                return tile.tile_type === Types.Stop && tile.pos.y >= entity.pos.y;
+            }
         }
+        return false;
     }
 
     /**
@@ -192,6 +241,12 @@ class CollisionHandler {
         return newX >= 0 && newY >= 0
             && newX + entity.size < this.game.board.width * cellSize
             && newY + entity.size < this.game.board.height * cellSize;
+    }
+
+    indexInBounds(x: number, y: number): boolean {
+        return x >= 0 && y >= 0
+            && x < this.game.board.width
+            && y < this.game.board.height;
     }
 }
 

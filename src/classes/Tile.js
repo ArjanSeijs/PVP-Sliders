@@ -1,15 +1,17 @@
 "use strict";
+var Types = require("./Types");
 var Tile = (function () {
     function Tile(x, y) {
         this.x = x;
         this.y = y;
-        this.wall = false;
+        this.tile_type = Types.None;
+        this.pos = { x: 100 * x, y: 100 * y };
     }
     Tile.prototype.toJson = function () {
         return {
             x: this.x,
             y: this.y,
-            wall: this.wall
+            tile_type: this.tile_type.toJson()
         };
     };
     return Tile;

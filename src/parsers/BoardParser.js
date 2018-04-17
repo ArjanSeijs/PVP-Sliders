@@ -2,6 +2,7 @@
 var fs = require("fs");
 var path = require("path");
 var Board = require("../classes/Board");
+var Types = require("../classes/Types");
 var _global = global;
 var BoardParser = (function () {
     function BoardParser() {
@@ -62,7 +63,10 @@ var BoardParser = (function () {
                     }
                 }
                 if (c === '#') {
-                    board.getTileAt(x, y).wall = true;
+                    board.getTileAt(x, y).tile_type = Types.Wall;
+                }
+                else if (c === '+') {
+                    board.getTileAt(x, y).tile_type = Types.Stop;
                 }
             }
         }
