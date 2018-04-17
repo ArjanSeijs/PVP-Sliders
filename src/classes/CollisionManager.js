@@ -58,7 +58,7 @@ var CollisionHandler = (function () {
                 else {
                     other.pos.x = entity.pos.x;
                 }
-                other.direction.next = entity.direction.curr;
+                other.forceMove(entity.direction.curr);
             }
         }
         else {

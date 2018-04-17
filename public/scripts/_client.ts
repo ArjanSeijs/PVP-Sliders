@@ -430,12 +430,62 @@ class Client {
         }
     }
 
+
+    private isStop(entity: any, speed: number): boolean {
+        const cellSize = 100;
+        let dir = entity.direction.curr;
+
+        //TODO Depends ons TPS
+        let newX = entity.pos.x + dir.x * speed;
+        let newY = entity.pos.y + dir.y * speed;
+
+        if (!this.inBounds(newX, newY, entity)) return false;
+        let tile = null;
+        switch (entity.direction) {
+            case "NORTH": {
+                let x = Math.floor(newX / cellSize);
+                let y = Math.floor(newY / cellSize) + 1;
+                if (!this.indexInBounds(x, y)) return false;
+                tile = this.game.board.getTileAt(x, y);
+                return tile.tile_type === "stop" && tile.pos.y <= entity.pos.y;
+            }
+            case "WEST": {
+                let x = Math.floor(newX / cellSize) + 1;
+                let y = Math.floor(newY / cellSize);
+                if (!this.indexInBounds(x, y)) return false;
+                tile = this.game.board.getTileAt(x, y);
+                return tile.tile_type === "stop" && tile.pos.x <= entity.pos.x;
+            }
+            case "EAST": {
+                let x = Math.floor((newX + entity.size) / cellSize) - 1;
+                let y = Math.floor(newY / cellSize);
+                if (!this.indexInBounds(x, y)) return false;
+                tile = this.game.board.getTileAt(x, y);
+                return tile.tile_type === "stop" && tile.pos.x >= entity.pos.x;
+            }
+            case "SOUTH": {
+                let x = Math.floor(newX / cellSize);
+                let y = Math.floor((newY + entity.size) / cellSize) - 1;
+                if (!this.indexInBounds(x, y)) return false;
+                tile = this.game.board.getTileAt(x, y);
+                return tile.tile_type === "stop" && tile.pos.y >= entity.pos.y;
+            }
+        }
+        return false;
+    }
+
     private inBounds(newX: number, newY: number, entity: any) {
         //TODO config
         const cellSize = 100;
         return newX >= 0 && newY >= 0
             && newX + entity.size < this.game.board.width * cellSize
             && newY + entity.size < this.game.board.height * cellSize;
+    }
+
+    indexInBounds(x: number, y: number): boolean {
+        return x >= 0 && y >= 0
+            && x < this.game.board.width
+            && y < this.game.board.height;
     }
 }
 

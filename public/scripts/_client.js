@@ -377,12 +377,62 @@ var Client = /** @class */ (function () {
             console.warn(error);
         }
     };
+    Client.prototype.isStop = function (entity, speed) {
+        var cellSize = 100;
+        var dir = entity.direction.curr;
+        //TODO Depends ons TPS
+        var newX = entity.pos.x + dir.x * speed;
+        var newY = entity.pos.y + dir.y * speed;
+        if (!this.inBounds(newX, newY, entity))
+            return false;
+        var tile = null;
+        switch (entity.direction) {
+            case "NORTH": {
+                var x = Math.floor(newX / cellSize);
+                var y = Math.floor(newY / cellSize) + 1;
+                if (!this.indexInBounds(x, y))
+                    return false;
+                tile = this.game.board.getTileAt(x, y);
+                return tile.tile_type === "stop" && tile.pos.y <= entity.pos.y;
+            }
+            case "WEST": {
+                var x = Math.floor(newX / cellSize) + 1;
+                var y = Math.floor(newY / cellSize);
+                if (!this.indexInBounds(x, y))
+                    return false;
+                tile = this.game.board.getTileAt(x, y);
+                return tile.tile_type === "stop" && tile.pos.x <= entity.pos.x;
+            }
+            case "EAST": {
+                var x = Math.floor((newX + entity.size) / cellSize) - 1;
+                var y = Math.floor(newY / cellSize);
+                if (!this.indexInBounds(x, y))
+                    return false;
+                tile = this.game.board.getTileAt(x, y);
+                return tile.tile_type === "stop" && tile.pos.x >= entity.pos.x;
+            }
+            case "SOUTH": {
+                var x = Math.floor(newX / cellSize);
+                var y = Math.floor((newY + entity.size) / cellSize) - 1;
+                if (!this.indexInBounds(x, y))
+                    return false;
+                tile = this.game.board.getTileAt(x, y);
+                return tile.tile_type === "stop" && tile.pos.y >= entity.pos.y;
+            }
+        }
+        return false;
+    };
     Client.prototype.inBounds = function (newX, newY, entity) {
         //TODO config
         var cellSize = 100;
         return newX >= 0 && newY >= 0
             && newX + entity.size < this.game.board.width * cellSize
             && newY + entity.size < this.game.board.height * cellSize;
+    };
+    Client.prototype.indexInBounds = function (x, y) {
+        return x >= 0 && y >= 0
+            && x < this.game.board.width
+            && y < this.game.board.height;
     };
     return Client;
 }());

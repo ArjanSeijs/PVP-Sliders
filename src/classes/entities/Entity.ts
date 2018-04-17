@@ -27,19 +27,23 @@ class Entity implements ToJson {
         this.team = team;
     }
 
+    forceMove(direction: Direction) {
+        this.direction = {curr: direction, next: direction};
+        //Small fix to move from stop.
+        //This may cause the entity to go out of bounds for 1 pixel but this will be automatigily be fixed when
+        //it snaps back to the grid in the cycle.
+        //So for now this is a valid solution
+        this.pos.x += this.direction.curr.x;
+        this.pos.y += this.direction.curr.y;
+    }
+
     /**
      *
      * @param {Direction} direction
      */
     move(direction: Direction): void {
         if (this.direction.curr === Direction.None && this.direction.next === Direction.None) {
-            this.direction = {curr: direction, next: direction};
-            //Small fix to move from stop.
-            //This may cause the entity to go out of bounds for 1 pixel but this will be automatigily be fixed when
-            //it snaps back to the grid in the cycle.
-            //So for now this is a valid solution
-            this.pos.x += this.direction.curr.x;
-            this.pos.y += this.direction.curr.y;
+            this.forceMove(direction);
         }
     }
 
