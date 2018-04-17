@@ -24,15 +24,9 @@ var LobbyManager = (function () {
             });
         });
         BoardParser.init();
-        LobbyManager.newLobby("lobby1");
-        LobbyManager.getLobby("lobby1").setLevel("speedy.txt");
     };
     LobbyManager.newId = function () {
-        var id;
-        do {
-            id = new Buffer(crypto.randomBytes(6)).toString("base64");
-        } while (this.lobbies[id]);
-        return id;
+        return new Buffer(crypto.randomBytes(6)).toString("base64");
     };
     LobbyManager.clientJoin = function (client, data) {
         if (!data || !LobbyManager.lobbies[data.lobby]) {
@@ -47,18 +41,21 @@ var LobbyManager = (function () {
             client.emit('failed', 'no username provided');
             return;
         }
-        data.lobby = LobbyManager.newLobby();
-        var lobby = LobbyManager.getLobby(data.lobby);
+        var lobby_id = LobbyManager.newLobby();
+        if (!lobby_id)
+            client.emit('failed', 'something went wrong with creating the lobby');
+        var lobby = LobbyManager.getLobby(lobby_id);
         if (data.password)
             lobby.setPassword(data.password);
         lobby.setLevel("Palooza.txt");
-        lobby.join(client, data, true);
-        var session_id = lobby.getSessionMap().getSession(client.id);
+        var session_id = lobby.join(client, data, true);
         lobby.setHost(session_id);
     };
     LobbyManager.newLobby = function (uuid) {
         if (!uuid)
             uuid = this.newId();
+        if (LobbyManager.lobbies[uuid])
+            return null;
         LobbyManager.lobbies[uuid] = new Lobby(uuid);
         return uuid;
     };
@@ -84,10 +81,10 @@ var SessionMap = (function () {
         var session_id = UUID();
         if (this.joined === 0)
             this.lobby.setHost(session_id);
-        var ids = [{ name: data.username, id: this.nextId++, ready: false, team: null }];
+        var ids = [{ name: data.username, id: this.nextId++, ready: false, team: 'red' }];
         this.joined++;
         if (data.multiplayer) {
-            ids.push({ name: data.username + "(2)", id: this.nextId++, ready: false, team: null });
+            ids.push({ name: data.username + "(2)", id: this.nextId++, ready: false, team: 'red' });
             this.joined++;
         }
         this.sessions[session_id] = { ids: ids };
@@ -98,6 +95,7 @@ var SessionMap = (function () {
             lobby_id: this.lobby.getId(),
             isHost: !!isHost
         });
+        return session_id;
     };
     SessionMap.prototype.removeSession = function (client) {
         var session_id = this.clients[client.id].session;
@@ -209,11 +207,12 @@ var Lobby = (function () {
             client.emit('failed', 'Lobby full');
             return;
         }
-        this._session_map.newSession(client, data, isHost);
+        var session_id = this._session_map.newSession(client, data, isHost);
         this.eventListeners(client);
         logger.log("Joined " + client.id + ", " + this._session_map.calcJoined() + "/" + (this.board ? this.board.metadata.playerAmount : 'NaN'));
         LobbyManager.socket.in(this.id).emit('players', this._session_map.getJoined());
         this.checkReady();
+        return session_id;
     };
     Lobby.prototype.eventListeners = function (client) {
         var that = this;

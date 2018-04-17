@@ -81,7 +81,7 @@ class SocketHandler {
         this.session_id = data.session_id;
 
 
-        let link = Util.getUrl() + "?id=" + data.lobby_id.replace("+", "%2B").replace("=", "%3D");
+        let link = Util.getUrl() + "?id=" + encodeURIComponent(data.lobby_id);
         document.getElementById("lobby-id").innerHTML = "Join: <a href='" + link + "'>" + data.lobby_id + "</a>";
         if (data.isHost) {
             view.showHost(data.ids.length > 1);

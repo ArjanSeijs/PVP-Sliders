@@ -45,16 +45,12 @@ class LobbyManager {
         });
         BoardParser.init();
 
-        LobbyManager.newLobby("lobby1");
-        LobbyManager.getLobby("lobby1").setLevel("speedy.txt");
+        // LobbyManager.newLobby("lobby1");
+        // LobbyManager.getLobby("lobby1").setLevel("speedy.txt");
     }
 
     static newId(): string {
-        let id;
-        do {
-            id = new Buffer(crypto.randomBytes(6)).toString("base64");
-        } while (this.lobbies[id]);
-        return id;
+        return new Buffer(crypto.randomBytes(6)).toString("base64");
     }
 
     /**
@@ -81,14 +77,15 @@ class LobbyManager {
             return;
         }
 
-        data.lobby = LobbyManager.newLobby();
+        let lobby_id = LobbyManager.newLobby();
+        if (!lobby_id) client.emit('failed', 'something went wrong with creating the lobby');
 
-        let lobby = LobbyManager.getLobby(data.lobby);
+        let lobby = LobbyManager.getLobby(lobby_id);
         if (data.password) lobby.setPassword(data.password);
         lobby.setLevel("Palooza.txt");
-        lobby.join(client, data, true);
+        // lobby.join(client, data, true);
 
-        let session_id = lobby.getSessionMap().getSession(client.id);
+        let session_id = lobby.join(client, data, true);
         lobby.setHost(session_id);
     }
 
@@ -99,6 +96,7 @@ class LobbyManager {
      */
     static newLobby(uuid?: string): string {
         if (!uuid) uuid = this.newId();
+        if (LobbyManager.lobbies[uuid]) return null;
         LobbyManager.lobbies[uuid] = new Lobby(uuid);
         return uuid;
     }
@@ -135,19 +133,20 @@ class SessionMap {
      * @param {SocketIO.Socket} client
      * @param {*} data The data send over the session.
      * @param {boolean} isHost
+     * @return {string} the session id
      */
-    newSession(client: Socket, data: any, isHost?: boolean) {
+    newSession(client: Socket, data: any, isHost?: boolean): string {
         if (!data || !data.username) {
             client.emit('failed', 'no username');
             return;
         }
         let session_id = UUID();
         if (this.joined === 0) this.lobby.setHost(session_id);
-        let ids = [{name: data.username, id: this.nextId++, ready: false, team: null}];
+        let ids = [{name: data.username, id: this.nextId++, ready: false, team: 'red'}];
         this.joined++;
 
         if (data.multiplayer) {
-            ids.push({name: data.username + "(2)", id: this.nextId++, ready: false, team: null});
+            ids.push({name: data.username + "(2)", id: this.nextId++, ready: false, team: 'red'});
             this.joined++;
         }
 
@@ -160,6 +159,7 @@ class SessionMap {
             lobby_id: this.lobby.getId(),
             isHost: !!isHost
         });
+        return session_id;
     }
 
     /**
@@ -306,8 +306,9 @@ class Lobby {
      * @param {SocketIO.Socket} client
      * @param data
      * @param {boolean} [isHost]
+     * @return {string} The session id.
      */
-    join(client: Socket, data: any, isHost?: boolean): void {
+    join(client: Socket, data: any, isHost?: boolean): string {
         if (!data) {
             client.emit('failed', "Don't you hate it when something is not defined?");
             return;
@@ -322,7 +323,7 @@ class Lobby {
         }
 
 
-        this._session_map.newSession(client, data, isHost);
+        let session_id = this._session_map.newSession(client, data, isHost);
 
         this.eventListeners(client);
 
@@ -330,6 +331,7 @@ class Lobby {
 
         LobbyManager.socket.in(this.id).emit('players', this._session_map.getJoined());
         this.checkReady();
+        return session_id;
     }
 
     eventListeners(client: Socket) {
