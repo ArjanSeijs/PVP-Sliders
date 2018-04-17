@@ -39,7 +39,7 @@ var Game = (function () {
     };
     Game.prototype.toJson = function () {
         return {
-            board: this.board,
+            board: this.board.toJson(),
             entities: this.entitiesJson()
         };
     };

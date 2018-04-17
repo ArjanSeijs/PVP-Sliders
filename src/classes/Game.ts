@@ -73,7 +73,7 @@ class Game implements ToJson {
 
     toJson(): any {
         return {
-            board: this.board,
+            board: this.board.toJson(),
             entities: this.entitiesJson()
         }
     }

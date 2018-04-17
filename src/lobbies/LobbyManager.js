@@ -98,6 +98,8 @@ var SessionMap = (function () {
         return session_id;
     };
     SessionMap.prototype.removeSession = function (client) {
+        if (!this.isJoined(client.id))
+            return;
         var session_id = this.clients[client.id].session;
         if (this.lobby.isHost(session_id))
             this.lobby.close();
@@ -177,6 +179,9 @@ var SessionMap = (function () {
             }
         }
     };
+    SessionMap.prototype.isJoined = function (id) {
+        return !!this.clients[id];
+    };
     return SessionMap;
 }());
 var State;
@@ -205,6 +210,10 @@ var Lobby = (function () {
         }
         if (this._session_map.calcJoined() + (data.multiplayer ? 2 : 1) > this.board.metadata.playerAmount) {
             client.emit('failed', 'Lobby full');
+            return;
+        }
+        if (this._session_map.isJoined(client.id)) {
+            client.emit('failed', 'Already joined!');
             return;
         }
         var session_id = this._session_map.newSession(client, data, isHost);

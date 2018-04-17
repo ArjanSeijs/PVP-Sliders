@@ -167,6 +167,7 @@ class SessionMap {
      * @param {SocketIO.Socket} client
      */
     removeSession(client: Socket) {
+        if (!this.isJoined(client.id)) return;
         let session_id = this.clients[client.id].session;
         if (this.lobby.isHost(session_id)) this.lobby.close();
         delete this.clients[client.id];
@@ -271,6 +272,10 @@ class SessionMap {
             }
         }
     }
+
+    isJoined(id: string) {
+        return !!this.clients[id];
+    }
 }
 
 enum State {
@@ -321,7 +326,10 @@ class Lobby {
             client.emit('failed', 'Lobby full');
             return;
         }
-
+        if (this._session_map.isJoined(client.id)) {
+            client.emit('failed', 'Already joined!');
+            return;
+        }
 
         let session_id = this._session_map.newSession(client, data, isHost);
 
