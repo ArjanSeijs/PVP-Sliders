@@ -10,10 +10,14 @@ class Util {
      * @return {string}
      */
     static getUrl(): string {
-        let index = window.location.href.indexOf('/', 'http://'.length);
-        return window.location.href.substr(0, index > -1 ? index : window.location.href.length);
+        return window.location.host;
     }
 
+    /**
+     * Returns a sprite of the given image.
+     * @param {string} image
+     * @return {PIXI.Sprite}
+     */
     static loadImage(image: string): Sprite {
         let texture = PIXI.loader.resources["assets/" + image].texture;
         return new PIXI.Sprite(texture);
@@ -81,8 +85,8 @@ class SocketHandler {
         this.session_id = data.session_id;
 
 
-        let link = Util.getUrl() + "?id=" + encodeURIComponent(data.lobby_id);
-        document.getElementById("lobby-id").innerHTML = "Join: <a href='" + link + "'>" + data.lobby_id + "</a>";
+        let link = "/?id=" + encodeURIComponent(data.lobby_id);
+        document.getElementById("lobby-id").innerHTML = "Join: <a target='_blank' href='" + link + "'>" + data.lobby_id + "</a>";
         if (data.isHost) {
             view.showHost(data.ids.length > 1);
         } else {
