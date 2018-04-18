@@ -253,8 +253,8 @@ class SessionMap {
         return this.sessions;
     }
 
-    getSession(id: string): string {
-        return this.clients[id].session;
+    getSession(client: Socket): string {
+        return this.clients[client.id].session;
     }
 
     disconnect() {
@@ -528,16 +528,32 @@ class Lobby {
     }
 
     changeMap(client: Socket, data: any) {
-        //TODO verify session.....
-        if (isNullOrUndefined(data) || (!isString(data) && !data.board)) {
+        if (this.state !== State.Joining) {
+            client.emit('failed', 'game already in progress');
+        }
+        if (!data.session_id || !this.isHost(data.session_id)) {
+            client.emit('failed', 'only host can change map');
+            return;
+        }
+        if (isNullOrUndefined(data.board) || !isString(data.board)) {
             client.emit('failed', 'no board defined');
             return;
         }
-        let info = this.setLevel(isString(data) ? data + ".txt" : data.board, this._session_map.calcJoined());
+        if (data.board.length > 100000) {
+            client.emit('failed', 'to large input');
+            return;
+        }
+        let info: { success: boolean; message?: string };
+        if (!data.custom) {
+            info = this.setLevel(data.board + ".txt");
+        } else {
+            let string = new Buffer(data.board, "base64").toString();
+            info = this.setLevel(string.split(/\r?\n/));
+        }
         if (!info.success) {
             client.emit('failed', info.message)
         } else {
-            LobbyManager.socket.in(this.id).emit('map', isString(data) ? data : data.board);
+            LobbyManager.socket.in(this.id).emit('map', !!data.custom ? "custom map" : data.board);
         }
     }
 
@@ -554,6 +570,9 @@ class Lobby {
                 return {success: false, message: "Could not find file"};
             }
         } else {
+            if (!BoardParser.valid(board).valid) {
+                return {success: false, message: "Something went wrong with parsing the file"};
+            }
             this.board = BoardParser.fromStrings(board);
             if (this.board === null) {
                 return {success: false, message: "Something went wrong with parsing the file"};

@@ -35,7 +35,7 @@ Force start does not always work (done)
 On end update positions (done)
 
 Update Interface
-Stopblock
+Stopblock (done)
 Add a option for custom maps.
 
 

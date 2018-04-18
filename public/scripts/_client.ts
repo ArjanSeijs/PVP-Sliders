@@ -131,8 +131,8 @@ class SocketHandler {
         this.socket.emit('host', data);
     }
 
-    sendMap(data: string | string[]): void {
-        this.socket.emit('map', data);
+    sendMap(board: string | string[], custom?: boolean): void {
+        this.socket.emit('map', {board: board, custom: !!custom, session_id: this.session_id});
     }
 
     sendStart(): void {
@@ -557,6 +557,11 @@ function _start() {
 function _resize() {
     if (!view) return;
     view.resize();
+}
+
+function _cMap() {
+    let elm = document.getElementById("custommap") as HTMLInputElement;
+    socketListener.sendMap(elm.value, true);
 }
 
 

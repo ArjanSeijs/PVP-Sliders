@@ -117,8 +117,8 @@ var SocketHandler = /** @class */ (function () {
     SocketHandler.prototype.sendHost = function (data) {
         this.socket.emit('host', data);
     };
-    SocketHandler.prototype.sendMap = function (data) {
-        this.socket.emit('map', data);
+    SocketHandler.prototype.sendMap = function (board, custom) {
+        this.socket.emit('map', { board: board, custom: !!custom, session_id: this.session_id });
     };
     SocketHandler.prototype.sendStart = function () {
         this.socket.emit('start', { session_id: this.session_id });
@@ -492,5 +492,9 @@ function _resize() {
     if (!view)
         return;
     view.resize();
+}
+function _cMap() {
+    var elm = document.getElementById("custommap");
+    socketListener.sendMap(elm.value, true);
 }
 //# sourceMappingURL=_client.js.map

@@ -50,6 +50,7 @@ class CollisionHandler {
 
         if (other.collides(entity, newX, newY)) {
             if (other.team === entity.team && other.collidesNow(entity, newX, newY)) {
+                //TODO check stopboard bounce?
                 this.bounce(entity, other, speed);
             } else if (other.team !== entity.team && other.collidesNow(entity, newX, newY)) {
                 this.enemyCollision(entity, other);

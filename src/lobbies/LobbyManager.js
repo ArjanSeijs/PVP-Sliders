@@ -159,8 +159,8 @@ var SessionMap = (function () {
     SessionMap.prototype.getSessions = function () {
         return this.sessions;
     };
-    SessionMap.prototype.getSession = function (id) {
-        return this.clients[id].session;
+    SessionMap.prototype.getSession = function (client) {
+        return this.clients[client.id].session;
     };
     SessionMap.prototype.disconnect = function () {
         for (var key in this.clients) {
@@ -365,16 +365,34 @@ var Lobby = (function () {
         logger.log("Restart!");
     };
     Lobby.prototype.changeMap = function (client, data) {
-        if (util_1.isNullOrUndefined(data) || (!util_1.isString(data) && !data.board)) {
+        if (this.state !== State.Joining) {
+            client.emit('failed', 'game already in progress');
+        }
+        if (!data.session_id || !this.isHost(data.session_id)) {
+            client.emit('failed', 'only host can change map');
+            return;
+        }
+        if (util_1.isNullOrUndefined(data.board) || !util_1.isString(data.board)) {
             client.emit('failed', 'no board defined');
             return;
         }
-        var info = this.setLevel(util_1.isString(data) ? data + ".txt" : data.board, this._session_map.calcJoined());
+        if (data.board.length > 100000) {
+            client.emit('failed', 'to large input');
+            return;
+        }
+        var info;
+        if (!data.custom) {
+            info = this.setLevel(data.board + ".txt");
+        }
+        else {
+            var string = new Buffer(data.board, "base64").toString();
+            info = this.setLevel(string.split(/\r?\n/));
+        }
         if (!info.success) {
             client.emit('failed', info.message);
         }
         else {
-            LobbyManager.socket.in(this.id).emit('map', util_1.isString(data) ? data : data.board);
+            LobbyManager.socket.in(this.id).emit('map', !!data.custom ? "custom map" : data.board);
         }
     };
     Lobby.prototype.setLevel = function (board, players) {
@@ -386,6 +404,9 @@ var Lobby = (function () {
             }
         }
         else {
+            if (!BoardParser.valid(board).valid) {
+                return { success: false, message: "Something went wrong with parsing the file" };
+            }
             this.board = BoardParser.fromStrings(board);
             if (this.board === null) {
                 return { success: false, message: "Something went wrong with parsing the file" };
