@@ -55,10 +55,15 @@ class MockClient implements ClientInterface {
     }
 }
 
-function initialBoard() {
-    for (let x = 0; x < 4; x++) {
+function initialBoard(width?: number, height?: number) {
+    if (!width) width = 4;
+    if (!height) height = 4;
+    game.board.width = width;
+    game.board.height = height;
+    game.board.tiles = [];
+    for (let x = 0; x < width; x++) {
         game.board.tiles[x] = [];
-        for (let y = 0; y < 4; y++) {
+        for (let y = 0; y < height; y++) {
             game.board.tiles[x].push({
                 x: x,
                 y: y,
@@ -168,6 +173,7 @@ function encodeMap() {
         for (let x = 0; x < game.board.width; x++) {
             let tile = game.board.tiles[x][y];
             if (tile.tile_type === "player") {
+                if (players >= 16) continue;
                 string += players.toString(16);
                 players++;
             } else if (tile.tile_type === "stop") {
@@ -180,18 +186,44 @@ function encodeMap() {
         }
         string += "\n";
     }
+    console.log("--- Map ---");
+    console.log(string);
     return btoa(string);
+}
+
+function decodeMap(map: string) {
+    let strings = map.split(/\r?\n/);
+    const width = strings[0].length;
+    const height = strings.length - 1;
+    initialBoard(width, height);
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            const c = strings[y].charAt(x);
+            if ('0123456789ABCDEF'.indexOf(c) !== -1) {
+                game.board.tiles[x][y].tile_type = "player"
+            } else if (c === '#') {
+                game.board.tiles[x][y].tile_type = "wall"
+            } else if (c === '+') {
+                game.board.tiles[x][y].tile_type = "stop"
+            }
+        }
+    }
 }
 
 function save() {
     let name = prompt("Save as", "save1");
-    Cookies.set(name, encodeMap())
+    let maps = Cookies.getJSON("maps");
+    maps = maps ? maps : {};
+    maps[name] = encodeMap();
+    Cookies.set("maps", maps)
 }
 
 function load() {
     let name = prompt("Load as", "save1");
-    let map = atob(Cookies.get(name));
-    console.log(map);
+    let map = Cookies.getJSON("maps")[name];
+    if (!map) return;
+    decodeMap(atob(map));
+    view.resize();
 }
 
 window.onclick = function (e) {
