@@ -42,6 +42,7 @@ var SocketHandler = /** @class */ (function () {
     };
     SocketHandler.prototype.onRestart = function (data) {
         view.showLobby(client.isMulti());
+        client.reset();
         view.clearCanvas();
         client.end();
         console.log('restart!');

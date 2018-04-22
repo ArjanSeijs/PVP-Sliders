@@ -61,6 +61,8 @@ class Game implements ToJson {
             if (entity.dead === true) {
                 delete this.entities[key];
             }
+
+            entity.gameTick();
         }
 
         this.collisionManager.movement(tps);

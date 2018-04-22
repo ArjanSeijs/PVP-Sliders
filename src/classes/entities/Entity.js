@@ -63,6 +63,8 @@ var Entity = (function () {
     Entity.prototype.updateDir = function () {
         this.direction.curr = this.direction.next;
     };
+    Entity.prototype.gameTick = function () {
+    };
     return Entity;
 }());
 module.exports = Entity;

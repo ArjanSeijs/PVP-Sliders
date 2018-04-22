@@ -74,6 +74,8 @@ interface ClientInterface {
     getId(key: string): number
 
     setReady(data: any): void;
+
+    reset(): void;
 }
 
 class View {
@@ -120,7 +122,10 @@ class View {
     }
 
     resize() {
-        if (!client.getGame()) return;
+        if (!client.getGame()) {
+            this.load();
+            return;
+        }
 
         let width = client.getGame().board.width;
         let height = client.getGame().board.height;
@@ -279,6 +284,8 @@ class View {
 
         document.getElementById("game-lobby").style.display = '';
         document.getElementById('wrapper').style.display = '';
+
+        this.resize();
     }
 
     showWin() {
@@ -315,7 +322,7 @@ class View {
     }
 }
 
-class Client {
+class Client implements ClientInterface{
     private game: any;
     private id_p1: { id: number, ready: boolean };
     private id_p2: { id: number, ready: boolean };
@@ -481,5 +488,9 @@ class Client {
         for (let i = 0; i < data.length; i++) {
             if (data[i].id === this.id_p1.id) this.id_p1.ready = this.id_p2.ready = data[i].ready;
         }
+    }
+
+    reset(): void {
+        this.game = null;
     }
 }

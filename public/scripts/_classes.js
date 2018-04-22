@@ -86,8 +86,10 @@ var View = /** @class */ (function () {
             onload();
     };
     View.prototype.resize = function () {
-        if (!client.getGame())
+        if (!client.getGame()) {
+            this.load();
             return;
+        }
         var width = client.getGame().board.width;
         var height = client.getGame().board.height;
         this.screen_width = window.innerWidth;
@@ -229,6 +231,7 @@ var View = /** @class */ (function () {
             document.getElementById("team2").style.display = 'none';
         document.getElementById("game-lobby").style.display = '';
         document.getElementById('wrapper').style.display = '';
+        this.resize();
     };
     View.prototype.showWin = function () {
         this.hideAll();
@@ -415,6 +418,9 @@ var Client = /** @class */ (function () {
             if (data[i].id === this.id_p1.id)
                 this.id_p1.ready = this.id_p2.ready = data[i].ready;
         }
+    };
+    Client.prototype.reset = function () {
+        this.game = null;
     };
     return Client;
 }());

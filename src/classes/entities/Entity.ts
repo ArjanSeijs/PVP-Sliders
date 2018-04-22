@@ -130,6 +130,10 @@ class Entity implements ToJson {
     updateDir() {
         this.direction.curr = this.direction.next;
     }
+
+    gameTick() {
+        //All childeren should call super.gameTick()
+    }
 }
 
 export = Entity

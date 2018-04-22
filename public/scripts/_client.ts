@@ -52,6 +52,7 @@ class SocketHandler {
 
     onRestart(data: any): void {
         view.showLobby(client.isMulti());
+        client.reset();
         view.clearCanvas();
         client.end();
         console.log('restart!');
