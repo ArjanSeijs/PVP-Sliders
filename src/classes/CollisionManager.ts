@@ -10,11 +10,19 @@ const logger = Logger("CollisionManager");
 class CollisionHandler {
     private game: Game;
 
+    /**
+     * @constructor
+     * @param {Game} game
+     */
     constructor(game: Game) {
         this.game = game;
     }
 
-    collisions(tps: number) {
+    /**
+     * Handle all the collisions.
+     * @param {number} tps The ticks per second.
+     */
+    collisions(tps: number): void {
         const entities = this.game.entities;
         for (let key in entities) {
             if (entities.hasOwnProperty(key)) {
@@ -26,7 +34,12 @@ class CollisionHandler {
         }
     }
 
-    private handleCollisions(entity: Entity, speed: number) {
+    /**
+     *
+     * @param {Entity} entity
+     * @param {number} speed
+     */
+    private handleCollisions(entity: Entity, speed: number): void {
         const entities = this.game.entities;
 
         let dir = entity.direction.curr;
@@ -40,6 +53,12 @@ class CollisionHandler {
         }
     }
 
+    /**
+     *
+     * @param {Entity} entity
+     * @param {Entity} other
+     * @param {number} speed
+     */
     private collisionCheck(entity: Entity, other: Entity, speed: number) {
         if (entity === other) return;
 
@@ -58,10 +77,15 @@ class CollisionHandler {
         }
     }
 
+    /**
+     * Bounce two players of the same team.
+     * @param {Entity} entity
+     * @param {Entity} other
+     * @param {number} speed
+     */
     private bounce(entity: Entity, other: Entity, speed: number) {
         let bounce = this.game.gameMode.onTeamCollision(entity, other);
         if (!bounce) return;
-
 
         if (entity.direction.curr !== other.direction.curr.opposite) {
             entity.stop();
@@ -81,6 +105,11 @@ class CollisionHandler {
         }
     }
 
+    /**
+     * Handle collision of two enemies.
+     * @param {Entity} entity
+     * @param {Entity} other
+     */
     private enemyCollision(entity: Entity, other: Entity) {
         logger.log("Collision " + JSON.stringify(entity.toJson()) + " " + JSON.stringify(other.toJson()));
         if (other.direction.curr === Direction.None) {
@@ -124,7 +153,10 @@ class CollisionHandler {
 
     /* Movement */
 
-
+    /**
+     * Move all the entities.
+     * @param {number} tps
+     */
     movement(tps: number) {
         const entities = this.game.entities;
         for (let key in entities) {
@@ -137,6 +169,7 @@ class CollisionHandler {
     }
 
     /**
+     * Update the position of the entity if it is able to move.
      * @param {Entity} entity
      * @param {Number} speed
      */
@@ -154,7 +187,7 @@ class CollisionHandler {
     }
 
     /**
-     * Can move
+     * Checks if the next position is in bounds and there is no wall.
      * @param {Entity} entity
      * @param {number} speed
      * @return {boolean}
@@ -172,6 +205,14 @@ class CollisionHandler {
 
     }
 
+    /**
+     * Checks if the next position is a block.
+     * @param {Entity} entity
+     * @param {number} speed
+     * @param {number} newX
+     * @param {number} newY
+     * @return {boolean}
+     */
     isFreeAt(entity: Entity, speed: number, newX: number, newY: number): boolean {
         const cellSize = 100;
         switch (entity.direction.curr) {
@@ -187,6 +228,12 @@ class CollisionHandler {
         }
     }
 
+    /**
+     * Checks if the entity will collide with a stop tile.
+     * @param {Entity} entity
+     * @param {number} speed
+     * @return {boolean}
+     */
     private isStop(entity: Entity, speed: number): boolean {
         const cellSize = 100;
         let dir = entity.direction.curr;
@@ -197,6 +244,7 @@ class CollisionHandler {
 
         if (!this.inBounds(newX, newY, entity)) return false;
         let tile: Tile = null;
+        //TODO make it a lot cleaner.
         switch (entity.direction.curr) {
             case Direction.North: {
                 let x = Math.floor(newX / cellSize);
@@ -231,6 +279,7 @@ class CollisionHandler {
     }
 
     /**
+     * Checks if the coordinates are in bounds.
      * @param {int} newX
      * @param {int} newY
      * @param {Entity} entity
@@ -244,6 +293,12 @@ class CollisionHandler {
             && newY + entity.size < this.game.board.height * cellSize;
     }
 
+    /**
+     * Checks if the tiles are in bounds.
+     * @param {number} x
+     * @param {number} y
+     * @return {boolean}
+     */
     indexInBounds(x: number, y: number): boolean {
         return x >= 0 && y >= 0
             && x < this.game.board.width

@@ -7,6 +7,14 @@ interface map {
 }
 
 class GameParser {
+    /**
+     * From the given board and sessions return a game with the correct entities.
+     * @param {Board} board
+     * @param {number} players
+     * @param {map} sessions
+     * @param {{bots: boolean}} options
+     * @return {Game}
+     */
     static create(board: Board, players: number, sessions: map, options: { bots: boolean }): Game {
         const cellSize = 100;
         let game = new Game(board);

@@ -12,7 +12,7 @@ class Entity implements ToJson {
     id: number;
 
     /**
-     *
+     * @constructor
      * @param {number} x
      * @param {number} y
      * @param {number} id
@@ -27,6 +27,10 @@ class Entity implements ToJson {
         this.team = team;
     }
 
+    /**
+     * Moves an entity in a given direction.
+     * @param {Direction} direction
+     */
     forceMove(direction: Direction) {
         this.direction = {curr: direction, next: direction};
         //Small fix to move from stop.
@@ -38,7 +42,7 @@ class Entity implements ToJson {
     }
 
     /**
-     *
+     * Moves an entity in an given direction if it is currently not moving.
      * @param {Direction} direction
      */
     move(direction: Direction): void {
@@ -48,7 +52,7 @@ class Entity implements ToJson {
     }
 
     /**
-     *
+     * Stop the entity from moving and snaps it to the grid.
      * @param {boolean} immediate
      */
     stop(immediate?: boolean): void {
@@ -64,14 +68,14 @@ class Entity implements ToJson {
     }
 
     /**
-     *
+     * Kills the entity
      */
     kill(): void {
         this.dead = true;
     }
 
     /**
-     *
+     * Checks if an collision occurs on the new location with the other entity
      * @param {Entity} entity
      * @param {number} xPos
      * @param {number} yPos
@@ -88,7 +92,7 @@ class Entity implements ToJson {
     }
 
     /**
-     *
+     * Checks if an collision in the next step occurs with the other entity.
      * @param {Entity} entity
      * @param {number} xPos
      * @param {number} yPos
@@ -107,7 +111,7 @@ class Entity implements ToJson {
 
     /**
      *
-     * @return {any}
+     * @return {*}
      */
     toJson(): any {
         return {
@@ -121,7 +125,7 @@ class Entity implements ToJson {
     }
 
     /**
-     *
+     * Sets the current direction to the next direction.
      */
     updateDir() {
         this.direction.curr = this.direction.next;

@@ -250,14 +250,26 @@ class SessionMap {
         return true;
     }
 
+    /**
+     * Getters
+     * @return {Sessions}
+     */
     getSessions(): Sessions {
         return this.sessions;
     }
 
+    /**
+     * Gets a session
+     * @param {SocketIO.Socket} client
+     * @return {string}
+     */
     getSession(client: Socket): string {
         return this.clients[client.id].session;
     }
 
+    /**
+     * Disconnects all the clients.
+     */
     disconnect() {
         for (let key in this.clients) {
             if (!this.clients.hasOwnProperty(key)) continue;
@@ -265,6 +277,9 @@ class SessionMap {
         }
     }
 
+    /**
+     * Restart the game.
+     */
     restart() {
         for (let key in this.sessions) {
             if (!this.sessions.hasOwnProperty(key)) continue;
@@ -274,6 +289,11 @@ class SessionMap {
         }
     }
 
+    /**
+     * Checks if a player is joined.
+     * @param {string} id
+     * @return {boolean}
+     */
     isJoined(id: string) {
         return !!this.clients[id];
     }
@@ -346,6 +366,10 @@ class Lobby {
         return session_id;
     }
 
+    /**
+     * Register the event listeners for the client.
+     * @param {SocketIO.Socket} client
+     */
     eventListeners(client: Socket) {
         let that = this;
         client.on('disconnect', function () {
@@ -523,6 +547,9 @@ class Lobby {
         return true;
     }
 
+    /**
+     * Restart the lobby.
+     */
     restart() {
         if (this.state == State.Joining) return;
         this.state = State.Joining;
@@ -532,6 +559,11 @@ class Lobby {
         logger.log("Restart!");
     }
 
+    /**
+     * Checks for the data send and then change map.
+     * @param {SocketIO.Socket} client
+     * @param data
+     */
     changeMap(client: Socket, data: any) {
         if (this.state !== State.Joining) {
             client.emit('failed', 'game already in progress');
@@ -593,6 +625,11 @@ class Lobby {
         return {success: true};
     }
 
+    /**
+     * Change the options
+     * @param {SocketIO.Socket} client
+     * @param data
+     */
     setOptions(client: Socket, data: any): void {
         if (!data.session_id || !this.isHost(data.session_id)) {
             client.emit('failed', 'only host can change options');
@@ -613,14 +650,26 @@ class Lobby {
         this.password = password;
     }
 
+    /**
+     * Sets a host
+     * @param {string} uuid
+     */
     setHost(uuid: string): void {
         this.host = uuid;
     }
 
+    /**
+     *
+     * @param {string} uuid
+     * @return {boolean}
+     */
     isHost(uuid: string): boolean {
         return this.host === uuid;
     }
 
+    /**
+     * Close the lobby and remove it from the lobby-manager to let the garbage collector take care of it.
+     */
     close() {
         if (this.state !== State.Joining) return;
         LobbyManager.socket.in(this.id).emit('failed', 'Host disconnected', true);
@@ -629,10 +678,18 @@ class Lobby {
         delete LobbyManager.lobbies[this.id];
     }
 
+    /**
+     *
+     * @return {SessionMap}
+     */
     getSessionMap(): SessionMap {
         return this._session_map;
     }
 
+    /**
+     * 
+     * @return {string}
+     */
     getId(): string {
         return this.id
     }

@@ -17,7 +17,7 @@ class Board implements ToJson {
     metadata: MetaData;
 
     /**
-     *
+     * @constructor
      * @param {number} width
      * @param {number} height
      */
@@ -30,7 +30,7 @@ class Board implements ToJson {
     }
 
     /**
-     *
+     * Initialize the tiles.
      */
     private makeBoard(): void {
         for (let x = 0; x < this.width; x++) {

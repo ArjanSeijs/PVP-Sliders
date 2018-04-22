@@ -24,7 +24,7 @@ class Game implements ToJson {
     winners: string;
 
     /**
-     *
+     * @constructor
      * @param {Board} board
      */
     constructor(board: Board) {
@@ -36,7 +36,7 @@ class Game implements ToJson {
     }
 
     /**
-     *
+     * Moves an entity if the entity exists.
      * @param {number} id
      * @param {Direction} direction
      */
@@ -66,11 +66,19 @@ class Game implements ToJson {
         this.collisionManager.movement(tps);
     }
 
+    /**
+     *
+     * @param {Array<Entity>} winners
+     */
     end(winners: Array<Entity>): void {
         this.state = State.Finished;
         this.winners = winners.length > 0 ? winners[0].team : "";
     }
 
+    /**
+     *
+     * @return {*}
+     */
     toJson(): any {
         return {
             board: this.board.toJson(),
@@ -78,6 +86,10 @@ class Game implements ToJson {
         }
     }
 
+    /**
+     * Converts the entity map to an entity json map.
+     * @return {*}
+     */
     entitiesJson(): any {
         let x = {};
         for (let key in this.entities) {
@@ -88,10 +100,17 @@ class Game implements ToJson {
         // return Object.keys(this.entities).map(x => this.entities[x].toJson());
     }
 
+    /**
+     * Starts the game.
+     */
     start(): void {
         this.state = State.InProgress;
     }
 
+    /**
+     * Checks wheter the game has ended.
+     * @return {boolean}
+     */
     isFinished(): boolean {
         return this.state === State.Finished;
     }

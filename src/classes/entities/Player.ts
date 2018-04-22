@@ -4,7 +4,7 @@ class Player extends Entity {
     name: string;
 
     /**
-     *
+     * @constructor
      * @param {number} x
      * @param {number} y
      * @param {number} id
@@ -19,7 +19,7 @@ class Player extends Entity {
 
     /**
      *
-     * @return {any}
+     * @return {*}
      */
     toJson(): any {
         let x : any = super.toJson();

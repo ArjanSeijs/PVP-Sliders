@@ -8,6 +8,11 @@ class Tile implements ToJson {
     x: number;
     pos: { x: number, y: number };
 
+    /**
+     * @constructor
+     * @param {number} x The tile x-index
+     * @param {number} y The tile y-index
+     */
     constructor(x: number, y: number) {
         this.x = x;
         this.y = y;
@@ -15,6 +20,10 @@ class Tile implements ToJson {
         this.pos = {x: 100 * x, y: 100 * y};
     }
 
+    /**
+     *
+     * @return {{x: number, y: number, tile_type: string}}
+     */
     toJson(): { x: number, y: number, tile_type: string } {
         return {
             x: this.x,

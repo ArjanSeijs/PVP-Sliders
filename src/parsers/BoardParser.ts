@@ -12,12 +12,20 @@ interface BIn {
 class BoardParser {
     static boards: BIn = {};
 
+    /**
+     * Read all the files in the boards directory.
+     */
     static init(): void {
         fs.readdirSync(path.join(_global.rootDir, "/public/assets/games/boards/"), "utf8").forEach(function (file) {
             BoardParser.boards[file] = BoardParser.fromFile(file);
         });
     }
 
+    /**
+     * Get a board from a file.
+     * @param {string} file
+     * @return {Board}
+     */
     static getBoard(file: string): Board {
         if (this.boards[file]) {
             return this.boards[file];
@@ -30,6 +38,11 @@ class BoardParser {
         }
     }
 
+    /**
+     * Parses the file and then parses the board.
+     * @param {string} file
+     * @return {Board}
+     */
     static fromFile(file: string): Board {
         const strings = fs.readFileSync(
             path.join(_global.rootDir, "/public/assets/games/boards/", file), "utf8"
@@ -37,6 +50,11 @@ class BoardParser {
         return BoardParser.fromStrings(strings);
     }
 
+    /**
+     * Checks if the board is valid
+     * @param {string[]} strings
+     * @return {{valid: boolean, message?: string, strings?: string[]}}
+     */
     static valid(strings: string[]): { valid: boolean, message?: string, strings?: string[] } {
         if (strings.length < 4 || strings.length[0] < 4) {
             return {valid: false, message: "Length must be at least 4 by 4"};
@@ -51,6 +69,11 @@ class BoardParser {
         return {valid: true};
     }
 
+    /**
+     * Creates a board from a string array.
+     * @param {string[]} strings
+     * @return {Board}
+     */
     static fromStrings(strings: string[]): Board {
         let valid = BoardParser.valid(strings);
         if (!valid.valid) {

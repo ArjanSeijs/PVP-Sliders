@@ -8,10 +8,18 @@ class Types implements ToJson {
 
     private readonly string;
 
+    /**
+     * @constructor
+     * @param string
+     */
     constructor(string) {
         this.string = string;
     }
 
+    /**
+     *
+     * @return {string}
+     */
     toJson(): string {
         return this.string;
     }
