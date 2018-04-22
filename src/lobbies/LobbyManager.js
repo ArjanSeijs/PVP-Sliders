@@ -29,11 +29,18 @@ var LobbyManager = (function () {
         return new Buffer(crypto.randomBytes(6)).toString("base64");
     };
     LobbyManager.clientJoin = function (client, data) {
-        if (!data || !LobbyManager.lobbies[data.lobby]) {
+        if (!data || (typeof data.lobby !== "string") || (data.lobby !== "" && !LobbyManager.lobbies[data.lobby])) {
             client.emit('failed', 'lobby does not exist');
         }
         else {
-            LobbyManager.lobbies[data.lobby].join(client, data);
+            var lobbyId = data.lobby;
+            if (lobbyId === "")
+                lobbyId = LobbyManager.randomLobby(data);
+            if (lobbyId === null) {
+                client.emit('failed', 'All lobbies were full');
+                return;
+            }
+            LobbyManager.lobbies[lobbyId].join(client, data);
         }
     };
     LobbyManager.clientHost = function (client, data) {
@@ -58,6 +65,14 @@ var LobbyManager = (function () {
             return null;
         LobbyManager.lobbies[uuid] = new Lobby(uuid);
         return uuid;
+    };
+    LobbyManager.randomLobby = function (data) {
+        var _this = this;
+        var ids = Object.keys(this.lobbies).filter(function (k) { return _this.lobbies[k].isPublic() && _this.lobbies[k].isJoinable(data); });
+        if (ids.length === 0)
+            return null;
+        var i = Math.floor(Math.random() * ids.length);
+        return ids[i];
     };
     LobbyManager.getLobby = function (uuid) {
         return this.lobbies[uuid];
@@ -269,6 +284,7 @@ var Lobby = (function () {
     Lobby.prototype.disconnect = function (client) {
         this._session_map.removeSession(client);
         logger.log("Disconnected " + client.id + ", " + this._session_map.calcJoined() + "/" + (this.board ? this.board.metadata.playerAmount : 'NaN'));
+        LobbyManager.socket.in(this.id).emit('players', this._session_map.getJoined());
     };
     Lobby.prototype.move = function (client, data) {
         if (!data || this.state !== State.InProgress)
@@ -464,6 +480,12 @@ var Lobby = (function () {
     };
     Lobby.prototype.getId = function () {
         return this.id;
+    };
+    Lobby.prototype.isPublic = function () {
+        return this.password === "";
+    };
+    Lobby.prototype.isJoinable = function (data) {
+        return this.state === State.Joining && this._session_map.calcJoined() + (data.multiplayer ? 2 : 1) <= this.board.metadata.playerAmount;
     };
     return Lobby;
 }());

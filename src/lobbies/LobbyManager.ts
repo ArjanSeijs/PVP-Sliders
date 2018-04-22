@@ -44,9 +44,6 @@ class LobbyManager {
             })
         });
         BoardParser.init();
-
-        // LobbyManager.newLobby("lobby1");
-        // LobbyManager.getLobby("lobby1").setLevel("speedy.txt");
     }
 
     static newId(): string {
@@ -59,11 +56,16 @@ class LobbyManager {
      * @param {*} data The data send on the socket.
      */
     static clientJoin(client: Socket, data: any) {
-        //TODO random lobby when no lobby is specified.
-        if (!data || !LobbyManager.lobbies[data.lobby]) {
+        if (!data || (typeof data.lobby !== "string") || (data.lobby !== "" && !LobbyManager.lobbies[data.lobby])) {
             client.emit('failed', 'lobby does not exist');
         } else {
-            LobbyManager.lobbies[data.lobby].join(client, data);
+            let lobbyId = data.lobby;
+            if (lobbyId === "") lobbyId = LobbyManager.randomLobby(data);
+            if (lobbyId === null) {
+                client.emit('failed', 'All lobbies were full');
+                return;
+            }
+            LobbyManager.lobbies[lobbyId].join(client, data);
         }
     }
 
@@ -100,6 +102,13 @@ class LobbyManager {
         if (LobbyManager.lobbies[uuid]) return null;
         LobbyManager.lobbies[uuid] = new Lobby(uuid);
         return uuid;
+    }
+
+    static randomLobby(data: any): string {
+        let ids = Object.keys(this.lobbies).filter((k) => this.lobbies[k].isPublic() && this.lobbies[k].isJoinable(data));
+        if (ids.length === 0) return null;
+        let i = Math.floor(Math.random() * ids.length);
+        return ids[i];
     }
 
     static getLobby(uuid: string): Lobby {
@@ -413,6 +422,7 @@ class Lobby {
     disconnect(client: Socket) {
         this._session_map.removeSession(client);
         logger.log(`Disconnected ${client.id}, ${this._session_map.calcJoined()}/${this.board ? this.board.metadata.playerAmount : 'NaN'}`);
+        LobbyManager.socket.in(this.id).emit('players', this._session_map.getJoined());
     }
 
     /**
@@ -687,11 +697,19 @@ class Lobby {
     }
 
     /**
-     * 
+     *
      * @return {string}
      */
     getId(): string {
         return this.id
+    }
+
+    isPublic(): boolean {
+        return this.password === "";
+    }
+
+    isJoinable(data: any): boolean {
+        return this.state === State.Joining && this._session_map.calcJoined() + (data.multiplayer ? 2 : 1) <= this.board.metadata.playerAmount
     }
 }
 
