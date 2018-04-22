@@ -152,7 +152,7 @@ class SessionMap {
         }
         let session_id = UUID();
         if (this.joined === 0) this.lobby.setHost(session_id);
-        let ids = [{name: data.username, id: this.nextId++, ready: false, team: 'red'}];
+        let ids = [{name: data.username, id: this.nextId++, ready: false, team: "random"}];
         this.joined++;
 
         if (data.multiplayer) {
@@ -241,7 +241,6 @@ class SessionMap {
     setTeam(session_id: string, team: string, player: number): void {
         if (!this.sessions[session_id]) return;
         if (!this.sessions[session_id].ids[player]) player = 0;
-        //TODO check valid team.
         this.sessions[session_id].ids[player].team = team;
     }
 
@@ -472,7 +471,7 @@ class Lobby {
             client.emit('failed', 'invalid team');
             return;
         }
-        const teams = {red: true, blue: true, yellow: true, green: true};
+        const teams = {"red": true, "blue": true, "yellow": true, "green": true, "random": true};
         if (!teams[data.team]) {
             client.emit('failed', 'invalid team');
             return

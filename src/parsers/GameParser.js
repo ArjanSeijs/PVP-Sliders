@@ -16,7 +16,8 @@ var GameParser = (function () {
             for (var j = 0; j < sessions[key].ids.length; j++) {
                 var pos = board.metadata.mapData[i];
                 var session = sessions[key].ids[j];
-                game.entities[i] = new Player(pos.x * cellSize, pos.y * cellSize, session.id, session.team, session.name);
+                var team = session.team !== "random" ? session.team : GameParser.randomTeam();
+                game.entities[i] = new Player(pos.x * cellSize, pos.y * cellSize, session.id, team, session.name);
                 if (session.id > maxId)
                     maxId = session.id;
                 i++;

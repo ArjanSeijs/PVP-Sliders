@@ -96,7 +96,7 @@ var SessionMap = (function () {
         var session_id = UUID();
         if (this.joined === 0)
             this.lobby.setHost(session_id);
-        var ids = [{ name: data.username, id: this.nextId++, ready: false, team: 'red' }];
+        var ids = [{ name: data.username, id: this.nextId++, ready: false, team: "random" }];
         this.joined++;
         if (data.multiplayer) {
             ids.push({ name: data.username + "(2)", id: this.nextId++, ready: false, team: 'red' });
@@ -314,7 +314,7 @@ var Lobby = (function () {
             client.emit('failed', 'invalid team');
             return;
         }
-        var teams = { red: true, blue: true, yellow: true, green: true };
+        var teams = { "red": true, "blue": true, "yellow": true, "green": true, "random": true };
         if (!teams[data.team]) {
             client.emit('failed', 'invalid team');
             return;
