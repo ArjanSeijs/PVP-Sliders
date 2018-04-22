@@ -58,7 +58,6 @@ class SocketHandler {
     }
 
     onPlayers(data: any): void {
-        // console.log(JSON.stringify(data));
         view.showPlayers(data);
     }
 
@@ -95,6 +94,10 @@ class SocketHandler {
 
     sendMove(id: number, direction: string): void {
         this.socket.emit('move', {session_id: this.session_id, id: id, direction: direction})
+    }
+
+    sendOptions(options: { bots: boolean }) {
+        this.socket.emit('options', {session_id: this.session_id, options: options});
     }
 
     close() {
@@ -165,6 +168,10 @@ function _resize() {
 function _cMap() {
     let elm = document.getElementById("custommap") as HTMLInputElement;
     socketListener.sendMap(elm.value, true);
+}
+
+function _options() {
+    socketListener.sendOptions(Util.getOptions());
 }
 
 

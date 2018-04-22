@@ -53,6 +53,7 @@
                     <option value="maze2">Maze2</option>
                     <option value="Palooza" selected="selected">Palooza</option>
                     <option value="vertical">Vertical</option>
+                    <option value="DontStopMeNow">Don't Stop Me Now</option>
                 </select>
             </label>
         </div>
@@ -73,6 +74,7 @@
         </select></span>
         <button onclick="_ready()">ToggleReady</button>
         <button onclick="_start()">Start</button>
+        <label for="bots">Enable bots:</label><input id="bots" type="checkbox" onchange="_options()">
     </div>
     <div id="winners" class="winner" style="display: none;">
         <div id="team"></div>

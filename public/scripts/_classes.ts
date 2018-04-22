@@ -35,6 +35,11 @@ class Util {
         return {username: username, multiplayer: multiplayer, lobby: lobby, password: password};
     }
 
+    static getOptions() {
+        const bots = (document.getElementById("bots") as HTMLInputElement).checked;
+        return {bots: bots};
+    }
+
     /**
      * Parses a paramater from the query string.
      * @param {string} name The parameter name.

@@ -32,6 +32,10 @@ var Util = /** @class */ (function () {
         var password = document.getElementById("password").value;
         return { username: username, multiplayer: multiplayer, lobby: lobby, password: password };
     };
+    Util.getOptions = function () {
+        var bots = document.getElementById("bots").checked;
+        return { bots: bots };
+    };
     /**
      * Parses a paramater from the query string.
      * @param {string} name The parameter name.

@@ -4,7 +4,7 @@ var Player = require("../classes/entities/Player");
 var GameParser = (function () {
     function GameParser() {
     }
-    GameParser.create = function (board, players, sessions) {
+    GameParser.create = function (board, players, sessions, options) {
         var cellSize = 100;
         var game = new Game(board);
         var i = 0;
@@ -13,15 +13,10 @@ var GameParser = (function () {
                 continue;
             for (var j = 0; j < sessions[key].ids.length; j++) {
                 var pos = board.metadata.mapData[i];
-                var entity = sessions[key].ids[j];
-                game.entities[i] = new Player(pos.x * cellSize, pos.y * cellSize, entity.id, temp(entity.team), entity.name);
+                var session = sessions[key].ids[j];
+                game.entities[i] = new Player(pos.x * cellSize, pos.y * cellSize, session.id, session.team, session.name);
                 i++;
             }
-        }
-        function temp(i) {
-            if (i == null)
-                return 'yellow';
-            return i;
         }
         return game;
     };

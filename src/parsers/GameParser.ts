@@ -7,8 +7,7 @@ interface map {
 }
 
 class GameParser {
-    static create(board: Board, players: number, sessions: map): Game {
-        //TODO improve.
+    static create(board: Board, players: number, sessions: map, options: { bots: boolean }): Game {
         const cellSize = 100;
         let game = new Game(board);
         let i = 0;
@@ -16,18 +15,12 @@ class GameParser {
             if (!sessions.hasOwnProperty(key)) continue;
             for (let j = 0; j < sessions[key].ids.length; j++) {
                 let pos = board.metadata.mapData[i];
-                let entity = sessions[key].ids[j];
-                game.entities[i] = new Player(pos.x * cellSize, pos.y * cellSize, entity.id, temp(entity.team), entity.name);
+                let session = sessions[key].ids[j];
+                game.entities[i] = new Player(pos.x * cellSize, pos.y * cellSize, session.id, session.team, session.name);
                 i++;
             }
         }
-
-        // TODO
-        function temp(i: string) {
-            if (i == null) return 'yellow';
-            return i;
-        }
-
+        //TODO BOTS;
         return game;
     }
 }

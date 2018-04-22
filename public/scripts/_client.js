@@ -47,7 +47,6 @@ var SocketHandler = /** @class */ (function () {
         console.log('restart!');
     };
     SocketHandler.prototype.onPlayers = function (data) {
-        // console.log(JSON.stringify(data));
         view.showPlayers(data);
     };
     SocketHandler.prototype.onEnd = function (data) {
@@ -76,6 +75,9 @@ var SocketHandler = /** @class */ (function () {
     };
     SocketHandler.prototype.sendMove = function (id, direction) {
         this.socket.emit('move', { session_id: this.session_id, id: id, direction: direction });
+    };
+    SocketHandler.prototype.sendOptions = function (options) {
+        this.socket.emit('options', { session_id: this.session_id, options: options });
     };
     SocketHandler.prototype.close = function () {
         if (this.socket)
@@ -133,5 +135,8 @@ function _resize() {
 function _cMap() {
     var elm = document.getElementById("custommap");
     socketListener.sendMap(elm.value, true);
+}
+function _options() {
+    socketListener.sendOptions(Util.getOptions());
 }
 //# sourceMappingURL=_client.js.map

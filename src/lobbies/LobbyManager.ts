@@ -59,6 +59,7 @@ class LobbyManager {
      * @param {*} data The data send on the socket.
      */
     static clientJoin(client: Socket, data: any) {
+        //TODO random lobby when no lobby is specified.
         if (!data || !LobbyManager.lobbies[data.lobby]) {
             client.emit('failed', 'lobby does not exist');
         } else {
@@ -295,6 +296,7 @@ class Lobby {
     private readonly _session_map: SessionMap;
     private state: State;
     private host: string = null;
+    private options: { bots: boolean };
 
     /**
      * @constructor
@@ -304,6 +306,9 @@ class Lobby {
         this.id = id;
         this._session_map = new SessionMap(this);
         this.state = State.Joining;
+        this.options = {
+            bots: false
+        }
     }
 
     /**
@@ -338,7 +343,6 @@ class Lobby {
         logger.log(`Joined ${client.id}, ${this._session_map.calcJoined()}/${this.board ? this.board.metadata.playerAmount : 'NaN'}`);
 
         LobbyManager.socket.in(this.id).emit('players', this._session_map.getJoined());
-        this.checkReady();
         return session_id;
     }
 
@@ -369,6 +373,10 @@ class Lobby {
                 return;
             }
             else that.start(client, data);
+        });
+        client.on('options', function (data) {
+            if (!data) return;
+            that.setOptions(client, data);
         });
 
         client.join(this.id);
@@ -413,8 +421,6 @@ class Lobby {
         this._session_map.toggleReady(data.session_id, data.ready === true);
 
         LobbyManager.socket.in(this.id).emit('players', this._session_map.getJoined());
-
-        this.checkReady();
     }
 
     /**
@@ -432,19 +438,15 @@ class Lobby {
             client.emit('failed', 'invalid team');
             return;
         }
+        const teams = {red: true, blue: true, yellow: true, green: true};
+        if (!teams[data.team]) {
+            client.emit('failed', 'invalid team');
+            return
+        }
         logger.log("Team changed!");
         this._session_map.setTeam(data.session_id, data.team, data.player === 0 ? 0 : 1);
 
         LobbyManager.socket.in(this.id).emit('players', this._session_map.getJoined());
-    }
-
-    /**
-     * Check if the server is full and all players are ready
-     */
-    checkReady(): void {
-        if (this.board && this._session_map.calcJoined() == this.board.metadata.playerAmount && this._session_map.isReady()) {
-            this.loadGame();
-        }
     }
 
     /**
@@ -477,6 +479,10 @@ class Lobby {
             client.emit('failed', 'Failed with starting: Board is not defined');
             return;
         }
+        if (!this._session_map.isReady()) {
+            client.emit('failed', 'Not everyone is ready!');
+            return;
+        }
         if (!this.loadGame()) {
             client.emit('failed', 'Something went wrong with loading.')
         }
@@ -491,7 +497,7 @@ class Lobby {
         let that = this;
         if (this._session_map.calcJoined() < 2 || isNullOrUndefined(this.board)) return false;
 
-        this.game = GameParser.create(this.board, this._session_map.calcJoined(), this._session_map.getSessions());
+        this.game = GameParser.create(this.board, this._session_map.calcJoined(), this._session_map.getSessions(), this.options);
 
         let tickRate: number = config.get("tickRate");
         let updateRate: number = config.get("updateRate");
@@ -520,7 +526,6 @@ class Lobby {
     restart() {
         if (this.state == State.Joining) return;
         this.state = State.Joining;
-        // this.board = BoardParser.getBoard("Palooza.txt");
         this._session_map.restart();
         LobbyManager.socket.in(this.id).emit('restart');
         LobbyManager.socket.in(this.id).emit('players', this._session_map.getJoined());
@@ -586,6 +591,18 @@ class Lobby {
             return {success: false, message: "too many players in lobby for this level"}
         }
         return {success: true};
+    }
+
+    setOptions(client: Socket, data: any): void {
+        if (!data.session_id || !this.isHost(data.session_id)) {
+            client.emit('failed', 'only host can change options');
+            return;
+        }
+        if (!data.options) {
+            client.emit('failed', 'No options specified');
+            return;
+        }
+        this.options.bots = !!data.options.bots;
     }
 
     /**

@@ -198,6 +198,9 @@ var Lobby = (function () {
         this.id = id;
         this._session_map = new SessionMap(this);
         this.state = State.Joining;
+        this.options = {
+            bots: false
+        };
     }
     Lobby.prototype.join = function (client, data, isHost) {
         if (!data) {
@@ -220,7 +223,6 @@ var Lobby = (function () {
         this.eventListeners(client);
         logger.log("Joined " + client.id + ", " + this._session_map.calcJoined() + "/" + (this.board ? this.board.metadata.playerAmount : 'NaN'));
         LobbyManager.socket.in(this.id).emit('players', this._session_map.getJoined());
-        this.checkReady();
         return session_id;
     };
     Lobby.prototype.eventListeners = function (client) {
@@ -257,6 +259,11 @@ var Lobby = (function () {
             else
                 that.start(client, data);
         });
+        client.on('options', function (data) {
+            if (!data)
+                return;
+            that.setOptions(client, data);
+        });
         client.join(this.id);
     };
     Lobby.prototype.disconnect = function (client) {
@@ -281,7 +288,6 @@ var Lobby = (function () {
         }
         this._session_map.toggleReady(data.session_id, data.ready === true);
         LobbyManager.socket.in(this.id).emit('players', this._session_map.getJoined());
-        this.checkReady();
     };
     Lobby.prototype.teamChange = function (client, data) {
         if (!data || !data.session_id || !this._session_map.getSessions()[data.session_id]) {
@@ -292,14 +298,14 @@ var Lobby = (function () {
             client.emit('failed', 'invalid team');
             return;
         }
+        var teams = { red: true, blue: true, yellow: true, green: true };
+        if (!teams[data.team]) {
+            client.emit('failed', 'invalid team');
+            return;
+        }
         logger.log("Team changed!");
         this._session_map.setTeam(data.session_id, data.team, data.player === 0 ? 0 : 1);
         LobbyManager.socket.in(this.id).emit('players', this._session_map.getJoined());
-    };
-    Lobby.prototype.checkReady = function () {
-        if (this.board && this._session_map.calcJoined() == this.board.metadata.playerAmount && this._session_map.isReady()) {
-            this.loadGame();
-        }
     };
     Lobby.prototype.stop = function () {
         if (this.state == State.Finished)
@@ -323,6 +329,10 @@ var Lobby = (function () {
             client.emit('failed', 'Failed with starting: Board is not defined');
             return;
         }
+        if (!this._session_map.isReady()) {
+            client.emit('failed', 'Not everyone is ready!');
+            return;
+        }
         if (!this.loadGame()) {
             client.emit('failed', 'Something went wrong with loading.');
         }
@@ -331,7 +341,7 @@ var Lobby = (function () {
         var that = this;
         if (this._session_map.calcJoined() < 2 || util_1.isNullOrUndefined(this.board))
             return false;
-        this.game = GameParser.create(this.board, this._session_map.calcJoined(), this._session_map.getSessions());
+        this.game = GameParser.create(this.board, this._session_map.calcJoined(), this._session_map.getSessions(), this.options);
         var tickRate = config.get("tickRate");
         var updateRate = config.get("updateRate");
         this.interval = {
@@ -420,6 +430,17 @@ var Lobby = (function () {
             return { success: false, message: "too many players in lobby for this level" };
         }
         return { success: true };
+    };
+    Lobby.prototype.setOptions = function (client, data) {
+        if (!data.session_id || !this.isHost(data.session_id)) {
+            client.emit('failed', 'only host can change options');
+            return;
+        }
+        if (!data.options) {
+            client.emit('failed', 'No options specified');
+            return;
+        }
+        this.options.bots = !!data.options.bots;
     };
     Lobby.prototype.setPassword = function (password) {
         this.password = password;
