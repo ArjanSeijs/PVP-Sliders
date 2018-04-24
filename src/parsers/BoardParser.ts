@@ -16,7 +16,7 @@ class BoardParser {
      * Read all the files in the boards directory.
      */
     static init(): void {
-        fs.readdirSync(path.join(_global.rootDir, "/public/assets/games/boards/"), "utf8").forEach(function (file) {
+        fs.readdirSync(path.join(_global.rootDir, "/public/assets/games/"), "utf8").forEach(function (file) {
             BoardParser.boards[file] = BoardParser.fromFile(file);
         });
     }

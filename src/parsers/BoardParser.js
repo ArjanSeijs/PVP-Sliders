@@ -8,7 +8,7 @@ var BoardParser = (function () {
     function BoardParser() {
     }
     BoardParser.init = function () {
-        fs.readdirSync(path.join(_global.rootDir, "/public/assets/games/boards/"), "utf8").forEach(function (file) {
+        fs.readdirSync(path.join(_global.rootDir, "/public/assets/games/"), "utf8").forEach(function (file) {
             BoardParser.boards[file] = BoardParser.fromFile(file);
         });
     };
