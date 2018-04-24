@@ -10,13 +10,14 @@ var GameParser = (function () {
         var game = new Game(board);
         var i = 0;
         var maxId = -1;
+        var teams = GameParser.teamSizes(sessions);
         for (var key in sessions) {
             if (!sessions.hasOwnProperty(key))
                 continue;
-            for (var j = 0; j < sessions[key].ids.length; j++) {
+            for (var _i = 0, _a = sessions[key].ids; _i < _a.length; _i++) {
+                var session = _a[_i];
                 var pos = board.metadata.mapData[i];
-                var session = sessions[key].ids[j];
-                var team = session.team !== "random" ? session.team : GameParser.randomTeam();
+                var team = session.team !== "random" ? session.team : GameParser.randomTeam(teams);
                 game.entities[i] = new Player(pos.x * cellSize, pos.y * cellSize, session.id, team, session.name);
                 if (session.id > maxId)
                     maxId = session.id;
@@ -24,16 +25,29 @@ var GameParser = (function () {
             }
         }
         if (options.bots) {
+            teams.random += board.metadata.playerAmount - i;
             for (; i < board.metadata.playerAmount; i++) {
                 var pos = board.metadata.mapData[i];
-                game.entities[i] = new SimpleBot(pos.x * cellSize, pos.y * cellSize, maxId++, GameParser.randomTeam(), "BOT", game);
+                game.entities[i] = new SimpleBot(pos.x * cellSize, pos.y * cellSize, maxId++, GameParser.randomTeam(teams), "BOT", game);
             }
         }
         return game;
     };
-    GameParser.randomTeam = function () {
+    GameParser.randomTeam = function (_teams) {
         var teams = ["red", "blue", "green", "yellow"];
         return teams[Math.floor(Math.random() * teams.length)];
+    };
+    GameParser.teamSizes = function (sessions) {
+        var teams = { red: 0, green: 0, yellow: 0, blue: 0, random: 0 };
+        for (var key in sessions) {
+            if (!sessions.hasOwnProperty(key))
+                continue;
+            for (var _i = 0, _a = sessions[key].ids; _i < _a.length; _i++) {
+                var session = _a[_i];
+                teams[session.team]++;
+            }
+        }
+        return teams;
     };
     return GameParser;
 }());

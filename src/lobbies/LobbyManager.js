@@ -99,7 +99,7 @@ var SessionMap = (function () {
         var ids = [{ name: data.username, id: this.nextId++, ready: false, team: "random" }];
         this.joined++;
         if (data.multiplayer) {
-            ids.push({ name: data.username + "(2)", id: this.nextId++, ready: false, team: 'red' });
+            ids.push({ name: data.username + "(2)", id: this.nextId++, ready: false, team: "random" });
             this.joined++;
         }
         this.sessions[session_id] = { ids: ids };

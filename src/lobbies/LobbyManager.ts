@@ -156,7 +156,7 @@ class SessionMap {
         this.joined++;
 
         if (data.multiplayer) {
-            ids.push({name: data.username + "(2)", id: this.nextId++, ready: false, team: 'red'});
+            ids.push({name: data.username + "(2)", id: this.nextId++, ready: false, team: "random"});
             this.joined++;
         }
 
