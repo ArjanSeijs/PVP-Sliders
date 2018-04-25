@@ -4,6 +4,7 @@ import Board = require("../classes/Board");
 import Types = require("../classes/Types");
 
 const _global: any = global;
+const EXTENSION = ".txt";
 
 interface BIn {
     [index: string]: Board
@@ -17,7 +18,8 @@ class BoardParser {
      */
     static init(): void {
         fs.readdirSync(path.join(_global.rootDir, "/public/assets/games/"), "utf8").forEach(function (file) {
-            BoardParser.boards[file] = BoardParser.fromFile(file);
+            if (file.substr(file.length - 3, 3) === EXTENSION)
+                BoardParser.boards[file] = BoardParser.fromFile(file);
         });
     }
 
@@ -45,7 +47,7 @@ class BoardParser {
      */
     static fromFile(file: string): Board {
         const strings = fs.readFileSync(
-            path.join(_global.rootDir, "/public/assets/games/boards/", file), "utf8"
+            path.join(_global.rootDir, "/public/assets/games/", file), "utf8"
         ).split(/\r?\n/);
         return BoardParser.fromStrings(strings);
     }

@@ -4,12 +4,14 @@ var path = require("path");
 var Board = require("../classes/Board");
 var Types = require("../classes/Types");
 var _global = global;
+var EXTENSION = ".txt";
 var BoardParser = (function () {
     function BoardParser() {
     }
     BoardParser.init = function () {
         fs.readdirSync(path.join(_global.rootDir, "/public/assets/games/"), "utf8").forEach(function (file) {
-            BoardParser.boards[file] = BoardParser.fromFile(file);
+            if (file.substr(file.length - 3, 3) === EXTENSION)
+                BoardParser.boards[file] = BoardParser.fromFile(file);
         });
     };
     BoardParser.getBoard = function (file) {
@@ -25,7 +27,7 @@ var BoardParser = (function () {
         }
     };
     BoardParser.fromFile = function (file) {
-        var strings = fs.readFileSync(path.join(_global.rootDir, "/public/assets/games/boards/", file), "utf8").split(/\r?\n/);
+        var strings = fs.readFileSync(path.join(_global.rootDir, "/public/assets/games/", file), "utf8").split(/\r?\n/);
         return BoardParser.fromStrings(strings);
     };
     BoardParser.valid = function (strings) {

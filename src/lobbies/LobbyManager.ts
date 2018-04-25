@@ -5,7 +5,6 @@ import * as crypto from "crypto"
 import {isNullOrUndefined, isString} from "util";
 import UUIDv4 = require("uuid/v4");
 
-
 import Game = require("../classes/Game");
 import GameParser = require("../parsers/GameParser");
 import BoardParser = require("../parsers/BoardParser");
@@ -17,6 +16,7 @@ import Timer = NodeJS.Timer;
 
 const UUID: () => string = UUIDv4;
 const logger = Logger("LobbyManager");
+const EXTENSION = ".txt";
 
 interface LobbyMap {
     [index: string]: Lobby;
@@ -85,7 +85,7 @@ class LobbyManager {
 
         let lobby = LobbyManager.getLobby(lobby_id);
         if (data.password) lobby.setPassword(data.password);
-        lobby.setLevel("Palooza.txt");
+        lobby.setLevel("Palooza" + EXTENSION);
         // lobby.join(client, data, true);
 
         let session_id = lobby.join(client, data, true);
@@ -305,6 +305,23 @@ class SessionMap {
     isJoined(id: string) {
         return !!this.clients[id];
     }
+
+    /**
+     * Checks if there are at least two different teams.
+     * @return {boolean}
+     */
+    minTeams(bots: boolean, boardAmount: number): boolean {
+        let team = null;
+        if (this.calcJoined() !== boardAmount && bots) return true;
+        for (let key in this.sessions) {
+            if (!this.sessions.hasOwnProperty(key)) continue;
+            for (let x of this.sessions[key].ids) {
+                if (!team) team = x.team;
+                else if (team !== x.team) return true;
+            }
+        }
+        return false;
+    }
 }
 
 enum State {
@@ -503,7 +520,7 @@ class Lobby {
      * @param data
      */
     start(client: Socket, data: any): void {
-        logger.log("Force starting a game");
+        logger.log("Starting a game");
         if (!data || !data.session_id || !this.isHost(data.session_id)) {
             client.emit('failed', 'Only host can start');
             return;
@@ -514,6 +531,10 @@ class Lobby {
         }
         if (!this._session_map.isReady()) {
             client.emit('failed', 'Not everyone is ready!');
+            return;
+        }
+        if (!this._session_map.minTeams(this.options.bots, this.board.metadata.playerAmount)) {
+            client.emit('failed', 'All players are on the same team');
             return;
         }
         if (!this.loadGame()) {
@@ -591,7 +612,7 @@ class Lobby {
         }
         let info: { success: boolean; message?: string };
         if (!data.custom) {
-            info = this.setLevel(data.board + ".txt");
+            info = this.setLevel(data.board + EXTENSION);
         } else {
             let string = new Buffer(data.board, "base64").toString();
             info = this.setLevel(string.split(/\r?\n/));
@@ -711,5 +732,4 @@ class Lobby {
         return this.state === State.Joining && this._session_map.calcJoined() + (data.multiplayer ? 2 : 1) <= this.board.metadata.playerAmount
     }
 }
-
 export = LobbyManager;

@@ -10,6 +10,7 @@ var Direction = require("../classes/Direction");
 var config = require("../lib/config");
 var UUID = UUIDv4;
 var logger = Logger("LobbyManager");
+var EXTENSION = ".txt";
 var LobbyManager = (function () {
     function LobbyManager() {
     }
@@ -54,7 +55,7 @@ var LobbyManager = (function () {
         var lobby = LobbyManager.getLobby(lobby_id);
         if (data.password)
             lobby.setPassword(data.password);
-        lobby.setLevel("Palooza.txt");
+        lobby.setLevel("Palooza" + EXTENSION);
         var session_id = lobby.join(client, data, true);
         lobby.setHost(session_id);
     };
@@ -197,6 +198,23 @@ var SessionMap = (function () {
     SessionMap.prototype.isJoined = function (id) {
         return !!this.clients[id];
     };
+    SessionMap.prototype.minTeams = function (bots, boardAmount) {
+        var team = null;
+        if (this.calcJoined() !== boardAmount && bots)
+            return true;
+        for (var key in this.sessions) {
+            if (!this.sessions.hasOwnProperty(key))
+                continue;
+            for (var _i = 0, _a = this.sessions[key].ids; _i < _a.length; _i++) {
+                var x = _a[_i];
+                if (!team)
+                    team = x.team;
+                else if (team !== x.team)
+                    return true;
+            }
+        }
+        return false;
+    };
     return SessionMap;
 }());
 var State;
@@ -336,7 +354,7 @@ var Lobby = (function () {
         }, 5000);
     };
     Lobby.prototype.start = function (client, data) {
-        logger.log("Force starting a game");
+        logger.log("Starting a game");
         if (!data || !data.session_id || !this.isHost(data.session_id)) {
             client.emit('failed', 'Only host can start');
             return;
@@ -347,6 +365,10 @@ var Lobby = (function () {
         }
         if (!this._session_map.isReady()) {
             client.emit('failed', 'Not everyone is ready!');
+            return;
+        }
+        if (!this._session_map.minTeams(this.options.bots, this.board.metadata.playerAmount)) {
+            client.emit('failed', 'All players are on the same team');
             return;
         }
         if (!this.loadGame()) {
@@ -408,7 +430,7 @@ var Lobby = (function () {
         }
         var info;
         if (!data.custom) {
-            info = this.setLevel(data.board + ".txt");
+            info = this.setLevel(data.board + EXTENSION);
         }
         else {
             var string = new Buffer(data.board, "base64").toString();
