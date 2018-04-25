@@ -11,6 +11,8 @@ class Entity implements ToJson {
     team: string;
     id: number;
 
+    private lastMove = 0;
+
     /**
      * @constructor
      * @param {number} x
@@ -33,6 +35,7 @@ class Entity implements ToJson {
      */
     forceMove(direction: Direction) {
         this.direction = {curr: direction, next: direction};
+        this.lastMove = 0;
         //Small fix to move from stop.
         //This may cause the entity to go out of bounds for 1 pixel but this will be automatigily be fixed when
         //it snaps back to the grid in the cycle.
@@ -133,6 +136,10 @@ class Entity implements ToJson {
 
     gameTick() {
         //All childeren should call super.gameTick()
+        this.lastMove++;
+        if (this.lastMove > 300) {
+            this.move(Direction.random());
+        }
     }
 }
 

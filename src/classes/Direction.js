@@ -29,6 +29,10 @@ var Direction = (function () {
                 return Direction.None;
         }
     };
+    Direction.random = function () {
+        var dirs = [Direction.West, Direction.East, Direction.North, Direction.South];
+        return dirs[Math.floor(Math.random() * dirs.length)];
+    };
     Direction.None = new Direction(0, 0, "NONE");
     Direction.North = new Direction(0, -1, "NORTH");
     Direction.South = new Direction(0, 1, "SOUTH");

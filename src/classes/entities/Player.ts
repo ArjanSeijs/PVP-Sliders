@@ -16,7 +16,6 @@ class Player extends Entity {
         this.name = name;
     }
 
-
     /**
      *
      * @return {*}

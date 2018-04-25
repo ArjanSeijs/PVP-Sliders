@@ -2,6 +2,7 @@
 var Direction = require("../Direction");
 var Entity = (function () {
     function Entity(x, y, id, team) {
+        this.lastMove = 0;
         this.pos = { x: x, y: y };
         this.direction = { curr: Direction.None, next: Direction.None };
         this.size = 99;
@@ -11,6 +12,7 @@ var Entity = (function () {
     }
     Entity.prototype.forceMove = function (direction) {
         this.direction = { curr: direction, next: direction };
+        this.lastMove = 0;
         this.pos.x += this.direction.curr.x;
         this.pos.y += this.direction.curr.y;
     };
@@ -64,6 +66,10 @@ var Entity = (function () {
         this.direction.curr = this.direction.next;
     };
     Entity.prototype.gameTick = function () {
+        this.lastMove++;
+        if (this.lastMove > 300) {
+            this.move(Direction.random());
+        }
     };
     return Entity;
 }());

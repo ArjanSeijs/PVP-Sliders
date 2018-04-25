@@ -65,6 +65,11 @@ class Direction implements ToJson {
                 return Direction.None;
         }
     }
+
+    static random(): Direction {
+        let dirs = [Direction.West, Direction.East, Direction.North, Direction.South];
+        return dirs[Math.floor(Math.random() * dirs.length)];
+    }
 }
 
 (function () {
