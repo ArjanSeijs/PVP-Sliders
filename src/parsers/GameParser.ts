@@ -37,7 +37,7 @@ class GameParser {
             for (let session of sessions[key].ids) {
 
                 let pos = board.metadata.mapData[i];
-                let team = session.team !== "random" ? session.team : GameParser.randomTeam(teams);
+                let team = session.team !== "random" ? session.team : GameParser.randomTeam(teams, false, i, players);
 
                 game.entities[i] = new Player(pos.x * cellSize, pos.y * cellSize, session.id, team, session.name);
                 if (session.id > maxId) maxId = session.id;
@@ -50,15 +50,40 @@ class GameParser {
             teams.random += board.metadata.playerAmount - i;
             for (; i < board.metadata.playerAmount; i++) {
                 let pos = board.metadata.mapData[i];
-                game.entities[i] = new SimpleBot(pos.x * cellSize, pos.y * cellSize, maxId++, GameParser.randomTeam(teams), "BOT", game);
+                game.entities[i] = new SimpleBot(pos.x * cellSize, pos.y * cellSize, maxId++, GameParser.randomTeam(teams, true, i, players), "BOT", game);
             }
         }
         return game;
     }
 
-    private static randomTeam(_teams: TeamMap): string {
-        let teams = ["red", "blue", "green", "yellow"];
-        return teams[Math.floor(Math.random() * teams.length)];
+    static randomTeam(_teams: TeamMap, isBot: boolean, i: number, max: number): string {
+        let allTeams = ["red", "green", "blue", "yellow"];
+        let filteredTeams = GameParser.mapTeams(allTeams, _teams);
+        filteredTeams = filteredTeams.filter(t => t.amount !== 0);
+
+        //Choose random if only 0 or 1 teams already has a player
+        if (filteredTeams.length === 1 || filteredTeams.length === 0) {
+            if (filteredTeams.length === 1) {
+                allTeams.splice(allTeams.indexOf(filteredTeams[0].team), 1);
+            }
+            let result = allTeams[Math.floor(Math.random() * allTeams.length)];
+            _teams[result]++;
+            _teams.random--;
+            return result;
+        } else {
+            //Choose the team with least amount of players when there are more than two teams with players.
+            let result = filteredTeams[0].team;
+            _teams[result]++;
+            _teams.random--;
+            return result;
+        }
+
+    }
+
+    private static mapTeams(allTeams: string[], _teams: TeamMap): { team: string; amount: any }[] {
+        return allTeams.map(k => {
+            return {team: k, amount: _teams[k]};
+        }).sort((a, b) => a.amount - b.amount);
     }
 
     private static teamSizes(sessions: SessionMap): TeamMap {
