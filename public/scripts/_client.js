@@ -137,6 +137,19 @@ function _cMap() {
     var elm = document.getElementById("custommap");
     socketListener.sendMap(elm.value, true);
 }
+function _load() {
+    var maps = Cookies.getJSON("maps");
+    console.log(maps);
+    var saved = Object.keys(maps).reduce(function (pv, cv, ci, arr) { return pv + cv + ","; }, "Choose a map:\n");
+    var save = prompt(saved, "Save1");
+    var elm = document.getElementById("custommap");
+    if (!maps[save]) {
+        alert("Map does not exist");
+        return;
+    }
+    elm.value = maps[save];
+    _cMap();
+}
 function _options() {
     socketListener.sendOptions(Util.getOptions());
 }

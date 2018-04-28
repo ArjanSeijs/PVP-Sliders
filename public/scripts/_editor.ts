@@ -172,8 +172,19 @@ window.onkeypress = function (e) {
         case 'c':
             listSaves();
             break;
-        case 'd':
+        case 'r':
             removeSave();
+            break;
+        case "e":
+            let encoded = encodeMap();
+            alert("Base64 encoding:" + encoded);
+            console.log(encoded);
+            break;
+        case "d":
+            let base64 = prompt("Base64 encoding");
+            if(!base64) return;
+            decodeMap(atob(base64));
+            view.resize();
             break;
         default:
             console.log("Unknown key: " + key);

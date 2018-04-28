@@ -1,5 +1,5 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", {value: true});
+Object.defineProperty(exports, "__esModule", { value: true });
 var Test = require("simple-tests-js");
 var Assert = require("assert");
 var GameParser = require("../src/parsers/GameParser");
@@ -13,13 +13,13 @@ Test.run({
         var team = GameParser.randomTeam({
             red: 2, green: 2, yellow: 2, blue: 1, random: 0
         }, false, -1, -1);
-        Assert.equal(team, "blue");
+        Assert(team === "blue");
     },
     test3: function () {
         var team = GameParser.randomTeam({
             red: 2, green: 0, yellow: 2, blue: 1, random: 0
         }, false, -1, -1);
-        Assert.equal(team, "blue");
+        Assert(team === "blue");
     }
 }, "TestRandomTeam");
 //# sourceMappingURL=TestRandomTeam.js.map

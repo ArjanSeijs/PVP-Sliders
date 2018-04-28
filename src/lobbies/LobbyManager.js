@@ -213,7 +213,7 @@ var SessionMap = (function () {
                     return true;
             }
         }
-        return false;
+        return team === "random";
     };
     return SessionMap;
 }());
@@ -380,6 +380,8 @@ var Lobby = (function () {
         if (this._session_map.calcJoined() < 2 || util_1.isNullOrUndefined(this.board))
             return false;
         this.game = GameParser.create(this.board, this._session_map.calcJoined(), this._session_map.getSessions(), this.options);
+        if (this.game === null)
+            return false;
         var tickRate = config.get("tickRate");
         var updateRate = config.get("updateRate");
         this.interval = {

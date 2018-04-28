@@ -320,7 +320,7 @@ class SessionMap {
                 else if (team !== x.team) return true;
             }
         }
-        return false;
+        return team === "random";
     }
 }
 
@@ -552,7 +552,7 @@ class Lobby {
         if (this._session_map.calcJoined() < 2 || isNullOrUndefined(this.board)) return false;
 
         this.game = GameParser.create(this.board, this._session_map.calcJoined(), this._session_map.getSessions(), this.options);
-
+        if (this.game === null) return false;
         let tickRate: number = config.get("tickRate");
         let updateRate: number = config.get("updateRate");
         //Game tick rate & update TODO config
@@ -732,4 +732,5 @@ class Lobby {
         return this.state === State.Joining && this._session_map.calcJoined() + (data.multiplayer ? 2 : 1) <= this.board.metadata.playerAmount
     }
 }
+
 export = LobbyManager;

@@ -171,6 +171,20 @@ function _cMap() {
     socketListener.sendMap(elm.value, true);
 }
 
+function _load() {
+    let maps = Cookies.getJSON("maps");
+    console.log(maps);
+    let saved = Object.keys(maps).reduce((pv, cv, ci, arr) => pv + cv + ",", "Choose a map:\n");
+    let save = prompt(saved, "Save1");
+    let elm = document.getElementById("custommap") as HTMLInputElement;
+    if (!maps[save]) {
+        alert("Map does not exist");
+        return;
+    }
+    elm.value = maps[save];
+    _cMap();
+}
+
 function _options() {
     socketListener.sendOptions(Util.getOptions());
 }

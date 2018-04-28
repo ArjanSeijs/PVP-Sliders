@@ -31,7 +31,7 @@ class GameParser {
         let i = 0;
         let maxId = -1;
         let teams = GameParser.teamSizes(sessions);
-
+        if(board.metadata.playerAmount < players) return null;
         for (let key in sessions) {
             if (!sessions.hasOwnProperty(key)) continue;
             for (let session of sessions[key].ids) {

@@ -5,6 +5,7 @@
     <title>PVP-Sliders</title>
     <script src="../scripts/socket.io.js"></script>
     <script src="../scripts/pixi.min.js"></script>
+    <script src="../scripts/js.cookies.js"></script>
     <script src="../scripts/_classes.js"></script>
     <script src="../scripts/_client.js"></script>
     <link href="stylesheets/style.css" rel="stylesheet" type="text/css">
@@ -44,7 +45,7 @@
         <div id="players"></div>
         <div id="maps" style="display: none;">
             <label for="custommap">Custom map (base64):</label><input id="custommap" type="text">
-            <button onclick="_cMap()">Change Map</button>
+            <button onclick="_load()">Load map</button> <button onclick="_cMap()">Change Map</button>
             <label>
                 <select id="mapselect" onchange="_map(this)">
                     <option value="horizontal">Horizontal</option>

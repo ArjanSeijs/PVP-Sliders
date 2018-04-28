@@ -11,6 +11,8 @@ var GameParser = (function () {
         var i = 0;
         var maxId = -1;
         var teams = GameParser.teamSizes(sessions);
+        if (board.metadata.playerAmount < players)
+            return null;
         for (var key in sessions) {
             if (!sessions.hasOwnProperty(key))
                 continue;
