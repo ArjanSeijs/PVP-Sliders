@@ -86,12 +86,15 @@ var View = /** @class */ (function () {
             onload();
     };
     View.prototype.resize = function (board) {
-        if (!client.getGame() && !board) {
+        if (!client.getGame() && !board && !this.board) {
             this.load();
             return;
         }
-        if (!board)
+        if (!board && client.getGame())
             board = client.getGame().board;
+        else if (!board && this.board)
+            board = this.board;
+        this.board = board;
         var width = board.width;
         var height = board.height;
         this.screen_width = window.innerWidth;
@@ -138,7 +141,6 @@ var View = /** @class */ (function () {
     View.prototype.displayGame = function (board) {
         if (!board)
             board = client.getGame().board;
-        console.log("!!!!");
         var width = board.width;
         var height = board.height;
         var image = Util.loadImage("board_background.png");

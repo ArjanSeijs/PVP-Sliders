@@ -91,6 +91,7 @@ class View {
     private offsetX: number;
     private offsetY: number;
     private readonly canvas: Application;
+    private board : any;
 
     constructor(onload: () => void, ...images: string[]) {
         this.screen_width = window.innerWidth;
@@ -125,11 +126,13 @@ class View {
     }
 
     resize(board?: any) {
-        if (!client.getGame() && !board) {
+        if (!client.getGame() && !board && !this.board) {
             this.load();
             return;
         }
-        if (!board) board = client.getGame().board;
+        if (!board && client.getGame()) board = client.getGame().board;
+        else if(!board && this.board) board = this.board;
+        this.board = board;
 
         let width = board.width;
         let height = board.height;
@@ -185,7 +188,6 @@ class View {
     displayGame(board?: any) {
         if (!board) board = client.getGame().board;
 
-        console.log("!!!!");
         let width = board.width;
         let height = board.height;
         let image = Util.loadImage("board_background.png");
