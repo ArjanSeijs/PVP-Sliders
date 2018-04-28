@@ -35,7 +35,6 @@
         <label>
             <input class="button" type="button" value="Host Lobby" onclick="_host()">
         </label>
-
     </div>
     <div id="game-lobby" class="lobby" style="display: none">
         <div><i class="fas fa-map"></i> <span id="selected-map">Palooza</span></div>
@@ -44,16 +43,10 @@
             <input id="custommap" type="text" style="display: none">
             <label>
                 <select id="mapselect" onchange="_map(this)">
-                    <option value="horizontal">Horizontal</option>
-                    <option value="map1v1">Map1v1</option>
-                    <option value="maze">Maze</option>
-                    <option value="maze2">Maze2</option>
-                    <option value="Palooza" selected="selected">Palooza</option>
-                    <option value="vertical">Vertical</option>
-                    <option value="DontStopMeNow">Don't Stop Me Now</option>
-                    <option value="IsThisRealLife">Is this real life?</option>
                 </select>
             </label>
+            <span class="clickable" onclick="_sync()"><i class="fas fa-sync">&nbsp;</i></span>
+            <span><a class="clickable" href="editor.html" target="_blank"> <i class="fas fa-edit">&nbsp;</i></a></span>
         </div>
         <span id="botsBox" style="display: none">
             <label for="bots">Enable bots:</label><input id="bots" type="checkbox" onchange="_options()">

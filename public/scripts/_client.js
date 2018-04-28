@@ -94,12 +94,24 @@ window.onload = function () {
     socketListener = new SocketHandler();
     client = new Client();
     view = new View(null, "assets/block.png", "assets/background.png", "assets/player_blue.png", "assets/player_green.png", "assets/player_red.png", "assets/player_yellow.png", "assets/board_background.png", "assets/stop.png");
+    selectMaps();
+};
+function selectMaps() {
     var maps = Cookies.getJSON("maps");
     var select = document.getElementById("mapselect");
+    select.innerHTML =
+        "<option value=\"horizontal\">Horizontal</option>\n" +
+            "<option value=\"map1v1\">Map1v1</option>\n" +
+            "<option value=\"maze\">Maze</option>\n" +
+            "<option value=\"maze2\">Maze2</option>\n" +
+            "<option value=\"Palooza\" selected=\"selected\">Palooza</option>\n" +
+            "<option value=\"vertical\">Vertical</option>\n" +
+            "<option value=\"DontStopMeNow\">Don't Stop Me Now</option>\n" +
+            "<option value=\"IsThisRealLife\">Is this real life?</option>";
     Object.keys(maps).forEach((function (map, index, array) {
-        select.innerHTML += '<option value="(Custom) ' + map + '">(Custom) ' + map + '</option>';
+        select.innerHTML += '<option data-custom=true value="(Custom) ' + map + '">(Custom) ' + map + '</option>';
     }));
-};
+}
 window.onkeypress = function (e) {
     move(e.key);
 };
@@ -184,5 +196,8 @@ function _load(save) {
 }
 function _options() {
     socketListener.sendOptions(Util.getOptions());
+}
+function _sync() {
+    selectMaps();
 }
 //# sourceMappingURL=_client.js.map

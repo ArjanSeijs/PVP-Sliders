@@ -121,12 +121,25 @@ window.onload = function () {
         "assets/player_yellow.png",
         "assets/board_background.png",
         "assets/stop.png");
+    selectMaps();
+};
+
+function selectMaps() {
     let maps = Cookies.getJSON("maps");
     let select = document.getElementById("mapselect") as HTMLSelectElement;
+    select.innerHTML =
+        "<option value=\"horizontal\">Horizontal</option>\n" +
+        "<option value=\"map1v1\">Map1v1</option>\n" +
+        "<option value=\"maze\">Maze</option>\n" +
+        "<option value=\"maze2\">Maze2</option>\n" +
+        "<option value=\"Palooza\" selected=\"selected\">Palooza</option>\n" +
+        "<option value=\"vertical\">Vertical</option>\n" +
+        "<option value=\"DontStopMeNow\">Don't Stop Me Now</option>\n" +
+        "<option value=\"IsThisRealLife\">Is this real life?</option>"
     Object.keys(maps).forEach(((map, index, array) => {
-        select.innerHTML += '<option value="(Custom) ' + map + '">(Custom) ' + map + '</option>'
+        select.innerHTML += '<option data-custom=true value="(Custom) ' + map + '">(Custom) ' + map + '</option>'
     }));
-};
+}
 
 window.onkeypress = function (e) {
     move(e.key);
@@ -218,6 +231,10 @@ function _load(save: string) {
 
 function _options() {
     socketListener.sendOptions(Util.getOptions());
+}
+
+function _sync() {
+    selectMaps()
 }
 
 
