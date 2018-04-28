@@ -111,6 +111,10 @@ class SocketHandler {
     close() {
         if (this.socket) this.socket.disconnect();
     }
+
+    sendKick(id: any) {
+        this.socket.emit('kick', {session_id: this.session_id, id: id});
+    }
 }
 
 window.onload = function () {
@@ -243,6 +247,12 @@ function _options() {
 
 function _sync() {
     selectMaps()
+}
+
+function _kick(id) {
+    if (id !== null) {
+        socketListener.sendKick(id);
+    }
 }
 
 

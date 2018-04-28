@@ -325,6 +325,31 @@ class SessionMap {
         }
         return team === "random";
     }
+
+    /**
+     *
+     */
+    kick(id: number) {
+        let session_id = null;
+        outerLoop:
+            for (let key in this.sessions) {
+                if (!this.sessions.hasOwnProperty(key)) continue;
+                for (let x of this.sessions[key].ids) {
+                    if (x.id === id) {
+                        session_id = key;
+                        break outerLoop;
+                    }
+                }
+            }
+        if (session_id === null || this.lobby.isHost(session_id)) return;
+        for (let key in this.clients) {
+            if (!this.clients.hasOwnProperty(key)) continue;
+            if (this.clients[key].session === session_id) {
+                this.clients[key].client.emit('failed', 'kicked by host', true);
+                this.removeSession(this.clients[key].client);
+            }
+        }
+    }
 }
 
 enum State {
@@ -430,6 +455,10 @@ class Lobby {
         client.on('options', function (data) {
             if (!data) return;
             that.setOptions(client, data);
+        });
+        client.on('kick', function (data) {
+            if (!data) return;
+            that.kick(client, data);
         });
 
         client.join(this.id);
@@ -711,6 +740,21 @@ class Lobby {
         this._session_map.disconnect();
         delete LobbyManager.socket.nsps[this.id];
         delete LobbyManager.lobbies[this.id];
+    }
+
+    /**
+     * Kick a player
+     * @param {Socket} client
+     * @param data
+     */
+    kick(client: Socket, data: any) {
+        if (!data.session_id || !this.isHost(data.session_id)) {
+            client.emit('failed', 'only host can kick players');
+            return;
+        }
+        if (!isNullOrUndefined(data.id) && typeof data.id === "number") {
+            this._session_map.kick(data.id);
+        }
     }
 
     /**

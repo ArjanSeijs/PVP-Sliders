@@ -232,6 +232,7 @@ var View = /** @class */ (function () {
         this.showLobby(multi);
         document.getElementById('maps').style.display = '';
         document.getElementById('botsBox').style.display = '';
+        this.isHost = true;
     };
     View.prototype.showLobby = function (multi) {
         this.hideAll();
@@ -270,7 +271,7 @@ var View = /** @class */ (function () {
             this.getOption("random", team) +
             "</select>";
     };
-    View.prototype.playerEntry = function (name, team, ready, player) {
+    View.prototype.playerEntry = function (name, team, ready, player, id) {
         var isready = "<i class=\"fas fa-check-square\"></i>";
         var notready = "<i class=\"fas fa-times-circle\"></i>";
         var string = "<li class='playerItem'>";
@@ -283,6 +284,11 @@ var View = /** @class */ (function () {
             string += "<div class=\"listReady\">" + (ready ? isready : notready) + "&nbsp;&nbsp;</div>";
         else
             string += "<div class=\"listReady\">Ready</div>";
+        if (this.isHost && id !== null) {
+            string += "<div class=\"listKick clickable\" onclick=\"_kick(" + id + ")\"><i class=\"fas fa-gavel\"></i>&nbsp;</div>";
+        }
+        else if (this.isHost)
+            string += '<div class="listKick">&nbsp;</div>';
         string += "</li>";
         return string;
     };
@@ -291,10 +297,15 @@ var View = /** @class */ (function () {
         var isTrue = function (string) {
             return string === "true" || string === true;
         };
-        string += this.playerEntry("Player", "Team", null, null);
+        string += this.playerEntry("Player", "Team", null, null, null);
         client.setReady(data);
         for (var i = 0; i < data.length; i++) {
-            string += this.playerEntry(data[i].name, data[i].team, isTrue(data[i].ready), client.isLocal(data[i].id) ? data[i].player : null);
+            var name_1 = data[i].name;
+            var team = data[i].team;
+            var ready = data[i].ready;
+            var id = data[i].id;
+            var player = data[i].player;
+            string += this.playerEntry(name_1, team, isTrue(ready), client.isLocal(id) ? player : null, id);
         }
         string += "</ol>";
         document.getElementById("players").innerHTML = string;

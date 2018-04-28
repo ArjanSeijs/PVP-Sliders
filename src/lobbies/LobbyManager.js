@@ -217,6 +217,30 @@ var SessionMap = (function () {
         }
         return team === "random";
     };
+    SessionMap.prototype.kick = function (id) {
+        var session_id = null;
+        outerLoop: for (var key in this.sessions) {
+            if (!this.sessions.hasOwnProperty(key))
+                continue;
+            for (var _i = 0, _a = this.sessions[key].ids; _i < _a.length; _i++) {
+                var x = _a[_i];
+                if (x.id === id) {
+                    session_id = key;
+                    break outerLoop;
+                }
+            }
+        }
+        if (session_id === null || this.lobby.isHost(session_id))
+            return;
+        for (var key in this.clients) {
+            if (!this.clients.hasOwnProperty(key))
+                continue;
+            if (this.clients[key].session === session_id) {
+                this.clients[key].client.emit('failed', 'kicked by host', true);
+                this.removeSession(this.clients[key].client);
+            }
+        }
+    };
     return SessionMap;
 }());
 var State;
@@ -299,6 +323,11 @@ var Lobby = (function () {
             if (!data)
                 return;
             that.setOptions(client, data);
+        });
+        client.on('kick', function (data) {
+            if (!data)
+                return;
+            that.kick(client, data);
         });
         client.join(this.id);
     };
@@ -502,6 +531,15 @@ var Lobby = (function () {
         this._session_map.disconnect();
         delete LobbyManager.socket.nsps[this.id];
         delete LobbyManager.lobbies[this.id];
+    };
+    Lobby.prototype.kick = function (client, data) {
+        if (!data.session_id || !this.isHost(data.session_id)) {
+            client.emit('failed', 'only host can kick players');
+            return;
+        }
+        if (!util_1.isNullOrUndefined(data.id) && typeof data.id === "number") {
+            this._session_map.kick(data.id);
+        }
     };
     Lobby.prototype.getSessionMap = function () {
         return this._session_map;

@@ -91,6 +91,9 @@ var SocketHandler = /** @class */ (function () {
         if (this.socket)
             this.socket.disconnect();
     };
+    SocketHandler.prototype.sendKick = function (id) {
+        this.socket.emit('kick', { session_id: this.session_id, id: id });
+    };
     return SocketHandler;
 }());
 window.onload = function () {
@@ -203,5 +206,10 @@ function _options() {
 }
 function _sync() {
     selectMaps();
+}
+function _kick(id) {
+    if (id !== null) {
+        socketListener.sendKick(id);
+    }
 }
 //# sourceMappingURL=_client.js.map

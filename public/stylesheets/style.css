@@ -62,7 +62,7 @@
 .lobby {
     margin: 100px auto 100px auto;
     min-width: 500px;
-    min-height: fit-content;
+    min-height: 500px;
     width: 30%;
     height: 30%;
     background-color: #fff6;
@@ -90,6 +90,10 @@
 
 .listReady {
     width: 75px;
+}
+
+.listKick {
+    width: 30px;
 }
 
 /* Team colours */

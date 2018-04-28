@@ -92,6 +92,7 @@ class View {
     private offsetY: number;
     private readonly canvas: Application;
     private board: any;
+    private isHost: boolean;
 
     constructor(onload: () => void, ...images: string[]) {
         this.screen_width = window.innerWidth;
@@ -287,6 +288,7 @@ class View {
         this.showLobby(multi);
         document.getElementById('maps').style.display = '';
         document.getElementById('botsBox').style.display = '';
+        this.isHost = true;
     }
 
     showLobby(multi: boolean) {
@@ -330,7 +332,7 @@ class View {
             `</select>`
     }
 
-    private playerEntry(name: string, team: string, ready: boolean, player: number): string {
+    private playerEntry(name: string, team: string, ready: boolean, player: number, id: number): string {
         const isready = "<i class=\"fas fa-check-square\"></i>";
         const notready = "<i class=\"fas fa-times-circle\"></i>";
 
@@ -343,6 +345,11 @@ class View {
         if (ready !== null) string += `<div class="listReady">${ready ? isready : notready}&nbsp;&nbsp;</div>`;
         else string += "<div class=\"listReady\">Ready</div>";
 
+        if (this.isHost && id !== null) {
+            string += `<div class="listKick clickable" onclick="_kick(${id})"><i class="fas fa-gavel"></i>&nbsp;</div>`;
+        }
+        else if (this.isHost) string += '<div class="listKick">&nbsp;</div>';
+
         string += "</li>";
         return string;
     }
@@ -354,11 +361,16 @@ class View {
             return string === "true" || string === true
         };
 
-        string += this.playerEntry("Player", "Team", null, null);
+        string += this.playerEntry("Player", "Team", null, null, null);
 
         client.setReady(data);
         for (let i = 0; i < data.length; i++) {
-            string += this.playerEntry(data[i].name, data[i].team, isTrue(data[i].ready), client.isLocal(data[i].id) ? data[i].player : null);
+            let name = data[i].name;
+            let team = data[i].team;
+            let ready = data[i].ready;
+            let id = data[i].id;
+            let player = data[i].player;
+            string += this.playerEntry(name, team, isTrue(ready), client.isLocal(id) ? player : null, id);
         }
         string += "</ol>";
         document.getElementById("players").innerHTML = string;
