@@ -11,19 +11,23 @@
     background-color: antiquewhite;
     border: 10px solid #ffe78e;
     border-radius: 15px;
-    width: 20%;
-    height: 20%;
+    padding: 10px;
+    width: fit-content;
+    height: fit-content;
+    max-width: 20%;
+    max-height: 20%;
     min-height: 250px;
     margin: 100px auto 100px auto;
 }
 
 .login > label {
-    display: inline-block;
+    /*display: inline-block;*/
     text-align: center;
 }
 
 .login > label > input {
     width: 100%;
+    text-align: center;
 }
 
 .winner {

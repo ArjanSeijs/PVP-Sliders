@@ -320,6 +320,11 @@ class View {
             size: this.size
         }
     }
+
+    loading(load: boolean) {
+        let elm = document.getElementById("loading") as HTMLDivElement;
+        elm.style.display = load ? "" : "none";
+    }
 }
 
 class Client implements ClientInterface {

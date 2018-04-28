@@ -16,6 +16,7 @@ var SocketHandler = /** @class */ (function () {
         view.hideAll();
         client.start(data);
         view.resize();
+        view.loading(false);
     };
     SocketHandler.prototype.onUpdate = function (entities) {
         view.displayPlayers(entities);
@@ -24,6 +25,7 @@ var SocketHandler = /** @class */ (function () {
         alert(data);
         if (refresh)
             location.reload();
+        view.loading(false);
     };
     SocketHandler.prototype.onJoined = function (data) {
         client.setIds(data);
@@ -36,9 +38,11 @@ var SocketHandler = /** @class */ (function () {
         else {
             view.showLobby(data.ids.length > 1);
         }
+        view.loading(false);
     };
     SocketHandler.prototype.onMapChange = function (data) {
         document.getElementById('selected-map').innerHTML = 'Map: ' + data;
+        view.loading(false);
     };
     SocketHandler.prototype.onRestart = function (data) {
         view.showLobby(client.isMulti());
@@ -49,6 +53,7 @@ var SocketHandler = /** @class */ (function () {
     };
     SocketHandler.prototype.onPlayers = function (data) {
         view.showPlayers(data);
+        view.loading(false);
     };
     SocketHandler.prototype.onEnd = function (data) {
         view.showWin();
@@ -112,21 +117,27 @@ window.onkeypress = function (e) {
 };
 function _map(elm) {
     socketListener.sendMap(elm.value);
+    view.loading(true);
 }
 function _join() {
     socketListener.sendJoin(Util.getFormData());
+    view.loading(true);
 }
 function _host() {
     socketListener.sendHost(Util.getFormData());
+    view.loading(true);
 }
 function _ready() {
     socketListener.sendReady(client.toggleReady());
+    view.loading(true);
 }
 function _setTeam(elm, i) {
     socketListener.sendTeam(elm.value, i);
+    view.loading(true);
 }
 function _start() {
     socketListener.sendStart();
+    view.loading(true);
 }
 function _resize() {
     if (!view)
@@ -136,6 +147,7 @@ function _resize() {
 function _cMap() {
     var elm = document.getElementById("custommap");
     socketListener.sendMap(elm.value, true);
+    view.loading(true);
 }
 function _load() {
     var maps = Cookies.getJSON("maps");
@@ -149,6 +161,7 @@ function _load() {
     }
     elm.value = maps[save];
     _cMap();
+    view.loading(true);
 }
 function _options() {
     socketListener.sendOptions(Util.getOptions());

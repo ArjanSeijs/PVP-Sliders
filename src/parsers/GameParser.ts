@@ -2,6 +2,7 @@ import Game = require("../classes/Game");
 import Board = require("../classes/Board");
 import Player = require("../classes/entities/Player");
 import SimpleBot = require("../classes/entities/SimpleBot");
+import {isNullOrUndefined} from "util";
 
 interface SessionMap {
     [p: string]: { ids: { id: number, name: string, ready: boolean, team: string }[] }
@@ -31,12 +32,13 @@ class GameParser {
         let i = 0;
         let maxId = -1;
         let teams = GameParser.teamSizes(sessions);
-        if(board.metadata.playerAmount < players) return null;
+        if (board.metadata.playerAmount < players) return null;
         for (let key in sessions) {
             if (!sessions.hasOwnProperty(key)) continue;
             for (let session of sessions[key].ids) {
 
                 let pos = board.metadata.mapData[i];
+                if (isNullOrUndefined(pos)) return null;
                 let team = session.team !== "random" ? session.team : GameParser.randomTeam(teams, false, i, players);
 
                 game.entities[i] = new Player(pos.x * cellSize, pos.y * cellSize, session.id, team, session.name);

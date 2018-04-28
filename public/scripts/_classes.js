@@ -262,6 +262,10 @@ var View = /** @class */ (function () {
             size: this.size
         };
     };
+    View.prototype.loading = function (load) {
+        var elm = document.getElementById("loading");
+        elm.style.display = load ? "" : "none";
+    };
     return View;
 }());
 var Client = /** @class */ (function () {
