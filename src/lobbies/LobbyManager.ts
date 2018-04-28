@@ -491,8 +491,8 @@ class Lobby {
             client.emit('failed', 'invalid team');
             return;
         }
-        const teams = {"red": true, "blue": true, "yellow": true, "green": true, "random": true};
-        if (!teams[data.team]) {
+        const teams = config.get("teams");
+        if (teams.indexOf(data.team) < 0) {
             client.emit('failed', 'invalid team');
             return
         }
@@ -624,7 +624,7 @@ class Lobby {
             client.emit('failed', info.message)
         } else {
             let boardName = !!data.custom ? "custom map" : data.board;
-            LobbyManager.socket.in(this.id).emit('map',{boardName:boardName,board:this.board.toJson()});
+            LobbyManager.socket.in(this.id).emit('map', {boardName: boardName, board: this.board.toJson()});
         }
     }
 

@@ -334,8 +334,8 @@ var Lobby = (function () {
             client.emit('failed', 'invalid team');
             return;
         }
-        var teams = { "red": true, "blue": true, "yellow": true, "green": true, "random": true };
-        if (!teams[data.team]) {
+        var teams = config.get("teams");
+        if (teams.indexOf(data.team) < 0) {
             client.emit('failed', 'invalid team');
             return;
         }

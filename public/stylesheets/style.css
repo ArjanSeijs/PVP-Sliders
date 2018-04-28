@@ -62,7 +62,7 @@
 .lobby {
     margin: 100px auto 100px auto;
     min-width: 500px;
-    min-height: 250px;
+    min-height: fit-content;
     width: 30%;
     height: 30%;
     background-color: #fff6;
@@ -106,7 +106,23 @@
 }
 
 .blue {
-    color: #00B7FF;
+    color: #1519ff;
+}
+
+.purple {
+    color: #8a2be2;
+}
+
+.cyan {
+    color: #00ffff;
+}
+
+.orange {
+    color: #ffa500;
+}
+
+.pink  {
+    color: #ff77dc;
 }
 
 /* The background will get overwriten without the .playerItem > tag*/
@@ -123,7 +139,27 @@
 }
 
 .playerItem > .bluebg {
-    background-color: #00B7FF;
+    background-color: #1519ff;
+}
+
+.playerItem > .purplebg {
+    background-color: #8a2be2;
+}
+
+.playerItem > .cyanbg {
+    background-color: #00ffff;
+}
+
+.playerItem > .orangebg {
+    background-color: #ffa500;
+}
+
+.playerItem > .pinkbg {
+    background-color: #ff77dc;
+}
+
+.playerItem > .randombg {
+    background-color: #999a9a;
 }
 
 /* Editor */

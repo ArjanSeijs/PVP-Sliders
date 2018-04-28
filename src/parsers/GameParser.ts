@@ -2,6 +2,7 @@ import Game = require("../classes/Game");
 import Board = require("../classes/Board");
 import Player = require("../classes/entities/Player");
 import SimpleBot = require("../classes/entities/SimpleBot");
+import config = require("../lib/config");
 import {isNullOrUndefined} from "util";
 
 interface SessionMap {
@@ -9,11 +10,7 @@ interface SessionMap {
 }
 
 interface TeamMap {
-    red: number;
-    green: number;
-    yellow: number;
-    blue: number;
-    random: number
+    [k: string]: number;
 }
 
 class GameParser {
@@ -59,7 +56,7 @@ class GameParser {
     }
 
     static randomTeam(_teams: TeamMap, isBot: boolean, i: number, max: number): string {
-        let allTeams = ["red", "green", "blue", "yellow"];
+        let allTeams = config.get("teams");
         let filteredTeams = GameParser.mapTeams(allTeams, _teams);
         filteredTeams = filteredTeams.filter(t => t.amount !== 0);
 
@@ -89,7 +86,10 @@ class GameParser {
     }
 
     private static teamSizes(sessions: SessionMap): TeamMap {
-        let teams = {red: 0, green: 0, yellow: 0, blue: 0, random: 0};
+        let teams: TeamMap = {random: 0};
+        for (let team of config.get("teams")) {
+            teams[team] = 0;
+        }
         for (let key in sessions) {
             if (!sessions.hasOwnProperty(key)) continue;
             for (let session of sessions[key].ids) {

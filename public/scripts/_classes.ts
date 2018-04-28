@@ -91,7 +91,7 @@ class View {
     private offsetX: number;
     private offsetY: number;
     private readonly canvas: Application;
-    private board : any;
+    private board: any;
 
     constructor(onload: () => void, ...images: string[]) {
         this.screen_width = window.innerWidth;
@@ -131,7 +131,7 @@ class View {
             return;
         }
         if (!board && client.getGame()) board = client.getGame().board;
-        else if(!board && this.board) board = this.board;
+        else if (!board && this.board) board = this.board;
         this.board = board;
 
         let width = board.width;
@@ -312,13 +312,21 @@ class View {
         }
     }
 
+    private getOption(team: string, actualteam: string) {
+        return `<option value=${team} class=${team} ${(actualteam === team ? "selected" : "")}>${team}</option>`;
+    }
+
     private getSelect(team: string, player: number): string {
         return ` <select class="select-style" id="teamselect" onchange="_setTeam(this,${player})">` +
-            `<option value="red" class="red" ${(team === "red" ? "selected" : "")}>red</option>` +
-            `<option value="green" class="green" ${(team === "green" ? "selected" : "")}>green</option>` +
-            `<option value="yellow" class="yellow" ${(team === "yellow" ? "selected" : "")}>yellow</option>` +
-            `<option value="blue" class="blue" ${(team === "blue" ? "selected" : "")}>blue</option>` +
-            `<option value="random" ${(team === "random" ? "selected" : "")}>random</option>` +
+            this.getOption("red", team) +
+            this.getOption("yellow", team) +
+            this.getOption("blue", team) +
+            this.getOption("green", team) +
+            this.getOption("purple", team) +
+            this.getOption("cyan", team) +
+            this.getOption("orange", team) +
+            this.getOption("pink", team) +
+            this.getOption("random", team) +
             `</select>`
     }
 

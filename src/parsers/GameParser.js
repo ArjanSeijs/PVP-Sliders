@@ -2,6 +2,7 @@
 var Game = require("../classes/Game");
 var Player = require("../classes/entities/Player");
 var SimpleBot = require("../classes/entities/SimpleBot");
+var config = require("../lib/config");
 var util_1 = require("util");
 var GameParser = (function () {
     function GameParser() {
@@ -39,7 +40,7 @@ var GameParser = (function () {
         return game;
     };
     GameParser.randomTeam = function (_teams, isBot, i, max) {
-        var allTeams = ["red", "green", "blue", "yellow"];
+        var allTeams = config.get("teams");
         var filteredTeams = GameParser.mapTeams(allTeams, _teams);
         filteredTeams = filteredTeams.filter(function (t) { return t.amount !== 0; });
         if (filteredTeams.length === 1 || filteredTeams.length === 0) {
@@ -64,12 +65,16 @@ var GameParser = (function () {
         }).sort(function (a, b) { return a.amount - b.amount; });
     };
     GameParser.teamSizes = function (sessions) {
-        var teams = { red: 0, green: 0, yellow: 0, blue: 0, random: 0 };
+        var teams = { random: 0 };
+        for (var _i = 0, _a = config.get("teams"); _i < _a.length; _i++) {
+            var team = _a[_i];
+            teams[team] = 0;
+        }
         for (var key in sessions) {
             if (!sessions.hasOwnProperty(key))
                 continue;
-            for (var _i = 0, _a = sessions[key].ids; _i < _a.length; _i++) {
-                var session = _a[_i];
+            for (var _b = 0, _c = sessions[key].ids; _b < _c.length; _b++) {
+                var session = _c[_b];
                 teams[session.team]++;
             }
         }

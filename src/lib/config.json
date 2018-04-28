@@ -4,5 +4,15 @@
   "speed": 30,
   "EPSILON": 2,
   "tickRate": 15,
-  "updateRate": 60
+  "updateRate": 60,
+  "teams": [
+    "red",
+    "green",
+    "yellow",
+    "blue",
+    "purple",
+    "cyan",
+    "orange",
+    "pink"
+  ]
 }

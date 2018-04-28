@@ -1,5 +1,5 @@
 import Player = require("./Player");
-import Direction = require("../Direction");
+
 import Game = require("../Game");
 
 abstract class Bot extends Player {

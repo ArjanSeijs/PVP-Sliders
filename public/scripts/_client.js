@@ -95,7 +95,7 @@ var SocketHandler = /** @class */ (function () {
 window.onload = function () {
     socketListener = new SocketHandler();
     client = new Client();
-    view = new View(null, "assets/block.png", "assets/background.png", "assets/player_blue.png", "assets/player_green.png", "assets/player_red.png", "assets/player_yellow.png", "assets/board_background.png", "assets/stop.png");
+    view = new View(null, "assets/block.png", "assets/background.png", "assets/player_blue.png", "assets/player_green.png", "assets/player_red.png", "assets/player_yellow.png", "assets/player_purple.png", "assets/player_cyan.png", "assets/player_orange.png", "assets/player_pink.png", "assets/board_background.png", "assets/stop.png");
     selectMaps();
 };
 function selectMaps() {

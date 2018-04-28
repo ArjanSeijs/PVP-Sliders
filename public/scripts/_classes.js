@@ -254,13 +254,20 @@ var View = /** @class */ (function () {
             document.getElementById('winners').innerHTML = "Draw";
         }
     };
+    View.prototype.getOption = function (team, actualteam) {
+        return "<option value=" + team + " class=" + team + " " + (actualteam === team ? "selected" : "") + ">" + team + "</option>";
+    };
     View.prototype.getSelect = function (team, player) {
         return " <select class=\"select-style\" id=\"teamselect\" onchange=\"_setTeam(this," + player + ")\">" +
-            ("<option value=\"red\" class=\"red\" " + (team === "red" ? "selected" : "") + ">red</option>") +
-            ("<option value=\"green\" class=\"green\" " + (team === "green" ? "selected" : "") + ">green</option>") +
-            ("<option value=\"yellow\" class=\"yellow\" " + (team === "yellow" ? "selected" : "") + ">yellow</option>") +
-            ("<option value=\"blue\" class=\"blue\" " + (team === "blue" ? "selected" : "") + ">blue</option>") +
-            ("<option value=\"random\" " + (team === "random" ? "selected" : "") + ">random</option>") +
+            this.getOption("red", team) +
+            this.getOption("yellow", team) +
+            this.getOption("blue", team) +
+            this.getOption("green", team) +
+            this.getOption("purple", team) +
+            this.getOption("cyan", team) +
+            this.getOption("orange", team) +
+            this.getOption("pink", team) +
+            this.getOption("random", team) +
             "</select>";
     };
     View.prototype.playerEntry = function (name, team, ready, player) {
