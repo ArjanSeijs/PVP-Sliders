@@ -167,6 +167,7 @@ class SessionMap {
             ids: this.sessions[session_id].ids,
             session_id: session_id,
             lobby_id: this.lobby.getId(),
+            board: this.lobby.getBoard(),
             isHost: !!isHost
         });
         return session_id;
@@ -301,7 +302,7 @@ class SessionMap {
 
     /**
      * Checks if a player is joined.
-     * @param {string} id
+     * @param {string} id the client id.
      * @return {boolean}
      */
     isJoined(id: string) {
@@ -343,7 +344,7 @@ class Lobby {
     private readonly _session_map: SessionMap;
     private state: State;
     private host: string = null;
-    private options: { bots: boolean };
+    private readonly options: { bots: boolean };
 
     /**
      * @constructor
@@ -734,6 +735,10 @@ class Lobby {
 
     isJoinable(data: any): boolean {
         return this.state === State.Joining && this._session_map.calcJoined() + (data.multiplayer ? 2 : 1) <= this.board.metadata.playerAmount
+    }
+
+    getBoard(): { width: number; height: number; tiles: { x: number; y: number; tile_type: string }[][] } {
+        return this.board ? this.board.toJson() : null;
     }
 }
 

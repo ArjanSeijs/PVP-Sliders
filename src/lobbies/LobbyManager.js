@@ -108,6 +108,7 @@ var SessionMap = (function () {
             ids: this.sessions[session_id].ids,
             session_id: session_id,
             lobby_id: this.lobby.getId(),
+            board: this.lobby.getBoard(),
             isHost: !!isHost
         });
         return session_id;
@@ -513,6 +514,9 @@ var Lobby = (function () {
     };
     Lobby.prototype.isJoinable = function (data) {
         return this.state === State.Joining && this._session_map.calcJoined() + (data.multiplayer ? 2 : 1) <= this.board.metadata.playerAmount;
+    };
+    Lobby.prototype.getBoard = function () {
+        return this.board ? this.board.toJson() : null;
     };
     return Lobby;
 }());

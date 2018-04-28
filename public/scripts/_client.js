@@ -39,6 +39,7 @@ var SocketHandler = /** @class */ (function () {
             view.showLobby(data.ids.length > 1);
         }
         view.loading(false);
+        view.resize(data.board);
     };
     SocketHandler.prototype.onMapChange = function (data) {
         console.log(data);

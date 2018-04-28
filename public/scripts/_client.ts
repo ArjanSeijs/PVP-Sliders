@@ -47,6 +47,7 @@ class SocketHandler {
             view.showLobby(data.ids.length > 1);
         }
         view.loading(false);
+        view.resize(data.board);
     }
 
     onMapChange(data: any): void {
