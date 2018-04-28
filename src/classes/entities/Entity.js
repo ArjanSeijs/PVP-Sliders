@@ -1,11 +1,12 @@
 "use strict";
 var Direction = require("../Direction");
+var config = require("../../lib/config");
 var Entity = (function () {
     function Entity(x, y, id, team) {
         this.lastMove = 0;
         this.pos = { x: x, y: y };
         this.direction = { curr: Direction.None, next: Direction.None };
-        this.size = 99;
+        this.size = config.get("entitySize");
         this.dead = false;
         this.id = id;
         this.team = team;
@@ -25,7 +26,7 @@ var Entity = (function () {
         this.direction.next = Direction.None;
         if (immediate)
             this.direction.curr = Direction.None;
-        var cellSize = 100;
+        var cellSize = config.get("cellSize");
         var x = Math.round(this.pos.x / cellSize) * cellSize;
         var y = Math.round(this.pos.y / cellSize) * cellSize;
         this.pos = {

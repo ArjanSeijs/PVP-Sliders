@@ -1,6 +1,7 @@
 "use strict";
 var Direction = require("./Direction");
 var Types = require("./Types");
+var config = require("../lib/config");
 var Logger = require("simple-nodejs-logger");
 var logger = Logger("CollisionManager");
 var CollisionHandler = (function () {
@@ -51,7 +52,7 @@ var CollisionHandler = (function () {
             entity.stop();
             var diffX = Math.abs(entity.pos.x - other.pos.x);
             var diffY = Math.abs(entity.pos.y - other.pos.y);
-            if (!(Math.abs(diffX - diffY) < 0.2)) {
+            if (!(Math.abs(diffX - diffY) < config.get("EPSILON"))) {
                 if (diffX > diffY) {
                     other.pos.y = entity.pos.y;
                 }
@@ -88,7 +89,7 @@ var CollisionHandler = (function () {
         }
         var diffX = Math.abs(entity.pos.x - other.pos.x);
         var diffY = Math.abs(entity.pos.y - other.pos.y);
-        if (Math.abs(diffX - diffY) < 5) {
+        if (Math.abs(diffX - diffY) < config.get("EPSILON")) {
             this.game.gameMode.onEnemyCollision(other, entity);
             this.game.gameMode.onEnemyCollision(entity, other);
         }
@@ -106,7 +107,7 @@ var CollisionHandler = (function () {
         for (var key in entities) {
             if (entities.hasOwnProperty(key)) {
                 var entity = entities[key];
-                this.handleMove(entity, 30);
+                this.handleMove(entity, config.get("speed"));
             }
         }
     };
@@ -188,7 +189,7 @@ var CollisionHandler = (function () {
         return false;
     };
     CollisionHandler.prototype.inBounds = function (newX, newY, entity) {
-        var cellSize = 100;
+        var cellSize = config.get("cellSize");
         return newX >= 0 && newY >= 0
             && newX + entity.size < this.game.board.width * cellSize
             && newY + entity.size < this.game.board.height * cellSize;

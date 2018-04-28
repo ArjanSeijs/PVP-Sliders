@@ -558,7 +558,7 @@ class Lobby {
         if (this.game === null) return false;
         let tickRate: number = config.get("tickRate");
         let updateRate: number = config.get("updateRate");
-        //Game tick rate & update TODO config
+        //Game tick rate & update
         this.interval = {
             tick: setInterval(function () {
                 try {

@@ -1,5 +1,6 @@
 import Direction = require("../Direction");
 import ToJson = require("../../interfaces/ToJson");
+import config = require("../../lib/config");
 
 class Entity implements ToJson {
 
@@ -23,7 +24,7 @@ class Entity implements ToJson {
     constructor(x: number, y: number, id: number, team: string) {
         this.pos = {x: x, y: y};
         this.direction = {curr: Direction.None, next: Direction.None};
-        this.size = 99; //TODO config
+        this.size = config.get("entitySize");
         this.dead = false;
         this.id = id;
         this.team = team;
@@ -61,7 +62,7 @@ class Entity implements ToJson {
     stop(immediate?: boolean): void {
         this.direction.next = Direction.None;
         if (immediate) this.direction.curr = Direction.None;
-        let cellSize = 100; //TODO config.
+        let cellSize = config.get("cellSize");
         let x = Math.round(this.pos.x / cellSize) * cellSize;
         let y = Math.round(this.pos.y / cellSize) * cellSize;
         this.pos = {

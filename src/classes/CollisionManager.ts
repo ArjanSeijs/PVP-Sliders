@@ -3,6 +3,7 @@ import Entity = require("./entities/Entity");
 import Direction = require("./Direction");
 import Types = require("./Types");
 import Tile = require("./Tile");
+import config = require("../lib/config");
 import * as Logger from 'simple-nodejs-logger';
 
 const logger = Logger("CollisionManager");
@@ -69,7 +70,6 @@ class CollisionHandler {
 
         if (other.collides(entity, newX, newY)) {
             if (other.team === entity.team && other.collidesNow(entity, newX, newY)) {
-                //TODO check stopboard bounce?
                 this.bounce(entity, other, speed);
             } else if (other.team !== entity.team && other.collidesNow(entity, newX, newY)) {
                 this.enemyCollision(entity, other);
@@ -91,8 +91,7 @@ class CollisionHandler {
             entity.stop();
             let diffX = Math.abs(entity.pos.x - other.pos.x);
             let diffY = Math.abs(entity.pos.y - other.pos.y);
-            //TODO config
-            if (!(Math.abs(diffX - diffY) < 0.2)) {
+            if (!(Math.abs(diffX - diffY) < config.get("EPSILON"))) {
                 if (diffX > diffY) {
                     other.pos.y = entity.pos.y;
                 } else {
@@ -137,8 +136,7 @@ class CollisionHandler {
         let diffX = Math.abs(entity.pos.x - other.pos.x);
         let diffY = Math.abs(entity.pos.y - other.pos.y);
 
-        //TODO config
-        if (Math.abs(diffX - diffY) < 5) {
+        if (Math.abs(diffX - diffY) < config.get("EPSILON")) {
             this.game.gameMode.onEnemyCollision(other, entity);
             this.game.gameMode.onEnemyCollision(entity, other);
         } else if (diffX > diffY && (other.direction.curr === Direction.North || other.direction.curr === Direction.South)) {
@@ -162,8 +160,7 @@ class CollisionHandler {
         for (let key in entities) {
             if (entities.hasOwnProperty(key)) {
                 let entity = entities[key];
-                //TODO config
-                this.handleMove(entity, 30);
+                this.handleMove(entity, config.get("speed"));
             }
         }
     }
@@ -176,7 +173,7 @@ class CollisionHandler {
     handleMove(entity: Entity, speed: number) {
         entity.updateDir();
         //TODO Depends on TPS
-        //TODO Binary search over speed.
+        //TODO Binary search over speed?
         if (this.isFree(entity, speed) && !this.isStop(entity, speed)) {
             let dir = entity.direction.curr;
             entity.pos.x += dir.x * speed;
@@ -193,7 +190,6 @@ class CollisionHandler {
      * @return {boolean}
      */
     isFree(entity: Entity, speed: number): boolean {
-        //TODO config
         let dir = entity.direction.curr;
 
         //TODO Depends ons TPS
@@ -286,8 +282,7 @@ class CollisionHandler {
      * @return {boolean}
      */
     inBounds(newX: number, newY: number, entity: Entity) {
-        //TODO config
-        const cellSize = 100;
+        const cellSize = config.get("cellSize");
         return newX >= 0 && newY >= 0
             && newX + entity.size < this.game.board.width * cellSize
             && newY + entity.size < this.game.board.height * cellSize;
