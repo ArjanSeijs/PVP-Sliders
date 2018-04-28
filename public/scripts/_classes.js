@@ -222,27 +222,63 @@ var View = /** @class */ (function () {
         this.hideAll();
         this.showLobby(multi);
         document.getElementById('maps').style.display = '';
+        document.getElementById('botsBox').style.display = '';
     };
     View.prototype.showLobby = function (multi) {
         this.hideAll();
-        if (multi)
-            document.getElementById("team2").style.display = '';
-        else
-            document.getElementById("team2").style.display = 'none';
         document.getElementById("game-lobby").style.display = '';
         document.getElementById('wrapper').style.display = '';
         this.resize();
     };
-    View.prototype.showWin = function () {
+    View.prototype.showWin = function (winners) {
         this.hideAll();
         document.getElementById('winners').style.display = '';
         document.getElementById('wrapper').style.display = '';
+        if (winners[0]) {
+            document.getElementById('winners').innerHTML = "Team <span class=\"" + winners[0].team + "\">" + winners[0].team + "</span> has won!<br> Winners:<br>";
+            for (var _i = 0, winners_1 = winners; _i < winners_1.length; _i++) {
+                var winner = winners_1[_i];
+                document.getElementById('winners').innerHTML += winner.name + "\n";
+            }
+        }
+        else {
+            document.getElementById('winners').innerHTML = "Draw";
+        }
+    };
+    View.prototype.getSelect = function (team, player) {
+        return " <select class=\"select-style\" id=\"teamselect\" onchange=\"_setTeam(this," + player + ")\">" +
+            ("<option value=\"red\" class=\"red\" " + (team === "red" ? "selected" : "") + ">red</option>") +
+            ("<option value=\"green\" class=\"green\" " + (team === "green" ? "selected" : "") + ">green</option>") +
+            ("<option value=\"yellow\" class=\"yellow\" " + (team === "yellow" ? "selected" : "") + ">yellow</option>") +
+            ("<option value=\"blue\" class=\"blue\" " + (team === "blue" ? "selected" : "") + ">blue</option>") +
+            ("<option value=\"random\" " + (team === "random" ? "selected" : "") + ">random</option>") +
+            "</select>";
+    };
+    View.prototype.playerEntry = function (name, team, ready, player) {
+        var isready = "<i class=\"fas fa-check-square\"></i>";
+        var notready = "<i class=\"fas fa-times-circle\"></i>";
+        var string = "<li class='playerItem'>";
+        string += "<div class=\"listName\">" + name + "</div>";
+        if (player !== null)
+            string += "<div class=\"listTeam " + team + "bg\">" + this.getSelect(team, player) + "</div>";
+        else
+            string += "<div class=\"listTeam " + team + "bg\">" + team + "</div>";
+        if (ready !== null)
+            string += "<div class=\"listReady\">" + (ready ? isready : notready) + "&nbsp;&nbsp;</div>";
+        else
+            string += "<div class=\"listReady\">Ready</div>";
+        string += "</li>";
+        return string;
     };
     View.prototype.showPlayers = function (data) {
-        var string = "<ol>";
+        var string = "<ol class='playerList'>";
+        var isTrue = function (string) {
+            return string === "true" || string === true;
+        };
+        string += this.playerEntry("Player", "Team", null, null);
         client.setReady(data);
         for (var i = 0; i < data.length; i++) {
-            string += "<li>" + data[i].name + ":" + data[i].ready + ":" + data[i].team + "</li>";
+            string += this.playerEntry(data[i].name, data[i].team, isTrue(data[i].ready), client.isLocal(data[i].id) ? data[i].player : null);
         }
         string += "</ol>";
         document.getElementById("players").innerHTML = string;
@@ -261,6 +297,10 @@ var View = /** @class */ (function () {
             offsetY: this.offsetY,
             size: this.size
         };
+    };
+    View.prototype.loading = function (load) {
+        var elm = document.getElementById("loading");
+        elm.style.display = load ? "" : "none";
     };
     return View;
 }());
@@ -421,6 +461,9 @@ var Client = /** @class */ (function () {
     };
     Client.prototype.reset = function () {
         this.game = null;
+    };
+    Client.prototype.isLocal = function (id) {
+        return id === this.id_p1.id || id === this.id_p2.id;
     };
     return Client;
 }());

@@ -2,6 +2,7 @@
 var Game = require("../classes/Game");
 var Player = require("../classes/entities/Player");
 var SimpleBot = require("../classes/entities/SimpleBot");
+var util_1 = require("util");
 var GameParser = (function () {
     function GameParser() {
     }
@@ -19,6 +20,8 @@ var GameParser = (function () {
             for (var _i = 0, _a = sessions[key].ids; _i < _a.length; _i++) {
                 var session = _a[_i];
                 var pos = board.metadata.mapData[i];
+                if (util_1.isNullOrUndefined(pos))
+                    return null;
                 var team = session.team !== "random" ? session.team : GameParser.randomTeam(teams, false, i, players);
                 game.entities[i] = new Player(pos.x * cellSize, pos.y * cellSize, session.id, team, session.name);
                 if (session.id > maxId)

@@ -21,7 +21,7 @@ class Game implements ToJson {
     collisionManager: CollisionManager;
     entities: EntityMap;
     state: State;
-    winners: string;
+    winners: Entity[];
 
     /**
      * @constructor
@@ -74,7 +74,7 @@ class Game implements ToJson {
      */
     end(winners: Array<Entity>): void {
         this.state = State.Finished;
-        this.winners = winners.length > 0 ? winners[0].team : "";
+        this.winners = winners.map(e => e.toJson());
     }
 
     /**

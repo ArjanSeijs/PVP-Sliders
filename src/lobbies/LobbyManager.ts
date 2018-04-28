@@ -62,7 +62,7 @@ class LobbyManager {
             let lobbyId = data.lobby;
             if (lobbyId === "") lobbyId = LobbyManager.randomLobby(data);
             if (lobbyId === null) {
-                client.emit('failed', 'All lobbies were full');
+                LobbyManager.clientHost(client, data);
                 return;
             }
             LobbyManager.lobbies[lobbyId].join(client, data);
@@ -85,7 +85,7 @@ class LobbyManager {
 
         let lobby = LobbyManager.getLobby(lobby_id);
         if (data.password) lobby.setPassword(data.password);
-        lobby.setLevel("Palooza" + EXTENSION);
+        // lobby.setLevel("Palooza" + EXTENSION);
         // lobby.join(client, data, true);
 
         let session_id = lobby.join(client, data, true);
@@ -214,7 +214,9 @@ class SessionMap {
         for (let key in this.sessions) {
             if (!this.sessions.hasOwnProperty(key)) continue;
             for (let i = 0; i < this.sessions[key].ids.length; i++) {
-                joined.push(this.sessions[key].ids[i]);
+                let player: any = this.sessions[key].ids[i];
+                player.player = i;
+                joined.push(player);
             }
         }
         return joined;
@@ -353,7 +355,8 @@ class Lobby {
         this.state = State.Joining;
         this.options = {
             bots: false
-        }
+        };
+        this.setLevel("Palooza" + EXTENSION);
     }
 
     /**

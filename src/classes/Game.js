@@ -36,7 +36,7 @@ var Game = (function () {
     };
     Game.prototype.end = function (winners) {
         this.state = State.Finished;
-        this.winners = winners.length > 0 ? winners[0].team : "";
+        this.winners = winners.map(function (e) { return e.toJson(); });
     };
     Game.prototype.toJson = function () {
         return {

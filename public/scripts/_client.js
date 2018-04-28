@@ -16,6 +16,7 @@ var SocketHandler = /** @class */ (function () {
         view.hideAll();
         client.start(data);
         view.resize();
+        view.loading(false);
     };
     SocketHandler.prototype.onUpdate = function (entities) {
         view.displayPlayers(entities);
@@ -24,6 +25,7 @@ var SocketHandler = /** @class */ (function () {
         alert(data);
         if (refresh)
             location.reload();
+        view.loading(false);
     };
     SocketHandler.prototype.onJoined = function (data) {
         client.setIds(data);
@@ -36,23 +38,25 @@ var SocketHandler = /** @class */ (function () {
         else {
             view.showLobby(data.ids.length > 1);
         }
+        view.loading(false);
     };
     SocketHandler.prototype.onMapChange = function (data) {
         document.getElementById('selected-map').innerHTML = 'Map: ' + data;
+        view.loading(false);
     };
     SocketHandler.prototype.onRestart = function (data) {
         view.showLobby(client.isMulti());
         client.reset();
         view.clearCanvas();
         client.end();
-        console.log('restart!');
+        view.resize();
     };
     SocketHandler.prototype.onPlayers = function (data) {
         view.showPlayers(data);
+        view.loading(false);
     };
     SocketHandler.prototype.onEnd = function (data) {
-        view.showWin();
-        document.getElementById('team').innerHTML = data.winners;
+        view.showWin(data.winners);
         view.displayPlayers(data.entities);
         client.end();
     };
@@ -90,10 +94,19 @@ window.onload = function () {
     socketListener = new SocketHandler();
     client = new Client();
     view = new View(null, "assets/block.png", "assets/background.png", "assets/player_blue.png", "assets/player_green.png", "assets/player_red.png", "assets/player_yellow.png", "assets/board_background.png", "assets/stop.png");
+    var maps = Cookies.getJSON("maps");
+    var select = document.getElementById("mapselect");
+    Object.keys(maps).forEach((function (map, index, array) {
+        select.innerHTML += '<option value="(Custom) ' + map + '">(Custom) ' + map + '</option>';
+    }));
 };
 window.onkeypress = function (e) {
+    move(e.key);
+};
+function move(key) {
     if (!client || !client.getGame() || !socketListener)
         return;
+    key = key.toLowerCase();
     var dirMap = {
         "w": "NORTH",
         "a": "WEST",
@@ -104,29 +117,41 @@ window.onkeypress = function (e) {
         "arrowup": "NORTH",
         "arrowdown": "SOUTH",
     };
-    var key = e.key.toLowerCase();
     var id = client.getId(key);
     if (id === null || !dirMap[key])
         return;
     socketListener.sendMove(id, dirMap[key]);
-};
+}
+;
 function _map(elm) {
-    socketListener.sendMap(elm.value);
+    var substr = "(Custom) ";
+    if (elm.value.length > substr.length && elm.value.substr(0, substr.length) === substr) {
+        _load(elm.value.substr(substr.length));
+    }
+    else {
+        socketListener.sendMap(elm.value);
+    }
+    view.loading(true);
 }
 function _join() {
     socketListener.sendJoin(Util.getFormData());
+    view.loading(true);
 }
 function _host() {
     socketListener.sendHost(Util.getFormData());
+    view.loading(true);
 }
 function _ready() {
     socketListener.sendReady(client.toggleReady());
+    view.loading(true);
 }
 function _setTeam(elm, i) {
     socketListener.sendTeam(elm.value, i);
+    view.loading(true);
 }
 function _start() {
     socketListener.sendStart();
+    view.loading(true);
 }
 function _resize() {
     if (!view)
@@ -135,13 +160,19 @@ function _resize() {
 }
 function _cMap() {
     var elm = document.getElementById("custommap");
+    if (atob(elm.value).length < 16) {
+        return;
+    }
     socketListener.sendMap(elm.value, true);
+    view.loading(true);
 }
-function _load() {
+function _load(save) {
     var maps = Cookies.getJSON("maps");
     console.log(maps);
-    var saved = Object.keys(maps).reduce(function (pv, cv, ci, arr) { return pv + cv + ","; }, "Choose a map:\n");
-    var save = prompt(saved, "Save1");
+    if (!save) {
+        var saved = Object.keys(maps).reduce(function (pv, cv, ci, arr) { return pv + cv + ","; }, "Choose a map:\n");
+        save = prompt(saved, "Save1");
+    }
     var elm = document.getElementById("custommap");
     if (!maps[save]) {
         alert("Map does not exist");
@@ -149,6 +180,7 @@ function _load() {
     }
     elm.value = maps[save];
     _cMap();
+    view.loading(true);
 }
 function _options() {
     socketListener.sendOptions(Util.getOptions());

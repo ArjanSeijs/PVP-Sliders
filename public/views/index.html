@@ -9,6 +9,8 @@
     <script src="../scripts/_classes.js"></script>
     <script src="../scripts/_client.js"></script>
     <link href="stylesheets/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.10/css/all.css"
+          integrity="sha384-+d0P83n9kaQMCwj8F4RJB66tzIwOKmrdb46+porD/OvrJ+37WqIM7UoBtwHO6Nlg" crossorigin="anonymous">
 </head>
 <body style="margin: 0; padding: 0" onresize="_resize()">
 <div id="wrapper" class="wrapper">
@@ -16,21 +18,17 @@
         <label>Username:<br>
             <input id="username" type="text">
         </label>
-        <br>
         <label>Local MultiPlayer:<br>
             <input id="multiplayer" type="checkbox">
         </label>
-        <br>
         <label>
             Lobby id<br>
             <input id="lobby" type="text">
         </label>
-        <br>
         <label>
             Password:<br>
             <input id="password" type="text">
         </label>
-        <br>
         <label>
             <input class="button" type="button" value="Join lobby" onclick="_join()">
         </label>
@@ -40,12 +38,10 @@
 
     </div>
     <div id="game-lobby" class="lobby" style="display: none">
-        <div id="selected-map">Palooza</div>
-        <div id="lobby-id"></div>
-        <div id="players"></div>
+        <div><i class="fas fa-map"></i> <span id="selected-map">Palooza</span></div>
+
         <div id="maps" style="display: none;">
-            <label for="custommap">Custom map (base64):</label><input id="custommap" type="text">
-            <button onclick="_load()">Load map</button> <button onclick="_cMap()">Change Map</button>
+            <input id="custommap" type="text" style="display: none">
             <label>
                 <select id="mapselect" onchange="_map(this)">
                     <option value="horizontal">Horizontal</option>
@@ -59,30 +55,25 @@
                 </select>
             </label>
         </div>
-        <label for="teamselect">Team:</label>
-        <select id="teamselect" onclick="_setTeam(this,0)" onchange="_setTeam(this,0)">
-            <option value="red" class="red">Red</option>
-            <option value="green" class="green">Green</option>
-            <option value="yellow" class="yellow">Yellow</option>
-            <option value="blue" class="blue">Blue</option>
-            <option value="blue" class="blue">Blue</option>
-            <option value="random">?</option>
-        </select>
-        <span id="team2">
-        <label for="teamselect2">Team:</label>
-        <select id="teamselect2" onclick="_setTeam(this,1)" onchange="_setTeam(this,1)">
-            <option value="red" class="red">Red</option>
-            <option value="green" class="green">Green</option>
-            <option value="yellow" class="yellow">Yellow</option>
-            <option value="blue" class="blue">Blue</option>
-            <option value="random">?</option>
-        </select></span>
-        <button onclick="_ready()">ToggleReady</button>
-        <button onclick="_start()">Start</button>
-        <label for="bots">Enable bots:</label><input id="bots" type="checkbox" onchange="_options()">
+        <span id="botsBox" style="display: none">
+            <label for="bots">Enable bots:</label><input id="bots" type="checkbox" onchange="_options()">
+        </span>
+
+
+        <div id="players"></div>
+
+        <button onclick="_ready()" class="button">Toggle Ready</button>
+        <button onclick="_start()" class="button">Start</button>
+        <br>
+        <div id="lobby-id"></div>
     </div>
+
     <div id="winners" class="winner" style="display: none;">
         <div id="team"></div>
+    </div>
+
+    <div id="loading" style="display: none">
+        <i class="fas fa-spinner fa-7x fa-spin"></i>
     </div>
 </div>
 </body>

@@ -2,7 +2,7 @@ let socketListener: SocketHandler;
 
 class SocketHandler {
 
-    private socket: SocketIOClient.Socket;
+    private readonly socket: SocketIOClient.Socket;
     private session_id: string;
 
     constructor() {
@@ -21,6 +21,7 @@ class SocketHandler {
         view.hideAll();
         client.start(data);
         view.resize();
+        view.loading(false);
     }
 
     onUpdate(entities: any): void {
@@ -30,6 +31,7 @@ class SocketHandler {
     onFailed(data: any, refresh: boolean): void {
         alert(data);
         if (refresh) location.reload();
+        view.loading(false);
     }
 
     onJoined(data: any): void {
@@ -44,10 +46,12 @@ class SocketHandler {
         } else {
             view.showLobby(data.ids.length > 1);
         }
+        view.loading(false);
     }
 
     onMapChange(data: any): void {
         (document.getElementById('selected-map') as HTMLDivElement).innerHTML = 'Map: ' + data;
+        view.loading(false);
     }
 
     onRestart(data: any): void {
@@ -55,16 +59,16 @@ class SocketHandler {
         client.reset();
         view.clearCanvas();
         client.end();
-        console.log('restart!');
+        view.resize();
     }
 
     onPlayers(data: any): void {
         view.showPlayers(data);
+        view.loading(false);
     }
 
     onEnd(data: any): void {
-        view.showWin();
-        document.getElementById('team').innerHTML = data.winners;
+        view.showWin(data.winners);
         view.displayPlayers(data.entities);
         client.end();
     }
@@ -117,10 +121,20 @@ window.onload = function () {
         "assets/player_yellow.png",
         "assets/board_background.png",
         "assets/stop.png");
+    let maps = Cookies.getJSON("maps");
+    let select = document.getElementById("mapselect") as HTMLSelectElement;
+    Object.keys(maps).forEach(((map, index, array) => {
+        select.innerHTML += '<option value="(Custom) ' + map + '">(Custom) ' + map + '</option>'
+    }));
 };
 
 window.onkeypress = function (e) {
+    move(e.key);
+};
+
+function move(key) {
     if (!client || !client.getGame() || !socketListener) return;
+    key = key.toLowerCase();
     const dirMap = {
         "w": "NORTH",
         "a": "WEST",
@@ -131,34 +145,44 @@ window.onkeypress = function (e) {
         "arrowup": "NORTH",
         "arrowdown": "SOUTH",
     };
-    let key = e.key.toLowerCase();
     let id = client.getId(key);
     if (id === null || !dirMap[key]) return;
     socketListener.sendMove(id, dirMap[key]);
 };
 
 function _map(elm: HTMLSelectElement) {
-    socketListener.sendMap(elm.value);
+    const substr = "(Custom) ";
+    if (elm.value.length > substr.length && elm.value.substr(0, substr.length) === substr) {
+        _load(elm.value.substr(substr.length));
+    } else {
+        socketListener.sendMap(elm.value);
+    }
+    view.loading(true);
 }
 
 function _join(): void {
     socketListener.sendJoin(Util.getFormData());
+    view.loading(true);
 }
 
 function _host(): void {
     socketListener.sendHost(Util.getFormData());
+    view.loading(true);
 }
 
 function _ready() {
     socketListener.sendReady(client.toggleReady());
+    view.loading(true);
 }
 
 function _setTeam(elm: HTMLSelectElement, i: number) {
     socketListener.sendTeam(elm.value, i)
+    view.loading(true);
 }
 
 function _start() {
     socketListener.sendStart();
+    view.loading(true);
 }
 
 function _resize() {
@@ -168,14 +192,20 @@ function _resize() {
 
 function _cMap() {
     let elm = document.getElementById("custommap") as HTMLInputElement;
+    if (atob(elm.value).length < 16) {
+        return;
+    }
     socketListener.sendMap(elm.value, true);
+    view.loading(true);
 }
 
-function _load() {
+function _load(save: string) {
     let maps = Cookies.getJSON("maps");
     console.log(maps);
-    let saved = Object.keys(maps).reduce((pv, cv, ci, arr) => pv + cv + ",", "Choose a map:\n");
-    let save = prompt(saved, "Save1");
+    if (!save) {
+        let saved = Object.keys(maps).reduce((pv, cv, ci, arr) => pv + cv + ",", "Choose a map:\n");
+        save = prompt(saved, "Save1");
+    }
     let elm = document.getElementById("custommap") as HTMLInputElement;
     if (!maps[save]) {
         alert("Map does not exist");
@@ -183,6 +213,7 @@ function _load() {
     }
     elm.value = maps[save];
     _cMap();
+    view.loading(true);
 }
 
 function _options() {
