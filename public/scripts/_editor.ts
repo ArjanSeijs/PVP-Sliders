@@ -53,24 +53,31 @@ class MockClient implements ClientInterface {
     toggleReady(): boolean {
         return false;
     }
+
+    reset(): void {
+
+    }
 }
 
 function initialBoard(width?: number, height?: number) {
     if (!width) width = 4;
     if (!height) height = 4;
-    game.board.width = width;
-    game.board.height = height;
-    game.board.tiles = [];
+    let board = {
+        width: width,
+        height: height,
+        tiles: []
+    };
     for (let x = 0; x < width; x++) {
-        game.board.tiles[x] = [];
+        board.tiles[x] = [];
         for (let y = 0; y < height; y++) {
-            game.board.tiles[x].push({
+            board.tiles[x].push({
                 x: x,
                 y: y,
                 tile_type: "none"
             })
         }
     }
+    return board;
 }
 
 function decreaseWidth() {
@@ -81,18 +88,8 @@ function decreaseWidth() {
 
 function increaseWidth() {
     game.board.width += 1;
-    let index = game.board.width - 1;
-    if (game.board.tiles.length < game.board.width) {
-        let newRow = [];
-        for (let y = 0; y < game.board.height; y++) {
-            newRow.push({
-                x: index,
-                y: y,
-                tile_type: "none"
-            })
-        }
-        game.board.tiles[index] = newRow;
-    }
+    //Code goes here
+    addTiles(game.board);
     view.resize();
 }
 
@@ -104,22 +101,32 @@ function decreaseHeight() {
 
 function increaseHeight() {
     game.board.height += 1;
-    let index = game.board.height - 1;
-    if (game.board.tiles[0].length < game.board.height) {
-        for (let x = 0; x < game.board.width; x++) {
-            game.board.tiles[x].push({
-                x: x,
-                y: index,
-                tile_type: "none"
-            })
+    //Code goes here.
+    addTiles(game.board);
+    view.resize();
+}
+
+function addTiles(board: { width: number; height: number; tiles: { x: number; y: number; tile_type: string }[][] }) {
+    let width = board.width;
+    let height = board.height;
+    for (let x = 0; x < width; x++) {
+        if (!board.tiles[x])
+            board.tiles[x] = [];
+        for (let y = 0; y < height; y++) {
+            if (!board.tiles[x][y]) {
+                board.tiles[x][y] = {
+                    x: x,
+                    y: y,
+                    tile_type: "none"
+                }
+            }
         }
     }
-    view.resize();
 }
 
 window.onload = function () {
     client = new MockClient();
-    initialBoard();
+    game.board = initialBoard();
     view = new View(() => view.resize(),
         "assets/block.png",
         "assets/background.png",
@@ -129,9 +136,8 @@ window.onload = function () {
         "assets/player_yellow.png",
         "assets/board_background.png",
         "assets/stop.png");
-    view.getCanvas().stage.on('click', function (e) {
-        console.log(e);
-    });
+
+
 };
 
 function toggleType(tile: { x: number; y: number; tile_type: string }) {
@@ -151,18 +157,26 @@ window.onkeypress = function (e) {
         case 'l':
             load();
             break;
-        case 'd':
+        case ']':
             increaseWidth();
             break;
-        case 'a':
+        case '[':
             decreaseWidth();
             break;
-        case 'w':
+        case '{':
             decreaseHeight();
             break;
-        case 'x':
+        case '}':
             increaseHeight();
-            break
+            break;
+        case 'c':
+            listSaves();
+            break;
+        case 'd':
+            removeSave();
+            break;
+        default:
+            console.log("Unknown key: " + key);
     }
 };
 
@@ -195,7 +209,7 @@ function decodeMap(map: string) {
     let strings = map.split(/\r?\n/);
     const width = strings[0].length;
     const height = strings.length - 1;
-    initialBoard(width, height);
+    game.board = initialBoard(width, height);
     for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
             const c = strings[y].charAt(x);
@@ -214,16 +228,43 @@ function save() {
     let name = prompt("Save as", "save1");
     let maps = Cookies.getJSON("maps");
     maps = maps ? maps : {};
+    if (maps[name]) {
+        let overwrite = prompt("Overwrite old save? (y/n)", "n");
+        if (overwrite.length === 0 || overwrite.charAt(0) !== 'y') return;
+    }
     maps[name] = encodeMap();
+    alert("Map saved!");
     Cookies.set("maps", maps)
 }
 
 function load() {
     let name = prompt("Load as", "save1");
     let map = Cookies.getJSON("maps")[name];
-    if (!map) return;
+    if (!map) {
+        alert("Map does not exist");
+        return;
+    }
     decodeMap(atob(map));
+    alert("Map loaded!");
     view.resize();
+}
+
+function listSaves() {
+    let maps = Cookies.getJSON("maps");
+    console.log(maps);
+    let saved = Object.keys(maps).reduce((pv, cv, ci, arr) => pv + cv + ",", "Maps:\n");
+    alert(saved);
+}
+
+function removeSave() {
+    let maps = Cookies.getJSON("maps");
+    let name = prompt("Remove map:", "save1");
+    if (maps[name]) {
+        delete maps[name];
+        Cookies.set("maps", maps);
+        return;
+    }
+    alert("Map removed");
 }
 
 window.onclick = function (e) {

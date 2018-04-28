@@ -36,6 +36,8 @@ var MockClient = /** @class */ (function () {
     MockClient.prototype.toggleReady = function () {
         return false;
     };
+    MockClient.prototype.reset = function () {
+    };
     return MockClient;
 }());
 function initialBoard(width, height) {
@@ -43,19 +45,22 @@ function initialBoard(width, height) {
         width = 4;
     if (!height)
         height = 4;
-    game.board.width = width;
-    game.board.height = height;
-    game.board.tiles = [];
+    var board = {
+        width: width,
+        height: height,
+        tiles: []
+    };
     for (var x = 0; x < width; x++) {
-        game.board.tiles[x] = [];
+        board.tiles[x] = [];
         for (var y = 0; y < height; y++) {
-            game.board.tiles[x].push({
+            board.tiles[x].push({
                 x: x,
                 y: y,
                 tile_type: "none"
             });
         }
     }
+    return board;
 }
 function decreaseWidth() {
     if (game.board.width <= 4)
@@ -65,18 +70,8 @@ function decreaseWidth() {
 }
 function increaseWidth() {
     game.board.width += 1;
-    var index = game.board.width - 1;
-    if (game.board.tiles.length < game.board.width) {
-        var newRow = [];
-        for (var y = 0; y < game.board.height; y++) {
-            newRow.push({
-                x: index,
-                y: y,
-                tile_type: "none"
-            });
-        }
-        game.board.tiles[index] = newRow;
-    }
+    //Code goes here
+    addTiles(game.board);
     view.resize();
 }
 function decreaseHeight() {
@@ -87,25 +82,31 @@ function decreaseHeight() {
 }
 function increaseHeight() {
     game.board.height += 1;
-    var index = game.board.height - 1;
-    if (game.board.tiles[0].length < game.board.height) {
-        for (var x = 0; x < game.board.width; x++) {
-            game.board.tiles[x].push({
-                x: x,
-                y: index,
-                tile_type: "none"
-            });
+    //Code goes here.
+    addTiles(game.board);
+    view.resize();
+}
+function addTiles(board) {
+    var width = board.width;
+    var height = board.height;
+    for (var x = 0; x < width; x++) {
+        if (!board.tiles[x])
+            board.tiles[x] = [];
+        for (var y = 0; y < height; y++) {
+            if (!board.tiles[x][y]) {
+                board.tiles[x][y] = {
+                    x: x,
+                    y: y,
+                    tile_type: "none"
+                };
+            }
         }
     }
-    view.resize();
 }
 window.onload = function () {
     client = new MockClient();
-    initialBoard();
+    game.board = initialBoard();
     view = new View(function () { return view.resize(); }, "assets/block.png", "assets/background.png", "assets/player_blue.png", "assets/player_green.png", "assets/player_red.png", "assets/player_yellow.png", "assets/board_background.png", "assets/stop.png");
-    view.getCanvas().stage.on('click', function (e) {
-        console.log(e);
-    });
 };
 function toggleType(tile) {
     var types = ["none", "wall", "stop", "player"];
@@ -124,18 +125,26 @@ window.onkeypress = function (e) {
         case 'l':
             load();
             break;
-        case 'd':
+        case ']':
             increaseWidth();
             break;
-        case 'a':
+        case '[':
             decreaseWidth();
             break;
-        case 'w':
+        case '{':
             decreaseHeight();
             break;
-        case 'x':
+        case '}':
             increaseHeight();
             break;
+        case 'c':
+            listSaves();
+            break;
+        case 'd':
+            removeSave();
+            break;
+        default:
+            console.log("Unknown key: " + key);
     }
 };
 function encodeMap() {
@@ -170,7 +179,7 @@ function decodeMap(map) {
     var strings = map.split(/\r?\n/);
     var width = strings[0].length;
     var height = strings.length - 1;
-    initialBoard(width, height);
+    game.board = initialBoard(width, height);
     for (var y = 0; y < height; y++) {
         for (var x = 0; x < width; x++) {
             var c = strings[y].charAt(x);
@@ -190,16 +199,41 @@ function save() {
     var name = prompt("Save as", "save1");
     var maps = Cookies.getJSON("maps");
     maps = maps ? maps : {};
+    if (maps[name]) {
+        var overwrite = prompt("Overwrite old save? (y/n)", "n");
+        if (overwrite.length === 0 || overwrite.charAt(0) !== 'y')
+            return;
+    }
     maps[name] = encodeMap();
+    alert("Map saved!");
     Cookies.set("maps", maps);
 }
 function load() {
     var name = prompt("Load as", "save1");
     var map = Cookies.getJSON("maps")[name];
-    if (!map)
+    if (!map) {
+        alert("Map does not exist");
         return;
+    }
     decodeMap(atob(map));
+    alert("Map loaded!");
     view.resize();
+}
+function listSaves() {
+    var maps = Cookies.getJSON("maps");
+    console.log(maps);
+    var saved = Object.keys(maps).reduce(function (pv, cv, ci, arr) { return pv + cv + ","; }, "Maps:\n");
+    alert(saved);
+}
+function removeSave() {
+    var maps = Cookies.getJSON("maps");
+    var name = prompt("Remove map:", "save1");
+    if (maps[name]) {
+        delete maps[name];
+        Cookies.set("maps", maps);
+        return;
+    }
+    alert("Map removed");
 }
 window.onclick = function (e) {
     var x = e.clientX;

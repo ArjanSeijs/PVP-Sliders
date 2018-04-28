@@ -322,7 +322,7 @@ class View {
     }
 }
 
-class Client implements ClientInterface{
+class Client implements ClientInterface {
     private game: any;
     private id_p1: { id: number, ready: boolean };
     private id_p2: { id: number, ready: boolean };
