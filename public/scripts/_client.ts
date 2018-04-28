@@ -68,8 +68,7 @@ class SocketHandler {
     }
 
     onEnd(data: any): void {
-        view.showWin();
-        document.getElementById('team').innerHTML = data.winners;
+        view.showWin(data.winners);
         view.displayPlayers(data.entities);
         client.end();
     }

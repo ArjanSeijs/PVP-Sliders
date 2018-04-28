@@ -56,8 +56,7 @@ var SocketHandler = /** @class */ (function () {
         view.loading(false);
     };
     SocketHandler.prototype.onEnd = function (data) {
-        view.showWin();
-        document.getElementById('team').innerHTML = data.winners;
+        view.showWin(data.winners);
         view.displayPlayers(data.entities);
         client.end();
     };

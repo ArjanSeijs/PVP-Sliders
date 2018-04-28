@@ -230,10 +230,20 @@ var View = /** @class */ (function () {
         document.getElementById('wrapper').style.display = '';
         this.resize();
     };
-    View.prototype.showWin = function () {
+    View.prototype.showWin = function (winners) {
         this.hideAll();
         document.getElementById('winners').style.display = '';
         document.getElementById('wrapper').style.display = '';
+        if (winners[0]) {
+            document.getElementById('winners').innerHTML = "Team <span class=\"" + winners[0].team + "\">" + winners[0].team + "</span> has won!<br> Winners:<br>";
+            for (var _i = 0, winners_1 = winners; _i < winners_1.length; _i++) {
+                var winner = winners_1[_i];
+                document.getElementById('winners').innerHTML += winner.name + "\n";
+            }
+        }
+        else {
+            document.getElementById('winners').innerHTML = "Draw";
+        }
     };
     View.prototype.getSelect = function (team, player) {
         return " <select class=\"select-style\" id=\"teamselect\" onchange=\"_setTeam(this," + player + ")\">" +

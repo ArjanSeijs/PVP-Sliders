@@ -289,10 +289,18 @@ class View {
         this.resize();
     }
 
-    showWin() {
+    showWin(winners: any[]) {
         this.hideAll();
         document.getElementById('winners').style.display = '';
         document.getElementById('wrapper').style.display = '';
+        if (winners[0]) {
+            document.getElementById('winners').innerHTML = `Team <span class="${winners[0].team}">${winners[0].team}</span> has won!<br> Winners:<br>`;
+            for (let winner of winners) {
+                document.getElementById('winners').innerHTML += winner.name + "\n";
+            }
+        } else {
+            document.getElementById('winners').innerHTML = "Draw";
+        }
     }
 
     private getSelect(team: string, player: number): string {
