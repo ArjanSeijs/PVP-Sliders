@@ -122,6 +122,11 @@ window.onload = function () {
         "assets/player_yellow.png",
         "assets/board_background.png",
         "assets/stop.png");
+    let maps = Cookies.getJSON("maps");
+    let select = document.getElementById("mapselect") as HTMLSelectElement;
+    Object.keys(maps).forEach(((map, index, array) => {
+        select.innerHTML += '<option value="(Custom) ' + map + '">(Custom) ' + map + '</option>'
+    }));
 };
 
 window.onkeypress = function (e) {
@@ -143,7 +148,12 @@ window.onkeypress = function (e) {
 };
 
 function _map(elm: HTMLSelectElement) {
-    socketListener.sendMap(elm.value);
+    const substr = "(Custom) ";
+    if (elm.value.length > substr.length && elm.value.substr(0, substr.length) === substr) {
+        _load(elm.value.substr(substr.length));
+    } else {
+        socketListener.sendMap(elm.value);
+    }
     view.loading(true);
 }
 
@@ -179,15 +189,20 @@ function _resize() {
 
 function _cMap() {
     let elm = document.getElementById("custommap") as HTMLInputElement;
+    if(atob(elm.value).length < 16) {
+        return;
+    }
     socketListener.sendMap(elm.value, true);
     view.loading(true);
 }
 
-function _load() {
+function _load(save: string) {
     let maps = Cookies.getJSON("maps");
     console.log(maps);
-    let saved = Object.keys(maps).reduce((pv, cv, ci, arr) => pv + cv + ",", "Choose a map:\n");
-    let save = prompt(saved, "Save1");
+    if (!save) {
+        let saved = Object.keys(maps).reduce((pv, cv, ci, arr) => pv + cv + ",", "Choose a map:\n");
+        save = prompt(saved, "Save1");
+    }
     let elm = document.getElementById("custommap") as HTMLInputElement;
     if (!maps[save]) {
         alert("Map does not exist");

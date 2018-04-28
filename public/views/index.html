@@ -41,10 +41,8 @@
         <div><i class="fas fa-map"></i> <span id="selected-map">Palooza</span></div>
 
         <div id="maps" style="display: none;">
-            <label for="custommap">Custom map (base64):</label><input id="custommap" type="text">
+            <label for="custommap">Custom map:</label><input id="custommap" type="text" onclick="_cMap()" placeholder="Encoded string">
             <br>
-            <button onclick="_load()">Load map</button>
-            <button onclick="_cMap()">Change Map</button>
             <label>
                 <select id="mapselect" onchange="_map(this)">
                     <option value="horizontal">Horizontal</option>
@@ -82,8 +80,9 @@
 
         <div id="players"></div>
 
-        <button onclick="_ready()">ToggleReady</button>
-        <button onclick="_start()">Start</button>
+        <button onclick="_ready()" class="button">ToggleReady</button>
+        <button onclick="_start()" class="button">Start</button>
+        <br>
         <div id="lobby-id"></div>
     </div>
 
