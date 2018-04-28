@@ -362,6 +362,7 @@ class View {
         }
         string += "</ol>";
         document.getElementById("players").innerHTML = string;
+        document.getElementById("player-amount").innerHTML = data.length;
     }
 
     clearCanvas() {
@@ -384,6 +385,11 @@ class View {
     loading(load: boolean) {
         let elm = document.getElementById("loading") as HTMLDivElement;
         elm.style.display = load ? "" : "none";
+    }
+
+    boardData(data: any) {
+        (document.getElementById('selected-map') as HTMLDivElement).innerHTML = 'Map: ' + data.boardName;
+        (document.getElementById('player-total') as HTMLSpanElement).innerHTML = data.board.players;
     }
 }
 

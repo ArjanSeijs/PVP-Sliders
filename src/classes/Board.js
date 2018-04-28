@@ -21,6 +21,7 @@ var Board = (function () {
     };
     Board.prototype.toJson = function () {
         return {
+            players: this.metadata.playerAmount,
             width: this.width,
             height: this.height,
             tiles: this.tiles.map(function (x) { return x.map(function (y) { return y.toJson(); }); })

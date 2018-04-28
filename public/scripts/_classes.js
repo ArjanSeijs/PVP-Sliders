@@ -298,6 +298,7 @@ var View = /** @class */ (function () {
         }
         string += "</ol>";
         document.getElementById("players").innerHTML = string;
+        document.getElementById("player-amount").innerHTML = data.length;
     };
     View.prototype.clearCanvas = function () {
         while (this.canvas.stage.children.length > 0)
@@ -317,6 +318,10 @@ var View = /** @class */ (function () {
     View.prototype.loading = function (load) {
         var elm = document.getElementById("loading");
         elm.style.display = load ? "" : "none";
+    };
+    View.prototype.boardData = function (data) {
+        document.getElementById('selected-map').innerHTML = 'Map: ' + data.boardName;
+        document.getElementById('player-total').innerHTML = data.board.players;
     };
     return View;
 }());

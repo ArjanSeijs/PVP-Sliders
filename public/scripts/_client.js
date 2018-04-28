@@ -43,7 +43,7 @@ var SocketHandler = /** @class */ (function () {
     };
     SocketHandler.prototype.onMapChange = function (data) {
         console.log(data);
-        document.getElementById('selected-map').innerHTML = 'Map: ' + data.boardName;
+        view.boardData(data);
         view.loading(false);
         view.resize(data.board);
     };
@@ -72,8 +72,8 @@ var SocketHandler = /** @class */ (function () {
     SocketHandler.prototype.sendHost = function (data) {
         this.socket.emit('host', data);
     };
-    SocketHandler.prototype.sendMap = function (board, custom) {
-        this.socket.emit('map', { board: board, custom: !!custom, session_id: this.session_id });
+    SocketHandler.prototype.sendMap = function (board, custom, mapName) {
+        this.socket.emit('map', { board: board, custom: !!custom, mapName: mapName, session_id: this.session_id });
     };
     SocketHandler.prototype.sendStart = function () {
         this.socket.emit('start', { session_id: this.session_id });
@@ -175,10 +175,11 @@ function _resize() {
 }
 function _cMap() {
     var elm = document.getElementById("custommap");
+    var elmmap = document.getElementById("mapselect");
     if (atob(elm.value).length < 16) {
         return;
     }
-    socketListener.sendMap(elm.value, true);
+    socketListener.sendMap(elm.value, true, elmmap.value);
     view.loading(true);
 }
 function _load(save) {

@@ -52,7 +52,7 @@ class SocketHandler {
 
     onMapChange(data: any): void {
         console.log(data);
-        (document.getElementById('selected-map') as HTMLDivElement).innerHTML = 'Map: ' + data.boardName;
+        view.boardData(data);
         view.loading(false);
         view.resize(data.board);
     }
@@ -88,8 +88,8 @@ class SocketHandler {
         this.socket.emit('host', data);
     }
 
-    sendMap(board: string | string[], custom?: boolean): void {
-        this.socket.emit('map', {board: board, custom: !!custom, session_id: this.session_id});
+    sendMap(board: string | string[], custom?: boolean, mapName?: string): void {
+        this.socket.emit('map', {board: board, custom: !!custom, mapName: mapName, session_id: this.session_id});
     }
 
     sendStart(): void {
@@ -212,10 +212,11 @@ function _resize() {
 
 function _cMap() {
     let elm = document.getElementById("custommap") as HTMLInputElement;
+    let elmmap = document.getElementById("mapselect") as HTMLSelectElement;
     if (atob(elm.value).length < 16) {
         return;
     }
-    socketListener.sendMap(elm.value, true);
+    socketListener.sendMap(elm.value, true, elmmap.value);
     view.loading(true);
 }
 

@@ -55,8 +55,9 @@ class Board implements ToJson {
      *
      * @return {{width: number, height: number, tiles: {x: number, y: number, wall: boolean}[][]}}
      */
-    toJson(): { width: number; height: number; tiles: { x: number; y: number; tile_type: string }[][] } {
+    toJson(): { players: number, width: number; height: number; tiles: { x: number; y: number; tile_type: string }[][] } {
         return {
+            players: this.metadata.playerAmount,
             width: this.width,
             height: this.height,
             tiles: this.tiles.map(x => x.map(y => y.toJson()))
