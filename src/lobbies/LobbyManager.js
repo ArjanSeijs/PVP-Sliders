@@ -38,7 +38,7 @@ var LobbyManager = (function () {
             if (lobbyId === "")
                 lobbyId = LobbyManager.randomLobby(data);
             if (lobbyId === null) {
-                client.emit('failed', 'All lobbies were full');
+                LobbyManager.clientHost(client, data);
                 return;
             }
             LobbyManager.lobbies[lobbyId].join(client, data);
@@ -55,7 +55,6 @@ var LobbyManager = (function () {
         var lobby = LobbyManager.getLobby(lobby_id);
         if (data.password)
             lobby.setPassword(data.password);
-        lobby.setLevel("Palooza" + EXTENSION);
         var session_id = lobby.join(client, data, true);
         lobby.setHost(session_id);
     };
@@ -234,6 +233,7 @@ var Lobby = (function () {
         this.options = {
             bots: false
         };
+        this.setLevel("Palooza" + EXTENSION);
     }
     Lobby.prototype.join = function (client, data, isHost) {
         if (!data) {

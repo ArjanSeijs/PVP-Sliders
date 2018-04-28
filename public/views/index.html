@@ -38,11 +38,11 @@
 
     </div>
     <div id="game-lobby" class="lobby" style="display: none">
-        <div id="selected-map">Palooza</div>
-        <div id="lobby-id"></div>
-        <div id="players"></div>
+        <div><i class="fas fa-map"></i> <span id="selected-map">Palooza</span></div>
+
         <div id="maps" style="display: none;">
             <label for="custommap">Custom map (base64):</label><input id="custommap" type="text">
+            <br>
             <button onclick="_load()">Load map</button>
             <button onclick="_cMap()">Change Map</button>
             <label>
@@ -58,12 +58,12 @@
                 </select>
             </label>
         </div>
+
         <label for="teamselect">Team:</label>
         <select id="teamselect" onclick="_setTeam(this,0)" onchange="_setTeam(this,0)">
             <option value="red" class="red">Red</option>
             <option value="green" class="green">Green</option>
             <option value="yellow" class="yellow">Yellow</option>
-            <option value="blue" class="blue">Blue</option>
             <option value="blue" class="blue">Blue</option>
             <option value="random">?</option>
         </select>
@@ -76,13 +76,21 @@
             <option value="blue" class="blue">Blue</option>
             <option value="random">?</option>
         </select></span>
+        <br>
+        <label for="bots">Enable bots:</label><input id="bots" type="checkbox" onchange="_options()">
+
+
+        <div id="players"></div>
+
         <button onclick="_ready()">ToggleReady</button>
         <button onclick="_start()">Start</button>
-        <label for="bots">Enable bots:</label><input id="bots" type="checkbox" onchange="_options()">
+        <div id="lobby-id"></div>
     </div>
+
     <div id="winners" class="winner" style="display: none;">
         <div id="team"></div>
     </div>
+
     <div id="loading" style="display: none">
         <i class="fas fa-spinner fa-7x fa-spin"></i>
     </div>

@@ -238,11 +238,28 @@ var View = /** @class */ (function () {
         document.getElementById('winners').style.display = '';
         document.getElementById('wrapper').style.display = '';
     };
+    View.prototype.playerEntry = function (name, team, ready) {
+        var isready = "<i class=\"fas fa-check-square\"></i>";
+        var notready = "<i class=\"fas fa-times-circle\"></i>";
+        var string = "<li class='playerItem'>";
+        string += "<div class=\"listName\">" + name + "</div>";
+        string += "<div class=\"listTeam " + team + "bg\">" + team + "</div>";
+        if (ready !== null)
+            string += "<div class=\"listReady\">" + (ready ? isready : notready) + "&nbsp;&nbsp;</div>";
+        else
+            string += "<div class=\"listReady\">Ready</div>";
+        string += "</li>";
+        return string;
+    };
     View.prototype.showPlayers = function (data) {
-        var string = "<ol>";
+        var string = "<ol class='playerList'>";
+        var isTrue = function (string) {
+            return string === "true" || string === true;
+        };
+        string += this.playerEntry("Player", "Team", null);
         client.setReady(data);
         for (var i = 0; i < data.length; i++) {
-            string += "<li>" + data[i].name + ":" + data[i].ready + ":" + data[i].team + "</li>";
+            string += this.playerEntry(data[i].name, data[i].team, isTrue(data[i].ready));
         }
         string += "</ol>";
         document.getElementById("players").innerHTML = string;

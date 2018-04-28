@@ -294,11 +294,31 @@ class View {
         document.getElementById('wrapper').style.display = '';
     }
 
+    private playerEntry(name: string, team: string, ready: boolean) {
+        const isready = "<i class=\"fas fa-check-square\"></i>";
+        const notready = "<i class=\"fas fa-times-circle\"></i>";
+
+        let string = "<li class='playerItem'>";
+        string += "<div class=\"listName\">" + name + "</div>";
+        string += "<div class=\"listTeam " + team + "bg\">" + team + "</div>";
+        if (ready !== null) string += "<div class=\"listReady\">" + (ready ? isready : notready) + "&nbsp;&nbsp;</div>";
+        else string += "<div class=\"listReady\">Ready</div>";
+        string += "</li>";
+        return string;
+    }
+
     showPlayers(data: any) {
-        let string = "<ol>";
+        let string = "<ol class='playerList'>";
+
+        let isTrue = function (string) {
+            return string === "true" || string === true
+        };
+
+        string += this.playerEntry("Player", "Team", null);
+
         client.setReady(data);
         for (let i = 0; i < data.length; i++) {
-            string += "<li>" + data[i].name + ":" + data[i].ready + ":" + data[i].team + "</li>";
+            string += this.playerEntry(data[i].name, data[i].team, isTrue(data[i].ready));
         }
         string += "</ol>";
         document.getElementById("players").innerHTML = string;

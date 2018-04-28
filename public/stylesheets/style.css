@@ -1,15 +1,15 @@
 .wrapper {
     width: 100%;
     height: 100%;
-    background: rgba(128, 128, 128, 0.3);
+    /*background: rgba(128, 128, 128, 0.3);*/
     position: absolute;
     z-index: 1;
     text-align: center;
 }
 
 .login {
-    background-color: antiquewhite;
-    border: 10px solid #ffe78e;
+    background-color: #fff6;
+    border: 10px solid #000;
     border-radius: 15px;
     padding: 10px;
     width: fit-content;
@@ -46,7 +46,8 @@
 }
 
 .button {
-    background-color: #aaaaaa;
+    background-color: #999a9a;
+    border-radius: 15px;
     color: black;
     border: none;
     margin: 2px 2px;
@@ -62,12 +63,46 @@
     color: black;
 }
 
+.lobby {
+    margin: 100px auto 100px auto;
+    min-width: fit-content;
+    min-height: fit-content;
+    width: 40%;
+    height: 40%;
+    background-color: #fff6;
+    border: 10px solid #000;
+}
+
+.playerList {
+    list-style: none;
+    padding-left: 4px;
+}
+
+.playerItem > div {
+    border: 1px solid black;
+    display: inline-block;
+    background-color: #e7e7e7;
+}
+
+.listName {
+    width: 200px;
+}
+
+.listTeam {
+    width: 50px;
+}
+
+.listReady {
+    width: 75px;
+}
+
+/* Team colours */
 .green {
-    color: lawngreen;
+    color: #7cfc00;
 }
 
 .red {
-    color: red;
+    color: #ff0000;
 }
 
 .yellow {
@@ -78,6 +113,23 @@
     color: #00B7FF;
 }
 
+.playerItem > .greenbg {
+    background-color: #7cfc00;
+}
+
+.playerItem > .redbg {
+    background-color: #ff0000;
+}
+
+.playerItem > .yellowbg {
+    background-color: #d5d500;
+}
+
+.playerItem > .bluebg {
+    background-color: #00B7FF;
+}
+
+/* Editor */
 .helper {
     position: absolute;
     width: auto;
@@ -105,3 +157,4 @@
     color: rgba(170, 170, 170, 0);
     background-color: rgba(170, 170, 170, 0);
 }
+
