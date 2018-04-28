@@ -82,6 +82,7 @@ class BoardParser {
             throw new Error(valid.message + "\n" + JSON.stringify(strings));
         }
 
+        strings = strings.filter(v => v !== "");
         const width = strings[0].length;
         const height = strings.length;
         const board = new Board(width, height);

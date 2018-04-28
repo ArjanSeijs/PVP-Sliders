@@ -91,6 +91,7 @@ function decreaseWidth() {
 }
 
 function increaseWidth() {
+    if (game.board.width >= 100) return;
     game.board.width += 1;
     //Code goes here
     addTiles(game.board);
@@ -104,6 +105,7 @@ function decreaseHeight() {
 }
 
 function increaseHeight() {
+    if (game.board.height >= 100) return;
     game.board.height += 1;
     //Code goes here.
     addTiles(game.board);

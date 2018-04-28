@@ -444,7 +444,8 @@ var Lobby = (function () {
             client.emit('failed', info.message);
         }
         else {
-            LobbyManager.socket.in(this.id).emit('map', !!data.custom ? "custom map" : data.board);
+            var boardName = !!data.custom ? "custom map" : data.board;
+            LobbyManager.socket.in(this.id).emit('map', { boardName: boardName, board: this.board.toJson() });
         }
     };
     Lobby.prototype.setLevel = function (board, players) {

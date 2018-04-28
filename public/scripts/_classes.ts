@@ -78,6 +78,7 @@ interface ClientInterface {
     reset(): void;
 
     isLocal(id: number): boolean
+
 }
 
 class View {
@@ -123,14 +124,15 @@ class View {
         if (onload) onload();
     }
 
-    resize() {
-        if (!client.getGame()) {
+    resize(board?: any) {
+        if (!client.getGame() && !board) {
             this.load();
             return;
         }
+        if (!board) board = client.getGame().board;
 
-        let width = client.getGame().board.width;
-        let height = client.getGame().board.height;
+        let width = board.width;
+        let height = board.height;
 
         this.screen_width = window.innerWidth;
         this.screen_height = window.innerHeight;
@@ -138,8 +140,8 @@ class View {
         this.paddingX = 44 / 1080 * Math.min(this.screen_width, this.screen_height);
         this.paddingY = 44 / 1080 * Math.min(this.screen_width, this.screen_height);
         this.size = Math.min(
-            (this.screen_width - 2 * this.paddingX) / client.getGame().board.width,
-            (this.screen_height - 2 * this.paddingY) / client.getGame().board.height
+            (this.screen_width - 2 * this.paddingX) / board.width,
+            (this.screen_height - 2 * this.paddingY) / board.height
         );
         this.offsetX = ((this.screen_width - 2 * this.paddingX) - width * this.size) / 2 + this.paddingX;
         this.offsetY = ((this.screen_height - 2 * this.paddingY) - height * this.size) / 2 + this.paddingY;
@@ -149,9 +151,11 @@ class View {
         this.canvas.renderer.resize(this.screen_width, this.screen_height);
 
         this.load();
-        this.displayGame();
-        this.makeSprites();
-        this.displayPlayers(client.getGame().entities);
+        this.displayGame(board);
+        if (client.getGame()) {
+            this.makeSprites();
+            this.displayPlayers(client.getGame().entities)
+        }
     }
 
     displayPlayers(entities: any) {
@@ -178,9 +182,12 @@ class View {
         }
     }
 
-    displayGame() {
-        let width = client.getGame().board.width;
-        let height = client.getGame().board.height;
+    displayGame(board?: any) {
+        if (!board) board = client.getGame().board;
+
+        console.log("!!!!");
+        let width = board.width;
+        let height = board.height;
         let image = Util.loadImage("board_background.png");
 
         image.x = this.offsetX - this.paddingX;
@@ -196,13 +203,13 @@ class View {
             for (let y = 0; y < height; y++) {
                 graphics.drawRect(this.offsetX + x * this.size, this.offsetY + y * this.size, this.size, this.size);
                 let block = null;
-                if (client.getGame().board.tiles[x][y].tile_type === "wall") {
+                if (board.tiles[x][y].tile_type === "wall") {
                     block = Util.loadImage("block.png");
                 }
-                if (client.getGame().board.tiles[x][y].tile_type === "stop") {
+                if (board.tiles[x][y].tile_type === "stop") {
                     block = Util.loadImage("stop.png");
                 }
-                if (client.getGame().board.tiles[x][y].tile_type === "player") {
+                if (board.tiles[x][y].tile_type === "player") {
                     block = Util.loadImage("player_red.png");
                 }
                 if (block != null) {
@@ -372,6 +379,7 @@ class View {
 
 class Client implements ClientInterface {
     private game: any;
+    private board: any;
     private id_p1: { id: number, ready: boolean };
     private id_p2: { id: number, ready: boolean };
     private timer: any;
@@ -399,10 +407,10 @@ class Client implements ClientInterface {
         }
     }
 
-    canMove(entity: any, speed: number) {
+    canMove(entity: any, speed: number): boolean {
         const cellSize = 100;
         let dir = entity.direction;
-
+        if (this.isStop(entity, speed)) return false;
         //TODO Depends ons TPS
         let newX = entity.pos.x + dir.x * speed;
         let newY = entity.pos.y + dir.y * speed;
@@ -433,7 +441,7 @@ class Client implements ClientInterface {
 
     private isStop(entity: any, speed: number): boolean {
         const cellSize = 100;
-        let dir = entity.direction.curr;
+        let dir = entity.direction;
 
         //TODO Depends ons TPS
         let newX = entity.pos.x + dir.x * speed;

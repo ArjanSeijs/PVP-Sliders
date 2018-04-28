@@ -85,28 +85,32 @@ var View = /** @class */ (function () {
         if (onload)
             onload();
     };
-    View.prototype.resize = function () {
-        if (!client.getGame()) {
+    View.prototype.resize = function (board) {
+        if (!client.getGame() && !board) {
             this.load();
             return;
         }
-        var width = client.getGame().board.width;
-        var height = client.getGame().board.height;
+        if (!board)
+            board = client.getGame().board;
+        var width = board.width;
+        var height = board.height;
         this.screen_width = window.innerWidth;
         this.screen_height = window.innerHeight;
         //44 of 1080 pixel is width of border.
         this.paddingX = 44 / 1080 * Math.min(this.screen_width, this.screen_height);
         this.paddingY = 44 / 1080 * Math.min(this.screen_width, this.screen_height);
-        this.size = Math.min((this.screen_width - 2 * this.paddingX) / client.getGame().board.width, (this.screen_height - 2 * this.paddingY) / client.getGame().board.height);
+        this.size = Math.min((this.screen_width - 2 * this.paddingX) / board.width, (this.screen_height - 2 * this.paddingY) / board.height);
         this.offsetX = ((this.screen_width - 2 * this.paddingX) - width * this.size) / 2 + this.paddingX;
         this.offsetY = ((this.screen_height - 2 * this.paddingY) - height * this.size) / 2 + this.paddingY;
         while (this.canvas.stage.children.length > 0)
             this.canvas.stage.removeChildAt(this.canvas.stage.children.length - 1);
         this.canvas.renderer.resize(this.screen_width, this.screen_height);
         this.load();
-        this.displayGame();
-        this.makeSprites();
-        this.displayPlayers(client.getGame().entities);
+        this.displayGame(board);
+        if (client.getGame()) {
+            this.makeSprites();
+            this.displayPlayers(client.getGame().entities);
+        }
     };
     View.prototype.displayPlayers = function (entities) {
         for (var key in client.getGame().entities) {
@@ -131,9 +135,12 @@ var View = /** @class */ (function () {
             }
         }
     };
-    View.prototype.displayGame = function () {
-        var width = client.getGame().board.width;
-        var height = client.getGame().board.height;
+    View.prototype.displayGame = function (board) {
+        if (!board)
+            board = client.getGame().board;
+        console.log("!!!!");
+        var width = board.width;
+        var height = board.height;
         var image = Util.loadImage("board_background.png");
         image.x = this.offsetX - this.paddingX;
         image.y = this.offsetY - this.paddingY;
@@ -146,13 +153,13 @@ var View = /** @class */ (function () {
             for (var y = 0; y < height; y++) {
                 graphics.drawRect(this.offsetX + x * this.size, this.offsetY + y * this.size, this.size, this.size);
                 var block = null;
-                if (client.getGame().board.tiles[x][y].tile_type === "wall") {
+                if (board.tiles[x][y].tile_type === "wall") {
                     block = Util.loadImage("block.png");
                 }
-                if (client.getGame().board.tiles[x][y].tile_type === "stop") {
+                if (board.tiles[x][y].tile_type === "stop") {
                     block = Util.loadImage("stop.png");
                 }
-                if (client.getGame().board.tiles[x][y].tile_type === "player") {
+                if (board.tiles[x][y].tile_type === "player") {
                     block = Util.loadImage("player_red.png");
                 }
                 if (block != null) {
@@ -328,6 +335,8 @@ var Client = /** @class */ (function () {
     Client.prototype.canMove = function (entity, speed) {
         var cellSize = 100;
         var dir = entity.direction;
+        if (this.isStop(entity, speed))
+            return false;
         //TODO Depends ons TPS
         var newX = entity.pos.x + dir.x * speed;
         var newY = entity.pos.y + dir.y * speed;
@@ -357,7 +366,7 @@ var Client = /** @class */ (function () {
     };
     Client.prototype.isStop = function (entity, speed) {
         var cellSize = 100;
-        var dir = entity.direction.curr;
+        var dir = entity.direction;
         //TODO Depends ons TPS
         var newX = entity.pos.x + dir.x * speed;
         var newY = entity.pos.y + dir.y * speed;

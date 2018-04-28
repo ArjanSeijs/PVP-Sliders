@@ -49,6 +49,7 @@ var BoardParser = (function () {
         if (!valid.valid) {
             throw new Error(valid.message + "\n" + JSON.stringify(strings));
         }
+        strings = strings.filter(function (v) { return v !== ""; });
         var width = strings[0].length;
         var height = strings.length;
         var board = new Board(width, height);

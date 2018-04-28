@@ -623,7 +623,8 @@ class Lobby {
         if (!info.success) {
             client.emit('failed', info.message)
         } else {
-            LobbyManager.socket.in(this.id).emit('map', !!data.custom ? "custom map" : data.board);
+            let boardName = !!data.custom ? "custom map" : data.board;
+            LobbyManager.socket.in(this.id).emit('map',{boardName:boardName,board:this.board.toJson()});
         }
     }
 

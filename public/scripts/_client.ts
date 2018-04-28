@@ -50,8 +50,10 @@ class SocketHandler {
     }
 
     onMapChange(data: any): void {
-        (document.getElementById('selected-map') as HTMLDivElement).innerHTML = 'Map: ' + data;
+        console.log(data);
+        (document.getElementById('selected-map') as HTMLDivElement).innerHTML = 'Map: ' + data.boardName;
         view.loading(false);
+        view.resize(data.board);
     }
 
     onRestart(data: any): void {

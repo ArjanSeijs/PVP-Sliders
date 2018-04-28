@@ -41,8 +41,10 @@ var SocketHandler = /** @class */ (function () {
         view.loading(false);
     };
     SocketHandler.prototype.onMapChange = function (data) {
-        document.getElementById('selected-map').innerHTML = 'Map: ' + data;
+        console.log(data);
+        document.getElementById('selected-map').innerHTML = 'Map: ' + data.boardName;
         view.loading(false);
+        view.resize(data.board);
     };
     SocketHandler.prototype.onRestart = function (data) {
         view.showLobby(client.isMulti());
