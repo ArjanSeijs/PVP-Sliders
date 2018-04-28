@@ -49,7 +49,7 @@ var SocketHandler = /** @class */ (function () {
         client.reset();
         view.clearCanvas();
         client.end();
-        console.log('restart!');
+        view.resize();
     };
     SocketHandler.prototype.onPlayers = function (data) {
         view.showPlayers(data);
@@ -102,8 +102,12 @@ window.onload = function () {
     }));
 };
 window.onkeypress = function (e) {
+    move(e.key);
+};
+function move(key) {
     if (!client || !client.getGame() || !socketListener)
         return;
+    key = key.toLowerCase();
     var dirMap = {
         "w": "NORTH",
         "a": "WEST",
@@ -114,12 +118,12 @@ window.onkeypress = function (e) {
         "arrowup": "NORTH",
         "arrowdown": "SOUTH",
     };
-    var key = e.key.toLowerCase();
     var id = client.getId(key);
     if (id === null || !dirMap[key])
         return;
     socketListener.sendMove(id, dirMap[key]);
-};
+}
+;
 function _map(elm) {
     var substr = "(Custom) ";
     if (elm.value.length > substr.length && elm.value.substr(0, substr.length) === substr) {

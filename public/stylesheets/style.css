@@ -89,7 +89,7 @@
 }
 
 .listTeam {
-    width: 50px;
+    width: 75px;
 }
 
 .listReady {
@@ -156,5 +156,11 @@
 .helper:hover {
     color: rgba(170, 170, 170, 0);
     background-color: rgba(170, 170, 170, 0);
+}
+
+.select-style {
+    border: 0;
+    background-color: #00000000;
+    margin: auto auto auto auto;
 }
 

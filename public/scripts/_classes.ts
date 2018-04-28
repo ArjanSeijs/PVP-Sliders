@@ -76,6 +76,8 @@ interface ClientInterface {
     setReady(data: any): void;
 
     reset(): void;
+
+    isLocal(id: number): boolean
 }
 
 class View {
@@ -275,12 +277,11 @@ class View {
         this.hideAll();
         this.showLobby(multi);
         document.getElementById('maps').style.display = '';
+        document.getElementById('botsBox').style.display = '';
     }
 
     showLobby(multi: boolean) {
         this.hideAll();
-        if (multi) document.getElementById("team2").style.display = '';
-        else document.getElementById("team2").style.display = 'none';
 
         document.getElementById("game-lobby").style.display = '';
         document.getElementById('wrapper').style.display = '';
@@ -294,15 +295,29 @@ class View {
         document.getElementById('wrapper').style.display = '';
     }
 
-    private playerEntry(name: string, team: string, ready: boolean) {
+    private getSelect(team: string, player: number): string {
+        return ` <select class="select-style" id="teamselect" onchange="_setTeam(this,${player})">` +
+            `<option value="red" class="red" ${(team === "red" ? "selected" : "")}>red</option>` +
+            `<option value="green" class="green" ${(team === "green" ? "selected" : "")}>green</option>` +
+            `<option value="yellow" class="yellow" ${(team === "yellow" ? "selected" : "")}>yellow</option>` +
+            `<option value="blue" class="blue" ${(team === "blue" ? "selected" : "")}>blue</option>` +
+            `<option value="random" ${(team === "random" ? "selected" : "")}>random</option>` +
+            `</select>`
+    }
+
+    private playerEntry(name: string, team: string, ready: boolean, player: number): string {
         const isready = "<i class=\"fas fa-check-square\"></i>";
         const notready = "<i class=\"fas fa-times-circle\"></i>";
 
         let string = "<li class='playerItem'>";
-        string += "<div class=\"listName\">" + name + "</div>";
-        string += "<div class=\"listTeam " + team + "bg\">" + team + "</div>";
-        if (ready !== null) string += "<div class=\"listReady\">" + (ready ? isready : notready) + "&nbsp;&nbsp;</div>";
+        string += `<div class="listName">${name}</div>`;
+
+        if (player !== null) string += `<div class="listTeam ${team}bg">${this.getSelect(team, player)}</div>`;
+        else string += `<div class="listTeam ${team}bg">${team}</div>`;
+
+        if (ready !== null) string += `<div class="listReady">${ready ? isready : notready}&nbsp;&nbsp;</div>`;
         else string += "<div class=\"listReady\">Ready</div>";
+
         string += "</li>";
         return string;
     }
@@ -314,11 +329,11 @@ class View {
             return string === "true" || string === true
         };
 
-        string += this.playerEntry("Player", "Team", null);
+        string += this.playerEntry("Player", "Team", null, null);
 
         client.setReady(data);
         for (let i = 0; i < data.length; i++) {
-            string += this.playerEntry(data[i].name, data[i].team, isTrue(data[i].ready));
+            string += this.playerEntry(data[i].name, data[i].team, isTrue(data[i].ready), client.isLocal(data[i].id) ? data[i].player : null);
         }
         string += "</ol>";
         document.getElementById("players").innerHTML = string;
@@ -517,5 +532,9 @@ class Client implements ClientInterface {
 
     reset(): void {
         this.game = null;
+    }
+
+    isLocal(id: number): boolean {
+        return id === this.id_p1.id || id === this.id_p2.id;
     }
 }

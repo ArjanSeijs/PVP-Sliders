@@ -59,7 +59,7 @@ class SocketHandler {
         client.reset();
         view.clearCanvas();
         client.end();
-        console.log('restart!');
+        view.resize();
     }
 
     onPlayers(data: any): void {
@@ -130,7 +130,12 @@ window.onload = function () {
 };
 
 window.onkeypress = function (e) {
+    move(e.key);
+};
+
+function move(key) {
     if (!client || !client.getGame() || !socketListener) return;
+    key = key.toLowerCase();
     const dirMap = {
         "w": "NORTH",
         "a": "WEST",
@@ -141,7 +146,6 @@ window.onkeypress = function (e) {
         "arrowup": "NORTH",
         "arrowdown": "SOUTH",
     };
-    let key = e.key.toLowerCase();
     let id = client.getId(key);
     if (id === null || !dirMap[key]) return;
     socketListener.sendMove(id, dirMap[key]);
@@ -189,7 +193,7 @@ function _resize() {
 
 function _cMap() {
     let elm = document.getElementById("custommap") as HTMLInputElement;
-    if(atob(elm.value).length < 16) {
+    if (atob(elm.value).length < 16) {
         return;
     }
     socketListener.sendMap(elm.value, true);

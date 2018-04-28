@@ -214,7 +214,9 @@ class SessionMap {
         for (let key in this.sessions) {
             if (!this.sessions.hasOwnProperty(key)) continue;
             for (let i = 0; i < this.sessions[key].ids.length; i++) {
-                joined.push(this.sessions[key].ids[i]);
+                let player: any = this.sessions[key].ids[i];
+                player.player = i;
+                joined.push(player);
             }
         }
         return joined;

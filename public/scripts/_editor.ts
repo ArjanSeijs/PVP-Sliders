@@ -57,6 +57,10 @@ class MockClient implements ClientInterface {
     reset(): void {
 
     }
+
+    isLocal(id: number): boolean {
+        return false;
+    }
 }
 
 function initialBoard(width?: number, height?: number) {

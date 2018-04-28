@@ -41,8 +41,7 @@
         <div><i class="fas fa-map"></i> <span id="selected-map">Palooza</span></div>
 
         <div id="maps" style="display: none;">
-            <label for="custommap">Custom map:</label><input id="custommap" type="text" onclick="_cMap()" placeholder="Encoded string">
-            <br>
+            <input id="custommap" type="text" style="display: none">
             <label>
                 <select id="mapselect" onchange="_map(this)">
                     <option value="horizontal">Horizontal</option>
@@ -56,31 +55,14 @@
                 </select>
             </label>
         </div>
-
-        <label for="teamselect">Team:</label>
-        <select id="teamselect" onclick="_setTeam(this,0)" onchange="_setTeam(this,0)">
-            <option value="red" class="red">Red</option>
-            <option value="green" class="green">Green</option>
-            <option value="yellow" class="yellow">Yellow</option>
-            <option value="blue" class="blue">Blue</option>
-            <option value="random">?</option>
-        </select>
-        <span id="team2">
-        <label for="teamselect2">Team:</label>
-        <select id="teamselect2" onclick="_setTeam(this,1)" onchange="_setTeam(this,1)">
-            <option value="red" class="red">Red</option>
-            <option value="green" class="green">Green</option>
-            <option value="yellow" class="yellow">Yellow</option>
-            <option value="blue" class="blue">Blue</option>
-            <option value="random">?</option>
-        </select></span>
-        <br>
-        <label for="bots">Enable bots:</label><input id="bots" type="checkbox" onchange="_options()">
+        <span id="botsBox" style="display: none">
+            <label for="bots">Enable bots:</label><input id="bots" type="checkbox" onchange="_options()">
+        </span>
 
 
         <div id="players"></div>
 
-        <button onclick="_ready()" class="button">ToggleReady</button>
+        <button onclick="_ready()" class="button">Toggle Ready</button>
         <button onclick="_start()" class="button">Start</button>
         <br>
         <div id="lobby-id"></div>

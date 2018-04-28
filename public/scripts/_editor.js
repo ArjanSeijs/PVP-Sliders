@@ -38,6 +38,9 @@ var MockClient = /** @class */ (function () {
     };
     MockClient.prototype.reset = function () {
     };
+    MockClient.prototype.isLocal = function (id) {
+        return false;
+    };
     return MockClient;
 }());
 function initialBoard(width, height) {
