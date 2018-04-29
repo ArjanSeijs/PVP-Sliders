@@ -11,6 +11,14 @@ var config = require("../lib/config");
 var UUID = UUIDv4;
 var logger = Logger("LobbyManager");
 var EXTENSION = ".txt";
+function safe(f) {
+    try {
+        f();
+    }
+    catch (e) {
+        logger.warn(e);
+    }
+}
 var LobbyManager = (function () {
     function LobbyManager() {
     }
@@ -18,18 +26,22 @@ var LobbyManager = (function () {
         LobbyManager.socket = io(server);
         LobbyManager.socket.on('connection', function (client) {
             client.on('join', function (data) {
-                if (LobbyManager.joined[client.id]) {
-                    client.emit('failed', 'You can only join one lobby');
-                    return;
-                }
-                LobbyManager.clientJoin(client, data);
+                safe(function () {
+                    if (LobbyManager.joined[client.id]) {
+                        client.emit('failed', 'You can only join one lobby');
+                        return;
+                    }
+                    LobbyManager.clientJoin(client, data);
+                });
             });
             client.on('host', function (data) {
-                if (LobbyManager.joined[client.id]) {
-                    client.emit('failed', 'You can only join one lobby');
-                    return;
-                }
-                LobbyManager.clientHost(client, data);
+                safe(function () {
+                    if (LobbyManager.joined[client.id]) {
+                        client.emit('failed', 'You can only join one lobby');
+                        return;
+                    }
+                    LobbyManager.clientHost(client, data);
+                });
             });
         });
         BoardParser.init();
@@ -309,58 +321,76 @@ var Lobby = (function () {
     Lobby.prototype.eventListeners = function (client) {
         var that = this;
         client.on('leave', function () {
-            that.disconnect(client);
+            safe(function () {
+                that.disconnect(client);
+            });
         });
         client.on('disconnect', function () {
-            that.disconnect(client);
+            safe(function () {
+                that.disconnect(client);
+            });
         });
         client.on('move', function (data) {
             if (!data)
                 return;
-            that.move(client, data);
+            safe(function () {
+                that.move(client, data);
+            });
         });
         client.on('ready', function (data) {
             if (!data)
                 return;
-            that.readyToggle(client, data);
+            safe(function () {
+                that.readyToggle(client, data);
+            });
         });
         client.on('team', function (data) {
             if (!data)
                 return;
-            that.teamChange(client, data);
+            safe(function () {
+                that.teamChange(client, data);
+            });
         });
         client.on('map', function (data) {
             if (!data)
                 return;
-            else
+            safe(function () {
                 that.changeMap(client, data);
+            });
         });
         client.on('start', function (data) {
             if (!data || that.state === State.InProgress || that.state === State.Starting) {
                 client.emit('failed', 'game already started');
                 return;
             }
-            else
+            safe(function () {
                 that.start(client, data);
+            });
         });
         client.on('options', function (data) {
             if (!data)
                 return;
-            that.setOptions(client, data);
+            safe(function () {
+                that.setOptions(client, data);
+            });
         });
         client.on('kick', function (data) {
             if (!data)
                 return;
-            that.kick(client, data);
+            safe(function () {
+                that.kick(client, data);
+            });
         });
         client.on('password', function (data) {
             if (!data || !data.password || !data.session_id)
                 return;
-            if (!that.isHost(data.session_id)) {
-                client.emit('failed', 'Only host can change password');
-                return;
-            }
-            that.setPassword(data.password, client);
+            safe(function () {
+                if (!that.isHost(data.session_id)) {
+                    client.emit('failed', 'Only host can change password');
+                    return;
+                }
+                that.setPassword(data.password, client);
+            });
         });
         client.join(this.id);
     };
@@ -415,7 +445,9 @@ var Lobby = (function () {
         this.state = State.Finished;
         LobbyManager.socket.in(this.id).emit('end', { entities: this.game.entitiesJson(), winners: this.game.winners });
         setTimeout(function () {
-            that.restart();
+            safe(function () {
+                that.restart();
+            });
         }, 5000);
     };
     Lobby.prototype.start = function (client, data) {

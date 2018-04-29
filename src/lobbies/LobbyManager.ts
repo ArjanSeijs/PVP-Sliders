@@ -19,6 +19,19 @@ const UUID: () => string = UUIDv4;
 const logger = Logger("LobbyManager");
 const EXTENSION = ".txt";
 
+/**
+ * Executes a function and catch all errors.
+ * If something goes wrong it will throw a warning instead of an error.
+ * @param {T} f
+ */
+function safe<T extends Function>(f: T) {
+    try {
+        f();
+    } catch (e) {
+        logger.warn(e);
+    }
+}
+
 interface LobbyMap {
     [index: string]: Lobby;
 }
@@ -39,18 +52,22 @@ class LobbyManager {
         LobbyManager.socket = io(server);
         LobbyManager.socket.on('connection', function (client: Socket) {
             client.on('join', function (data) {
-                if (LobbyManager.joined[client.id]) {
-                    client.emit('failed', 'You can only join one lobby')
-                    return;
-                }
-                LobbyManager.clientJoin(client, data);
+                safe(() => {
+                    if (LobbyManager.joined[client.id]) {
+                        client.emit('failed', 'You can only join one lobby')
+                        return;
+                    }
+                    LobbyManager.clientJoin(client, data);
+                })
             });
             client.on('host', function (data) {
-                if (LobbyManager.joined[client.id]) {
-                    client.emit('failed', 'You can only join one lobby')
-                    return;
-                }
-                LobbyManager.clientHost(client, data);
+                safe(() => {
+                    if (LobbyManager.joined[client.id]) {
+                        client.emit('failed', 'You can only join one lobby')
+                        return;
+                    }
+                    LobbyManager.clientHost(client, data);
+                })
             })
         });
         BoardParser.init();
@@ -452,51 +469,72 @@ class Lobby {
     eventListeners(client: Socket) {
         let that = this;
         client.on('leave', function () {
-            that.disconnect(client);
+            safe(() => {
+                that.disconnect(client);
+            })
         });
         client.on('disconnect', function () {
-            that.disconnect(client);
+            safe(() => {
+                that.disconnect(client);
+            });
         });
         client.on('move', function (data) {
             if (!data) return;
-            that.move(client, data);
+            safe(() => {
+                that.move(client, data);
+            });
         });
         client.on('ready', function (data) {
             if (!data) return;
-            that.readyToggle(client, data);
+            safe(() => {
+                that.readyToggle(client, data);
+            })
         });
         client.on('team', function (data) {
             if (!data) return;
-            that.teamChange(client, data);
+            safe(() => {
+                that.teamChange(client, data);
+            });
         });
         client.on('map', function (data) {
             if (!data) return;
-            else that.changeMap(client, data);
+            safe(() => {
+                that.changeMap(client, data);
+            })
         });
         client.on('start', function (data) {
             if (!data || that.state === State.InProgress || that.state === State.Starting) {
                 client.emit('failed', 'game already started');
                 return;
             }
-            else that.start(client, data);
+            safe(() => {
+                that.start(client, data);
+            })
         });
         client.on('options', function (data) {
             if (!data) return;
-            that.setOptions(client, data);
+            safe(() => {
+                that.setOptions(client, data);
+            });
         });
         client.on('kick', function (data) {
             if (!data) return;
-            that.kick(client, data);
+            safe(() => {
+                that.kick(client, data);
+            })
         });
         client.on('password', function (data) {
             if (!data || !data.password || !data.session_id) return;
-            if (!that.isHost(data.session_id)) {
-                client.emit('failed', 'Only host can change password');
-                return;
-            }
-            that.setPassword(data.password, client);
+            safe(() => {
+                if (!that.isHost(data.session_id)) {
+                    client.emit('failed', 'Only host can change password');
+                    return;
+                }
+                that.setPassword(data.password, client);
+            })
         });
 
+        //Join the namespace.
         client.join(this.id);
     }
 
@@ -579,7 +617,9 @@ class Lobby {
         this.state = State.Finished;
         LobbyManager.socket.in(this.id).emit('end', {entities: this.game.entitiesJson(), winners: this.game.winners});
         setTimeout(function () {
-            that.restart();
+            safe(() => {
+                that.restart();
+            })
         }, 5000);
     }
 
