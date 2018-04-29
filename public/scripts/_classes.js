@@ -356,6 +356,8 @@ var View = /** @class */ (function () {
     };
     View.prototype.loading = function (load) {
         var elm = document.getElementById("loading");
+        if (!elm)
+            return;
         elm.style.display = load ? "" : "none";
     };
     View.prototype.boardData = function (data) {

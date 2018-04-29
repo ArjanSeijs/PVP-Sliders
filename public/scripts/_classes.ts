@@ -420,6 +420,7 @@ class View {
 
     loading(load: boolean) {
         let elm = document.getElementById("loading") as HTMLDivElement;
+        if(!elm) return;
         elm.style.display = load ? "" : "none";
     }
 

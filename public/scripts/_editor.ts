@@ -285,6 +285,7 @@ function removeSave() {
 }
 
 window.onclick = function (e) {
+    if(!game || !game.board) return;
     let x = e.clientX;
     let y = e.clientY;
     let xPos = Math.floor((x - view.getValues().offsetX) / view.getValues().size);

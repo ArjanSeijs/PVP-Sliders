@@ -255,6 +255,8 @@ function removeSave() {
     alert("Map removed");
 }
 window.onclick = function (e) {
+    if (!game || !game.board)
+        return;
     var x = e.clientX;
     var y = e.clientY;
     var xPos = Math.floor((x - view.getValues().offsetX) / view.getValues().size);
