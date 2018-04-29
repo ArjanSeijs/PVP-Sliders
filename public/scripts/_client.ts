@@ -120,6 +120,7 @@ class SocketHandler {
 window.onload = function () {
     socketListener = new SocketHandler();
     client = new Client();
+    Util.setFormData(Cookies.get("username"), Cookies.get("multiplayer"), Cookies.get("lobby"), Cookies.get("password"));
     view = new View(null, "assets/block.png",
         "assets/background.png",
         "assets/player_blue.png",
@@ -147,7 +148,7 @@ function selectMaps() {
         "<option value=\"vertical\">Vertical</option>\n" +
         "<option value=\"DontStopMeNow\">Don't Stop Me Now</option>\n" +
         "<option value=\"IsThisRealLife\">Is this real life?</option>";
-    if(!maps) return;
+    if (!maps) return;
     Object.keys(maps).forEach(((map, index, array) => {
         select.innerHTML += '<option data-custom=true value="(Custom) ' + map + '">(Custom) ' + map + '</option>'
     }));
@@ -185,12 +186,22 @@ function _map(elm: HTMLSelectElement) {
     view.loading(true);
 }
 
+function setCookies() {
+    let data = Util.getFormData();
+    Cookies.set("username", data.username, {expires: Number.MAX_VALUE});
+    Cookies.set("multiplayer", data.multiplayer ? "true" : "false", {expires: Number.MAX_VALUE});
+    Cookies.set("lobby", data.lobby, {expires: Number.MAX_VALUE});
+    Cookies.set("password", data.password, {expires: Number.MAX_VALUE});
+}
+
 function _join(): void {
+    setCookies();
     socketListener.sendJoin(Util.getFormData());
     view.loading(true);
 }
 
 function _host(): void {
+    setCookies();
     socketListener.sendHost(Util.getFormData());
     view.loading(true);
 }

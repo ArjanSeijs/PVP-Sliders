@@ -40,14 +40,14 @@ class LobbyManager {
         LobbyManager.socket.on('connection', function (client: Socket) {
             client.on('join', function (data) {
                 if (LobbyManager.joined[client.id]) {
-                    client.emit('failed','You can only join one lobby')
+                    client.emit('failed', 'You can only join one lobby')
                     return;
                 }
                 LobbyManager.clientJoin(client, data);
             });
             client.on('host', function (data) {
                 if (LobbyManager.joined[client.id]) {
-                    client.emit('failed','You can only join one lobby')
+                    client.emit('failed', 'You can only join one lobby')
                     return;
                 }
                 LobbyManager.clientHost(client, data);
@@ -198,13 +198,8 @@ class SessionMap {
      * @param {SocketIO.Socket} client
      */
     removeSession(client: Socket) {
-        logger.log(JSON.stringify(this.sessions));
-        logger.log(JSON.stringify(Object.keys(this.clients)));
-
         if (!this.isJoined(client.id)) return;
         let session_id = this.clients[client.id].session;
-
-        logger.log(session_id);
 
         delete this.clients[client.id];
         this.joined -= this.sessions[session_id].ids.length;

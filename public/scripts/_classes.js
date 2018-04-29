@@ -32,6 +32,20 @@ var Util = /** @class */ (function () {
         var password = document.getElementById("password").value;
         return { username: username, multiplayer: multiplayer, lobby: lobby, password: password };
     };
+    Util.setFormData = function (username, multiplayer, lobby, password) {
+        var usernameElm = document.getElementById("username");
+        var multiplayerElm = document.getElementById("multiplayer");
+        var lobbyElm = document.getElementById("lobby");
+        var passwordElm = document.getElementById("password");
+        if (username)
+            usernameElm.value = username;
+        if (multiplayer === "true")
+            multiplayerElm.checked = true;
+        if (lobby)
+            lobbyElm.value = lobby;
+        if (password)
+            passwordElm.value = password;
+    };
     Util.getOptions = function () {
         var bots = document.getElementById("bots").checked;
         return { bots: bots };

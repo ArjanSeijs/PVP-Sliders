@@ -99,6 +99,7 @@ var SocketHandler = /** @class */ (function () {
 window.onload = function () {
     socketListener = new SocketHandler();
     client = new Client();
+    Util.setFormData(Cookies.get("username"), Cookies.get("multiplayer"), Cookies.get("lobby"), Cookies.get("password"));
     view = new View(null, "assets/block.png", "assets/background.png", "assets/player_blue.png", "assets/player_green.png", "assets/player_red.png", "assets/player_yellow.png", "assets/player_purple.png", "assets/player_cyan.png", "assets/player_orange.png", "assets/player_pink.png", "assets/board_background.png", "assets/stop.png");
     selectMaps();
 };
@@ -153,11 +154,20 @@ function _map(elm) {
     }
     view.loading(true);
 }
+function setCookies() {
+    var data = Util.getFormData();
+    Cookies.set("username", data.username, { expires: Number.MAX_VALUE });
+    Cookies.set("multiplayer", data.multiplayer ? "true" : "false", { expires: Number.MAX_VALUE });
+    Cookies.set("lobby", data.lobby, { expires: Number.MAX_VALUE });
+    Cookies.set("password", data.password, { expires: Number.MAX_VALUE });
+}
 function _join() {
+    setCookies();
     socketListener.sendJoin(Util.getFormData());
     view.loading(true);
 }
 function _host() {
+    setCookies();
     socketListener.sendHost(Util.getFormData());
     view.loading(true);
 }

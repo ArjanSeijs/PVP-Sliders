@@ -35,6 +35,17 @@ class Util {
         return {username: username, multiplayer: multiplayer, lobby: lobby, password: password};
     }
 
+    static setFormData(username, multiplayer, lobby, password): void {
+        const usernameElm = (document.getElementById("username") as HTMLInputElement);
+        const multiplayerElm = (document.getElementById("multiplayer") as HTMLInputElement);
+        const lobbyElm = (document.getElementById("lobby") as HTMLInputElement);
+        const passwordElm = (document.getElementById("password") as HTMLInputElement);
+        if (username) usernameElm.value = username;
+        if (multiplayer === "true") multiplayerElm.checked = true;
+        if (lobby) lobbyElm.value = lobby;
+        if (password) passwordElm.value = password;
+    }
+
     static getOptions() {
         const bots = (document.getElementById("bots") as HTMLInputElement).checked;
         return {bots: bots};

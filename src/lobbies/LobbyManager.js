@@ -132,12 +132,9 @@ var SessionMap = (function () {
         return session_id;
     };
     SessionMap.prototype.removeSession = function (client) {
-        logger.log(JSON.stringify(this.sessions));
-        logger.log(JSON.stringify(Object.keys(this.clients)));
         if (!this.isJoined(client.id))
             return;
         var session_id = this.clients[client.id].session;
-        logger.log(session_id);
         delete this.clients[client.id];
         this.joined -= this.sessions[session_id].ids.length;
         delete this.sessions[session_id];
