@@ -246,6 +246,7 @@ var View = /** @class */ (function () {
         this.showLobby(multi);
         document.getElementById('maps').style.display = '';
         document.getElementById('botsBox').style.display = '';
+        document.getElementById("changePassword").style.display = '';
         this.isHost = true;
     };
     View.prototype.showLobby = function (multi) {

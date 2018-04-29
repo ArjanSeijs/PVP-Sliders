@@ -75,8 +75,10 @@ class LobbyManager {
                 LobbyManager.clientHost(client, data);
                 return;
             }
-            LobbyManager.lobbies[lobbyId].join(client, data);
-            LobbyManager.joined[client.id] = {client: client, lobby: lobbyId};
+            let session_id = LobbyManager.lobbies[lobbyId].join(client, data);
+            if (!isNullOrUndefined(session_id)) {
+                LobbyManager.joined[client.id] = {client: client, lobby: lobbyId};
+            }
         }
     }
 
@@ -486,6 +488,14 @@ class Lobby {
             if (!data) return;
             that.kick(client, data);
         });
+        client.on('password', function (data) {
+            if (!data || !data.password || !data.session_id) return;
+            if (!that.isHost(data.session_id)) {
+                client.emit('failed', 'Only host can change password');
+                return;
+            }
+            that.setPassword(data.password, client);
+        });
 
         client.join(this.id);
     }
@@ -735,9 +745,14 @@ class Lobby {
     /**
      * Set a password.
      * @param {string} password
+     * @param client
      */
-    setPassword(password: string): void {
+    setPassword(password: string, client?: SocketIO.Socket): void {
+        logger.log("Password set to:" + password);
         this.password = password;
+        if (client) {
+            client.emit('info', 'Password changed!');
+        }
     }
 
     /**

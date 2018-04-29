@@ -10,6 +10,7 @@ class SocketHandler {
         this.socket.on('start', (data) => this.onStart(data));
         this.socket.on('update', (data) => this.onUpdate(data));
         this.socket.on('failed', (data, refresh) => this.onFailed(data, refresh));
+        this.socket.on('info',(data) => this.onInfo(data));
         this.socket.on('joined', (data) => this.onJoined(data));
         this.socket.on('restart', (data) => this.onRestart(data));
         this.socket.on('players', (data) => this.onPlayers(data));
@@ -31,6 +32,11 @@ class SocketHandler {
     onFailed(data: any, refresh: boolean): void {
         alert(data);
         if (refresh) location.reload();
+        view.loading(false);
+    }
+
+    onInfo(data: any): void {
+        alert(data);
         view.loading(false);
     }
 
@@ -113,7 +119,13 @@ class SocketHandler {
     }
 
     sendKick(id: any) {
+        view.loading(true);
         this.socket.emit('kick', {session_id: this.session_id, id: id});
+    }
+
+    sendPassword(value: string) {
+        view.loading(true);
+        this.socket.emit('password', {session_id: this.session_id, password: value});
     }
 }
 
@@ -265,6 +277,11 @@ function _kick(id) {
     if (id !== null) {
         socketListener.sendKick(id);
     }
+}
+
+function _password() {
+    let elm = document.getElementById("newPassword") as HTMLInputElement;
+    socketListener.sendPassword(elm.value);
 }
 
 

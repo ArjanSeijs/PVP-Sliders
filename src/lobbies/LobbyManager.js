@@ -49,8 +49,10 @@ var LobbyManager = (function () {
                 LobbyManager.clientHost(client, data);
                 return;
             }
-            LobbyManager.lobbies[lobbyId].join(client, data);
-            LobbyManager.joined[client.id] = { client: client, lobby: lobbyId };
+            var session_id = LobbyManager.lobbies[lobbyId].join(client, data);
+            if (!util_1.isNullOrUndefined(session_id)) {
+                LobbyManager.joined[client.id] = { client: client, lobby: lobbyId };
+            }
         }
     };
     LobbyManager.clientHost = function (client, data) {
@@ -351,6 +353,15 @@ var Lobby = (function () {
                 return;
             that.kick(client, data);
         });
+        client.on('password', function (data) {
+            if (!data || !data.password || !data.session_id)
+                return;
+            if (!that.isHost(data.session_id)) {
+                client.emit('failed', 'Only host can change password');
+                return;
+            }
+            that.setPassword(data.password, client);
+        });
         client.join(this.id);
     };
     Lobby.prototype.disconnect = function (client) {
@@ -537,8 +548,12 @@ var Lobby = (function () {
         }
         this.options.bots = !!data.options.bots;
     };
-    Lobby.prototype.setPassword = function (password) {
+    Lobby.prototype.setPassword = function (password, client) {
+        logger.log("Password set to:" + password);
         this.password = password;
+        if (client) {
+            client.emit('info', 'Password changed!');
+        }
     };
     Lobby.prototype.setHost = function (uuid) {
         this.host = uuid;

@@ -6,6 +6,7 @@ var SocketHandler = /** @class */ (function () {
         this.socket.on('start', function (data) { return _this.onStart(data); });
         this.socket.on('update', function (data) { return _this.onUpdate(data); });
         this.socket.on('failed', function (data, refresh) { return _this.onFailed(data, refresh); });
+        this.socket.on('info', function (data) { return _this.onInfo(data); });
         this.socket.on('joined', function (data) { return _this.onJoined(data); });
         this.socket.on('restart', function (data) { return _this.onRestart(data); });
         this.socket.on('players', function (data) { return _this.onPlayers(data); });
@@ -25,6 +26,10 @@ var SocketHandler = /** @class */ (function () {
         alert(data);
         if (refresh)
             location.reload();
+        view.loading(false);
+    };
+    SocketHandler.prototype.onInfo = function (data) {
+        alert(data);
         view.loading(false);
     };
     SocketHandler.prototype.onJoined = function (data) {
@@ -92,7 +97,12 @@ var SocketHandler = /** @class */ (function () {
             this.socket.disconnect();
     };
     SocketHandler.prototype.sendKick = function (id) {
+        view.loading(true);
         this.socket.emit('kick', { session_id: this.session_id, id: id });
+    };
+    SocketHandler.prototype.sendPassword = function (value) {
+        view.loading(true);
+        this.socket.emit('password', { session_id: this.session_id, password: value });
     };
     return SocketHandler;
 }());
@@ -223,5 +233,9 @@ function _kick(id) {
     if (id !== null) {
         socketListener.sendKick(id);
     }
+}
+function _password() {
+    var elm = document.getElementById("newPassword");
+    socketListener.sendPassword(elm.value);
 }
 //# sourceMappingURL=_client.js.map
