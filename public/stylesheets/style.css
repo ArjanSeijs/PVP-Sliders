@@ -166,6 +166,20 @@
     background-color: #999a9a;
 }
 
+
+#loading {
+    position: absolute;
+    bottom: 50px;
+    width: 50px;
+    left: calc(50% - 25px);
+    margin: 0 auto 0 auto;
+}
+
+.editor {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+}
 /* Editor */
 .helper {
     position: absolute;
@@ -209,13 +223,5 @@
 
 .clickable:visited {
     color: inherit;
-}
-
-#loading {
-    position: absolute;
-    bottom: 50px;
-    width: 50px;
-    left: calc(50% - 25px);
-    margin: 0 auto 0 auto;
 }
 

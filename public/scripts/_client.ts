@@ -284,4 +284,10 @@ function _password() {
     socketListener.sendPassword(elm.value);
 }
 
+function _loadBase64() {
+    let value = prompt("Give the encoded string to parse");
+    socketListener.sendMap(value,true,"(Custom)");
+
+}
+
 

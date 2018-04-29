@@ -238,4 +238,8 @@ function _password() {
     var elm = document.getElementById("newPassword");
     socketListener.sendPassword(elm.value);
 }
+function _loadBase64() {
+    var value = prompt("Give the encoded string to parse");
+    socketListener.sendMap(value, true, "(Custom)");
+}
 //# sourceMappingURL=_client.js.map
