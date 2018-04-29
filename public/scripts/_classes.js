@@ -94,11 +94,14 @@ var View = /** @class */ (function () {
         background.height = this.screen_height;
         this.canvas.stage.addChild(background);
         var lobby = Util.getParameterByName("id", window.location.href);
-        var elm = document.getElementById('lobby');
-        if (elm)
-            elm.value = lobby ? lobby : "";
+        var lobbyDiv = document.getElementById('lobby');
+        if (lobbyDiv)
+            lobbyDiv.value = lobby ? lobby : "";
         this.loaded = true;
         view.loading(false);
+        var loginDiv = document.getElementById("login");
+        if (loginDiv)
+            loginDiv.style.display = '';
         if (onload)
             onload();
     };

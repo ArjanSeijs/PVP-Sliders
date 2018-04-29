@@ -132,16 +132,22 @@ class View {
         background.width = this.screen_width;
         background.height = this.screen_height;
         this.canvas.stage.addChild(background);
+
         let lobby = Util.getParameterByName("id", window.location.href);
-        let elm = (document.getElementById('lobby') as HTMLInputElement);
-        if (elm) elm.value = lobby ? lobby : "";
+        let lobbyDiv = (document.getElementById('lobby') as HTMLInputElement);
+        if (lobbyDiv) lobbyDiv.value = lobby ? lobby : "";
+
         this.loaded = true;
         view.loading(false);
+
+        let loginDiv = document.getElementById("login");
+        if (loginDiv) loginDiv.style.display = '';
+
         if (onload) onload();
     }
 
     resize(board?: any) {
-        if(!this.loaded) return;
+        if (!this.loaded) return;
         if (!client.getGame() && !board && !this.board) {
             this.load();
             return;
@@ -420,7 +426,7 @@ class View {
 
     loading(load: boolean) {
         let elm = document.getElementById("loading") as HTMLDivElement;
-        if(!elm) return;
+        if (!elm) return;
         elm.style.display = load ? "" : "none";
     }
 
