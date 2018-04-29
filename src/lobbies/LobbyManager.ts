@@ -619,7 +619,7 @@ class Lobby {
             client.emit('failed', "Incorrect session and id");
             return;
         }
-        if (!data.id || !isNumber(data.id)) return;
+        if (isNullOrUndefined(data.id)|| !isNumber(data.id)) return;
         if (!data.direction || !isString(data.direction)) return;
 
         let id = data.id;

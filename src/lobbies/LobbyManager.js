@@ -453,7 +453,7 @@ var Lobby = (function () {
             client.emit('failed', "Incorrect session and id");
             return;
         }
-        if (!data.id || !util_1.isNumber(data.id))
+        if (util_1.isNullOrUndefined(data.id) || !util_1.isNumber(data.id))
             return;
         if (!data.direction || !util_1.isString(data.direction))
             return;
