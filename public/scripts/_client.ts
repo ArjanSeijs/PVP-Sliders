@@ -154,6 +154,7 @@ window.onload = function () {
         "assets/player_darkpink.png",
         "assets/board_background.png",
         "assets/stop.png");
+    view.loading(true);
     selectMaps();
 };
 
@@ -296,7 +297,10 @@ function _password() {
 function _loadBase64() {
     let value = prompt("Give the encoded string to parse");
     socketListener.sendMap(value,true,"(Custom)");
+}
 
+function _leave() {
+    window.location.reload();
 }
 
 

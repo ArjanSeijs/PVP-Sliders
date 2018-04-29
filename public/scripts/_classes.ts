@@ -104,6 +104,7 @@ class View {
     private readonly canvas: Application;
     private board: any;
     private isHost: boolean;
+    private loaded: boolean = false;
 
     constructor(onload: () => void, ...images: string[]) {
         this.screen_width = window.innerWidth;
@@ -134,10 +135,13 @@ class View {
         let lobby = Util.getParameterByName("id", window.location.href);
         let elm = (document.getElementById('lobby') as HTMLInputElement);
         if (elm) elm.value = lobby ? lobby : "";
+        this.loaded = true;
+        view.loading(false);
         if (onload) onload();
     }
 
     resize(board?: any) {
+        if(!this.loaded) return;
         if (!client.getGame() && !board && !this.board) {
             this.load();
             return;

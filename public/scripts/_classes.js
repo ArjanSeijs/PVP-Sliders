@@ -70,6 +70,7 @@ var View = /** @class */ (function () {
             images[_i - 1] = arguments[_i];
         }
         var _this = this;
+        this.loaded = false;
         this.screen_width = window.innerWidth;
         this.screen_height = window.innerHeight;
         var type = "WebGL";
@@ -96,10 +97,14 @@ var View = /** @class */ (function () {
         var elm = document.getElementById('lobby');
         if (elm)
             elm.value = lobby ? lobby : "";
+        this.loaded = true;
+        view.loading(false);
         if (onload)
             onload();
     };
     View.prototype.resize = function (board) {
+        if (!this.loaded)
+            return;
         if (!client.getGame() && !board && !this.board) {
             this.load();
             return;

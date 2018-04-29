@@ -1,8 +1,6 @@
 global.rootDir = __dirname;
 
 const path = require("path");
-const fs = require("fs");
-const bodyParser = require("body-parser");
 const express = require("express");
 const http = require("http");
 const LobbyManager = require("./src/lobbies/LobbyManager");
