@@ -53,6 +53,7 @@ class SocketHandler {
             view.showLobby(data.ids.length > 1);
         }
         view.loading(false);
+        view.boardData(data);
         view.resize(data.board);
     }
 

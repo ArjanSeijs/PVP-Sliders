@@ -241,6 +241,7 @@ class SessionMap {
             session_id: session_id,
             lobby_id: this.lobby.getId(),
             board: this.lobby.getBoard(),
+            boardName: this.lobby.getBoardName(),
             isHost: !!isHost
         });
 
@@ -452,6 +453,7 @@ class Lobby {
 
     private game: Game;
     private board: Board;
+    private boardName : string;
 
     private interval: { update: Timer, tick: Timer };
 
@@ -471,6 +473,7 @@ class Lobby {
         this.options = {
             bots: false
         };
+        this.boardName = "Palooza";
         this.setLevel("Palooza" + EXTENSION);
         logger.info("Created lobby with id: " + this.id);
     }
@@ -800,11 +803,11 @@ class Lobby {
             logger.info(`Client ${client.id} tried to change map but failed: ${info.message}`);
             client.emit('failed', info.message)
         } else {
-            let boardName = !!data.custom ? data.mapName.toString() : data.board;
+            this.boardName = !!data.custom ? data.mapName.toString() : data.board;
 
-            logger.info(`Client ${client.id} changed map to ${boardName}`);
+            logger.info(`Client ${client.id} changed map to ${this.boardName}`);
 
-            LobbyManager.socket.in(this.id).emit('map', {boardName: boardName, board: this.board.toJson()});
+            LobbyManager.socket.in(this.id).emit('map', {boardName: this.boardName, board: this.board.toJson()});
         }
     }
 
@@ -942,6 +945,10 @@ class Lobby {
 
     getBoard(): { width: number; height: number; tiles: { x: number; y: number; tile_type: string }[][] } {
         return this.board ? this.board.toJson() : null;
+    }
+
+    getBoardName() {
+        return this.boardName;
     }
 }
 

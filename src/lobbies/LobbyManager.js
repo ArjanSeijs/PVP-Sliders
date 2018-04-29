@@ -169,6 +169,7 @@ var SessionMap = (function () {
             session_id: session_id,
             lobby_id: this.lobby.getId(),
             board: this.lobby.getBoard(),
+            boardName: this.lobby.getBoardName(),
             isHost: !!isHost
         });
         return session_id;
@@ -328,6 +329,7 @@ var Lobby = (function () {
         this.options = {
             bots: false
         };
+        this.boardName = "Palooza";
         this.setLevel("Palooza" + EXTENSION);
         logger.info("Created lobby with id: " + this.id);
     }
@@ -592,9 +594,9 @@ var Lobby = (function () {
             client.emit('failed', info.message);
         }
         else {
-            var boardName = !!data.custom ? data.mapName.toString() : data.board;
-            logger.info("Client " + client.id + " changed map to " + boardName);
-            LobbyManager.socket.in(this.id).emit('map', { boardName: boardName, board: this.board.toJson() });
+            this.boardName = !!data.custom ? data.mapName.toString() : data.board;
+            logger.info("Client " + client.id + " changed map to " + this.boardName);
+            LobbyManager.socket.in(this.id).emit('map', { boardName: this.boardName, board: this.board.toJson() });
         }
     };
     Lobby.prototype.setLevel = function (board, players) {
@@ -680,6 +682,9 @@ var Lobby = (function () {
     };
     Lobby.prototype.getBoard = function () {
         return this.board ? this.board.toJson() : null;
+    };
+    Lobby.prototype.getBoardName = function () {
+        return this.boardName;
     };
     return Lobby;
 }());
