@@ -2,8 +2,6 @@
 var Direction = require("./Direction");
 var Types = require("./Types");
 var config = require("../lib/config");
-var Logger = require("simple-nodejs-logger");
-var logger = Logger("CollisionManager");
 var CollisionHandler = (function () {
     function CollisionHandler(game) {
         this.game = game;
@@ -67,7 +65,6 @@ var CollisionHandler = (function () {
         }
     };
     CollisionHandler.prototype.enemyCollision = function (entity, other) {
-        logger.log("Collision " + JSON.stringify(entity.toJson()) + " " + JSON.stringify(other.toJson()));
         if (other.direction.curr === Direction.None) {
             this.game.gameMode.onEnemyCollision(entity, other);
             return;

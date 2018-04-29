@@ -4,9 +4,7 @@ import Direction = require("./Direction");
 import Types = require("./Types");
 import Tile = require("./Tile");
 import config = require("../lib/config");
-import * as Logger from 'simple-nodejs-logger';
 
-const logger = Logger("CollisionManager");
 
 class CollisionHandler {
     private game: Game;
@@ -110,7 +108,6 @@ class CollisionHandler {
      * @param {Entity} other
      */
     private enemyCollision(entity: Entity, other: Entity) {
-        logger.log("Collision " + JSON.stringify(entity.toJson()) + " " + JSON.stringify(other.toJson()));
         if (other.direction.curr === Direction.None) {
             this.game.gameMode.onEnemyCollision(entity, other);
             return;

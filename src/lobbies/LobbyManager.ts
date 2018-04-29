@@ -1,8 +1,8 @@
 import * as io from "socket.io"
 import {Server, Socket} from "socket.io"
-import * as Logger from "simple-nodejs-logger";
 import * as crypto from "crypto"
 import {isNullOrUndefined, isString} from "util";
+import * as winston from "winston";
 import UUIDv4 = require("uuid/v4");
 
 import Game = require("../classes/Game");
@@ -15,8 +15,21 @@ import SocketIO = require("socket.io");
 
 import Timer = NodeJS.Timer;
 
+const format = winston.format;
+const myFormat = format.printf(info => {
+    return `${info.timestamp} [${info.label}] [${info.level}]: ${info.message}`;
+});
+const logger = winston.createLogger({
+    format: format.combine(
+        format.label({label: 'LobbyManager'}),
+        format.timestamp(),
+        myFormat
+    ),
+    transports: [
+        new (winston.transports.File)({filename: 'lobby.log'})
+    ]
+});
 const UUID: () => string = UUIDv4;
-const logger = Logger("LobbyManager");
 const EXTENSION = ".txt";
 
 /**
@@ -28,7 +41,8 @@ function safe<T extends Function>(f: T) {
     try {
         f();
     } catch (e) {
-        logger.warn(e);
+        logger.error(`Error ${e.message} at ${e.lineNumber} in ${e.filename}`);
+        logger.error(`Stacktrace ${e.stack}`);
     }
 }
 
@@ -49,12 +63,16 @@ class LobbyManager {
      * @param server The express server.
      */
     static init(server): void {
+        logger.info("LobbyManager initialized!");
         LobbyManager.socket = io(server);
         LobbyManager.socket.on('connection', function (client: Socket) {
+
+            logger.info(`Client ${client.id} connected! from ${client.handshake.address}`);
+
             client.on('join', function (data) {
                 safe(() => {
                     if (LobbyManager.joined[client.id]) {
-                        client.emit('failed', 'You can only join one lobby')
+                        client.emit('failed', 'You can only join one lobby');
                         return;
                     }
                     LobbyManager.clientJoin(client, data);
@@ -63,7 +81,7 @@ class LobbyManager {
             client.on('host', function (data) {
                 safe(() => {
                     if (LobbyManager.joined[client.id]) {
-                        client.emit('failed', 'You can only join one lobby')
+                        client.emit('failed', 'You can only join one lobby');
                         return;
                     }
                     LobbyManager.clientHost(client, data);
@@ -86,6 +104,7 @@ class LobbyManager {
         if (!data || (typeof data.lobby !== "string") || (data.lobby !== "" && !LobbyManager.lobbies[data.lobby])) {
             client.emit('failed', 'lobby does not exist');
         } else {
+            logger.info(`Client ${client.id} joined a lobby.`);
             let lobbyId = data.lobby;
             if (lobbyId === "") lobbyId = LobbyManager.randomLobby(data);
             if (lobbyId === null) {
@@ -94,6 +113,7 @@ class LobbyManager {
             }
             let session_id = LobbyManager.lobbies[lobbyId].join(client, data);
             if (!isNullOrUndefined(session_id)) {
+                logger.info(`Client ${client.id} joined lobby: ${lobbyId}`);
                 LobbyManager.joined[client.id] = {client: client, lobby: lobbyId};
             }
         }
@@ -115,12 +135,12 @@ class LobbyManager {
 
         let lobby = LobbyManager.getLobby(lobby_id);
         if (data.password) lobby.setPassword(data.password);
-        // lobby.setLevel("Palooza" + EXTENSION);
-        // lobby.join(client, data, true);
 
         let session_id = lobby.join(client, data, true);
         lobby.setHost(session_id);
         LobbyManager.joined[client.id] = {client: client, lobby: lobby_id};
+
+        logger.info(`Client ${client.id} hosted lobby ${lobby_id}`);
     }
 
     /**
@@ -131,6 +151,7 @@ class LobbyManager {
     static newLobby(uuid?: string): string {
         if (!uuid) uuid = this.newId();
         if (LobbyManager.lobbies[uuid]) return null;
+        logger.info(`New lobby created with id ${uuid}`);
         LobbyManager.lobbies[uuid] = new Lobby(uuid);
         return uuid;
     }
@@ -149,6 +170,7 @@ class LobbyManager {
     static leave(client: SocketIO.Socket, lobby: Lobby) {
         if (this.joined[client.id]) {
             if (this.joined[client.id].lobby === lobby.getId()) {
+                logger.info(`Client ${client.id} has disconnected`);
                 delete this.joined[client.id];
             }
         }
@@ -161,7 +183,7 @@ interface Sessions {
 
 class SessionMap {
 
-    private lobby: Lobby;
+    private readonly lobby: Lobby;
     private sessions: Sessions = {};
     private clients: { [index: string]: { session: string, client: Socket } } = {};
     private nextId: number;
@@ -202,6 +224,8 @@ class SessionMap {
         this.sessions[session_id] = {ids: ids};
         this.clients[client.id] = {session: session_id, client: client};
 
+        logger.info(`Created a new session for ${client.id} with session id ${session_id}`);
+
         client.emit('joined', {
             ids: this.sessions[session_id].ids,
             session_id: session_id,
@@ -209,6 +233,7 @@ class SessionMap {
             board: this.lobby.getBoard(),
             isHost: !!isHost
         });
+
         return session_id;
     }
 
@@ -225,7 +250,13 @@ class SessionMap {
         delete this.sessions[session_id];
 
         LobbyManager.leave(client, this.lobby);
-        if (this.lobby.isHost(session_id)) this.lobby.close();
+
+        logger.info(`Session removed for client: ${client.id} with session ${session_id} in lobby ${this.lobby.getId()}`);
+
+        if (this.lobby.isHost(session_id)) {
+            logger.info(`Host disconnected in ${this.lobby.getId()}`);
+            this.lobby.close();
+        }
     }
 
     /**
@@ -324,6 +355,7 @@ class SessionMap {
      * Disconnects all the clients.
      */
     disconnect() {
+        logger.info(`Disconnecting all clients in lobby ${this.lobby.getId()}`);
         for (let key in this.clients) {
             if (!this.clients.hasOwnProperty(key)) continue;
             this.clients[key].client.disconnect();
@@ -384,6 +416,9 @@ class SessionMap {
                 }
             }
         if (session_id === null || this.lobby.isHost(session_id)) return;
+
+        logger.info(`Kicked client with session ${session_id} from lobby ${this.lobby.getId()}`);
+
         for (let key in this.clients) {
             if (!this.clients.hasOwnProperty(key)) continue;
             if (this.clients[key].session === session_id) {
@@ -425,6 +460,7 @@ class Lobby {
             bots: false
         };
         this.setLevel("Palooza" + EXTENSION);
+        logger.info("Created lobby with id: " + this.id);
     }
 
     /**
@@ -456,7 +492,8 @@ class Lobby {
 
         this.eventListeners(client);
 
-        logger.log(`Joined ${client.id}, ${this._session_map.calcJoined()}/${this.board ? this.board.metadata.playerAmount : 'NaN'}`);
+        logger.info(`Client ${client.id} joined with session ${session_id}`);
+        logger.info(`Total joined:, ${this._session_map.calcJoined()}/${this.board ? this.board.metadata.playerAmount : 'NaN'}`);
 
         LobbyManager.socket.in(this.id).emit('players', this._session_map.getJoined());
         return session_id;
@@ -470,39 +507,46 @@ class Lobby {
         let that = this;
         client.on('leave', function () {
             safe(() => {
+                logger.info(`Client ${client.id} send "leave" `);
                 that.disconnect(client);
             })
         });
         client.on('disconnect', function () {
             safe(() => {
+                logger.info(`Client ${client.id} send "disconnect" `);
                 that.disconnect(client);
             });
         });
         client.on('move', function (data) {
+            logger.info(`Client ${client.id} send "move" with data ${JSON.stringify(data)}`);
             if (!data) return;
             safe(() => {
                 that.move(client, data);
             });
         });
         client.on('ready', function (data) {
+            logger.info(`Client ${client.id} send "move" with ready ${JSON.stringify(data)}`);
             if (!data) return;
             safe(() => {
                 that.readyToggle(client, data);
             })
         });
         client.on('team', function (data) {
+            logger.info(`Client ${client.id} send "team" with data ${JSON.stringify(data)}`);
             if (!data) return;
             safe(() => {
                 that.teamChange(client, data);
             });
         });
         client.on('map', function (data) {
+            logger.info(`Client ${client.id} send "map" with data ${JSON.stringify(data)}`);
             if (!data) return;
             safe(() => {
                 that.changeMap(client, data);
             })
         });
         client.on('start', function (data) {
+            logger.info(`Client ${client.id} send "start" with data ${JSON.stringify(data)}`);
             if (!data || that.state === State.InProgress || that.state === State.Starting) {
                 client.emit('failed', 'game already started');
                 return;
@@ -512,18 +556,22 @@ class Lobby {
             })
         });
         client.on('options', function (data) {
+            logger.info(`Client ${client.id} send "options" with data ${JSON.stringify(data)}`);
             if (!data) return;
             safe(() => {
                 that.setOptions(client, data);
             });
         });
         client.on('kick', function (data) {
+            logger.info(`Client ${client.id} send "kick" with data ${JSON.stringify(data)}`);
             if (!data) return;
             safe(() => {
                 that.kick(client, data);
             })
         });
         client.on('password', function (data) {
+            logger.info(`Client ${client.id} send "password" with data ${JSON.stringify(data)}`);
+
             if (!data || !data.password || !data.session_id) return;
             safe(() => {
                 if (!that.isHost(data.session_id)) {
@@ -544,7 +592,7 @@ class Lobby {
      */
     disconnect(client: Socket) {
         this._session_map.removeSession(client);
-        logger.log(`Disconnected ${client.id}, ${this._session_map.calcJoined()}/${this.board ? this.board.metadata.playerAmount : 'NaN'}`);
+        logger.info(`Disconnected ${client.id}, ${this._session_map.calcJoined()}/${this.board ? this.board.metadata.playerAmount : 'NaN'}`);
         LobbyManager.socket.in(this.id).emit('players', this._session_map.getJoined());
     }
 
@@ -600,7 +648,6 @@ class Lobby {
             client.emit('failed', 'invalid team');
             return
         }
-        logger.log("Team changed!");
         this._session_map.setTeam(data.session_id, data.team, data.player === 0 ? 0 : 1);
 
         LobbyManager.socket.in(this.id).emit('players', this._session_map.getJoined());
@@ -629,7 +676,6 @@ class Lobby {
      * @param data
      */
     start(client: Socket, data: any): void {
-        logger.log("Starting a game");
         if (!data || !data.session_id || !this.isHost(data.session_id)) {
             client.emit('failed', 'Only host can start');
             return;
@@ -649,6 +695,7 @@ class Lobby {
         if (!this.loadGame()) {
             client.emit('failed', 'Something went wrong with loading.')
         }
+        logger.info(`Start game in lobby ${this.id}`);
 
     }
 
@@ -672,7 +719,10 @@ class Lobby {
                     that.game.gameTick(-1);
                 } catch (e) {
                     LobbyManager.socket.in(that.id).emit('failed', 'something went wrong');
-                    console.warn(e);
+
+                    logger.error('Something happend in the gametick');
+                    logger.error(e);
+
                     that.stop();
                 }
             }, tickRate),
@@ -683,6 +733,9 @@ class Lobby {
 
         this.state = State.InProgress;
         LobbyManager.socket.in(this.id).emit('start', {game: this.game.toJson()});
+
+        logger.info(`Game in ${this.id} has loaded`);
+
         return true;
     }
 
@@ -695,7 +748,8 @@ class Lobby {
         this._session_map.restart();
         LobbyManager.socket.in(this.id).emit('restart');
         LobbyManager.socket.in(this.id).emit('players', this._session_map.getJoined());
-        logger.log("Restart!");
+
+        logger.info(`Restarting game in lobby ${this.id}`);
     }
 
     /**
@@ -727,9 +781,13 @@ class Lobby {
             info = this.setLevel(string.split(/\r?\n/));
         }
         if (!info.success) {
+            logger.info(`Client ${client.id} tried to change map but failed: ${info.message}`);
             client.emit('failed', info.message)
         } else {
             let boardName = !!data.custom ? data.mapName : data.board;
+
+            logger.info(`Client ${client.id} changed map to ${boardName}`);
+
             LobbyManager.socket.in(this.id).emit('map', {boardName: boardName, board: this.board.toJson()});
         }
     }
@@ -788,8 +846,8 @@ class Lobby {
      * @param client
      */
     setPassword(password: string, client?: SocketIO.Socket): void {
-        logger.log("Password set to:" + password);
         this.password = password;
+        logger.info(`Password in lobby ${this.id} set to ${password}`);
         if (client) {
             client.emit('info', 'Password changed!');
         }
@@ -800,6 +858,7 @@ class Lobby {
      * @param {string} uuid
      */
     setHost(uuid: string): void {
+        logger.info(`Host set to ${uuid} in lobby ${this.id}`);
         this.host = uuid;
     }
 
@@ -819,6 +878,9 @@ class Lobby {
         if (this.state !== State.Joining) return;
         LobbyManager.socket.in(this.id).emit('failed', 'Host disconnected', true);
         this._session_map.disconnect();
+
+        logger.info(`Closed lobby ${this.id}`);
+
         delete LobbyManager.socket.nsps[this.id];
         delete LobbyManager.lobbies[this.id];
     }
