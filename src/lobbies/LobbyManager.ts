@@ -26,7 +26,11 @@ const logger = winston.createLogger({
         myFormat
     ),
     transports: [
-        new (winston.transports.File)({filename: 'lobby.log'})
+        new (winston.transports.File)({
+            filename: 'logs/lobby.log',
+            maxFiles: '300',
+            maxsize: 10000000
+        })
     ]
 });
 const UUID: () => string = UUIDv4;
@@ -453,7 +457,7 @@ class Lobby {
 
     private game: Game;
     private board: Board;
-    private boardName : string;
+    private boardName: string;
 
     private interval: { update: Timer, tick: Timer };
 
@@ -622,7 +626,7 @@ class Lobby {
             client.emit('failed', "Incorrect session and id");
             return;
         }
-        if (isNullOrUndefined(data.id)|| !isNumber(data.id)) return;
+        if (isNullOrUndefined(data.id) || !isNumber(data.id)) return;
         if (!data.direction || !isString(data.direction)) return;
 
         let id = data.id;

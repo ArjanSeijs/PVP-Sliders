@@ -15,7 +15,11 @@ var myFormat = format.printf(function (info) {
 var logger = winston.createLogger({
     format: format.combine(format.label({ label: 'LobbyManager' }), format.timestamp(), myFormat),
     transports: [
-        new (winston.transports.File)({ filename: 'lobby.log' })
+        new (winston.transports.File)({
+            filename: 'logs/lobby.log',
+            maxFiles: '300',
+            maxsize: 10000000
+        })
     ]
 });
 var UUID = UUIDv4;
