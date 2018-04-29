@@ -11,6 +11,7 @@ import BoardParser = require("../parsers/BoardParser");
 import Board = require("../classes/Board");
 import Direction = require("../classes/Direction");
 import config = require("../lib/config");
+import SocketIO = require("socket.io");
 
 import Timer = NodeJS.Timer;
 
@@ -24,6 +25,7 @@ interface LobbyMap {
 
 class LobbyManager {
 
+    static joined: { [k: number]: { client: Socket, lobby: string } } = {};
     static socket: Server;
     static game: Game;
 
@@ -37,9 +39,17 @@ class LobbyManager {
         LobbyManager.socket = io(server);
         LobbyManager.socket.on('connection', function (client: Socket) {
             client.on('join', function (data) {
+                if (LobbyManager.joined[client.id]) {
+                    client.emit('failed','You can only join one lobby')
+                    return;
+                }
                 LobbyManager.clientJoin(client, data);
             });
             client.on('host', function (data) {
+                if (LobbyManager.joined[client.id]) {
+                    client.emit('failed','You can only join one lobby')
+                    return;
+                }
                 LobbyManager.clientHost(client, data);
             })
         });
@@ -66,6 +76,7 @@ class LobbyManager {
                 return;
             }
             LobbyManager.lobbies[lobbyId].join(client, data);
+            LobbyManager.joined[client.id] = {client: client, lobby: lobbyId};
         }
     }
 
@@ -90,6 +101,7 @@ class LobbyManager {
 
         let session_id = lobby.join(client, data, true);
         lobby.setHost(session_id);
+        LobbyManager.joined[client.id] = {client: client, lobby: lobby_id};
     }
 
     /**
@@ -113,6 +125,14 @@ class LobbyManager {
 
     static getLobby(uuid: string): Lobby {
         return this.lobbies[uuid];
+    }
+
+    static leave(client: SocketIO.Socket, lobby: Lobby) {
+        if (this.joined[client.id]) {
+            if (this.joined[client.id].lobby === lobby.getId()) {
+                delete this.joined[client.id];
+            }
+        }
     }
 }
 
@@ -151,7 +171,7 @@ class SessionMap {
             return;
         }
         let session_id = UUID();
-        if (this.joined === 0) this.lobby.setHost(session_id);
+        if (this.joined === 0 || isHost) this.lobby.setHost(session_id);
         let ids = [{name: data.username, id: this.nextId++, ready: false, team: "random"}];
         this.joined++;
 
@@ -178,12 +198,20 @@ class SessionMap {
      * @param {SocketIO.Socket} client
      */
     removeSession(client: Socket) {
+        logger.log(JSON.stringify(this.sessions));
+        logger.log(JSON.stringify(Object.keys(this.clients)));
+
         if (!this.isJoined(client.id)) return;
         let session_id = this.clients[client.id].session;
-        if (this.lobby.isHost(session_id)) this.lobby.close();
+
+        logger.log(session_id);
+
         delete this.clients[client.id];
         this.joined -= this.sessions[session_id].ids.length;
         delete this.sessions[session_id];
+
+        LobbyManager.leave(client, this.lobby);
+        if (this.lobby.isHost(session_id)) this.lobby.close();
     }
 
     /**
@@ -426,6 +454,9 @@ class Lobby {
      */
     eventListeners(client: Socket) {
         let that = this;
+        client.on('leave', function () {
+            that.disconnect(client);
+        });
         client.on('disconnect', function () {
             that.disconnect(client);
         });

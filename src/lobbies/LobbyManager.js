@@ -18,9 +18,17 @@ var LobbyManager = (function () {
         LobbyManager.socket = io(server);
         LobbyManager.socket.on('connection', function (client) {
             client.on('join', function (data) {
+                if (LobbyManager.joined[client.id]) {
+                    client.emit('failed', 'You can only join one lobby');
+                    return;
+                }
                 LobbyManager.clientJoin(client, data);
             });
             client.on('host', function (data) {
+                if (LobbyManager.joined[client.id]) {
+                    client.emit('failed', 'You can only join one lobby');
+                    return;
+                }
                 LobbyManager.clientHost(client, data);
             });
         });
@@ -42,6 +50,7 @@ var LobbyManager = (function () {
                 return;
             }
             LobbyManager.lobbies[lobbyId].join(client, data);
+            LobbyManager.joined[client.id] = { client: client, lobby: lobbyId };
         }
     };
     LobbyManager.clientHost = function (client, data) {
@@ -57,6 +66,7 @@ var LobbyManager = (function () {
             lobby.setPassword(data.password);
         var session_id = lobby.join(client, data, true);
         lobby.setHost(session_id);
+        LobbyManager.joined[client.id] = { client: client, lobby: lobby_id };
     };
     LobbyManager.newLobby = function (uuid) {
         if (!uuid)
@@ -77,6 +87,14 @@ var LobbyManager = (function () {
     LobbyManager.getLobby = function (uuid) {
         return this.lobbies[uuid];
     };
+    LobbyManager.leave = function (client, lobby) {
+        if (this.joined[client.id]) {
+            if (this.joined[client.id].lobby === lobby.getId()) {
+                delete this.joined[client.id];
+            }
+        }
+    };
+    LobbyManager.joined = {};
     LobbyManager.lobbies = {};
     return LobbyManager;
 }());
@@ -94,7 +112,7 @@ var SessionMap = (function () {
             return;
         }
         var session_id = UUID();
-        if (this.joined === 0)
+        if (this.joined === 0 || isHost)
             this.lobby.setHost(session_id);
         var ids = [{ name: data.username, id: this.nextId++, ready: false, team: "random" }];
         this.joined++;
@@ -114,14 +132,18 @@ var SessionMap = (function () {
         return session_id;
     };
     SessionMap.prototype.removeSession = function (client) {
+        logger.log(JSON.stringify(this.sessions));
+        logger.log(JSON.stringify(Object.keys(this.clients)));
         if (!this.isJoined(client.id))
             return;
         var session_id = this.clients[client.id].session;
-        if (this.lobby.isHost(session_id))
-            this.lobby.close();
+        logger.log(session_id);
         delete this.clients[client.id];
         this.joined -= this.sessions[session_id].ids.length;
         delete this.sessions[session_id];
+        LobbyManager.leave(client, this.lobby);
+        if (this.lobby.isHost(session_id))
+            this.lobby.close();
     };
     SessionMap.prototype.calcJoined = function () {
         return this.joined;
@@ -287,6 +309,9 @@ var Lobby = (function () {
     };
     Lobby.prototype.eventListeners = function (client) {
         var that = this;
+        client.on('leave', function () {
+            that.disconnect(client);
+        });
         client.on('disconnect', function () {
             that.disconnect(client);
         });

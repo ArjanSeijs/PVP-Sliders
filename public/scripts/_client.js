@@ -114,6 +114,8 @@ function selectMaps() {
             "<option value=\"vertical\">Vertical</option>\n" +
             "<option value=\"DontStopMeNow\">Don't Stop Me Now</option>\n" +
             "<option value=\"IsThisRealLife\">Is this real life?</option>";
+    if (!maps)
+        return;
     Object.keys(maps).forEach((function (map, index, array) {
         select.innerHTML += '<option data-custom=true value="(Custom) ' + map + '">(Custom) ' + map + '</option>';
     }));
