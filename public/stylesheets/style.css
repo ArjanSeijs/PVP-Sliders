@@ -129,6 +129,38 @@
     color: #ff77dc;
 }
 
+.darkgreen {
+    color: #3e7e00;
+}
+
+.darkred {
+    color: #7c0000;
+}
+
+.darkyellow {
+    color: #868600;
+}
+
+.darkblue {
+    color: #042b85;
+}
+
+.darkpurple {
+    color: #4b177b;
+}
+
+.darkcyan {
+    color: #007b7b;
+}
+
+.darkorange {
+    color: #7b5000;
+}
+
+.darkpink {
+    color: #7f3f67;
+}
+
 /* The background will get overwriten without the .playerItem > tag*/
 .playerItem > .greenbg {
     background-color: #7cfc00;
@@ -160,6 +192,46 @@
 
 .playerItem > .pinkbg {
     background-color: #ff77dc;
+}
+
+.playerItem > .darkgreenbg {
+    background-color: #3e7e00;
+    color: white;
+}
+
+.playerItem > .darkredbg {
+    background-color: #7c0000;
+    color: white;
+}
+
+.playerItem > .darkyellowbg {
+    background-color: #868600;
+    color: white;
+}
+
+.playerItem > .darkbluebg {
+    background-color: #042b85;
+    color: white;
+}
+
+.playerItem > .darkpurplebg {
+    background-color: #4b177b;
+    color: white;
+}
+
+.playerItem > .darkcyanbg {
+    background-color: #007b7b;
+    color: white;
+}
+
+.playerItem > .darkorangebg {
+    background-color: #7b5000;
+    color: white;
+}
+
+.playerItem > .darkpinkbg {
+    background-color: #7f3f67;
+    color: white;
 }
 
 .playerItem > .randombg {

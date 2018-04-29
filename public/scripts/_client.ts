@@ -143,6 +143,14 @@ window.onload = function () {
         "assets/player_cyan.png",
         "assets/player_orange.png",
         "assets/player_pink.png",
+        "assets/player_darkblue.png",
+        "assets/player_darkgreen.png",
+        "assets/player_darkred.png",
+        "assets/player_darkyellow.png",
+        "assets/player_darkpurple.png",
+        "assets/player_darkcyan.png",
+        "assets/player_darkorange.png",
+        "assets/player_darkpink.png",
         "assets/board_background.png",
         "assets/stop.png");
     selectMaps();

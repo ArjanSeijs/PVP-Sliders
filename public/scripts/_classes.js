@@ -197,10 +197,10 @@ var View = /** @class */ (function () {
             var entity = client.getGame().entities[key];
             entity.sprite = Util.loadImage("player_" + entity.team + ".png");
             entity.text = new PIXI.Text(entity.name, {
-                fontFamily: 'Arial',
-                fontSize: 12,
-                fill: 0xff1010,
-                align: 'center'
+                fontFamily: '"Lucida Sans Unicode", "Lucida Grande", sans-serif',
+                fontSize: 16,
+                fill: 0xDDDDDD,
+                align: 'center',
             });
             entity.sprite.width = entity.sprite.height = this.size;
             entity.sprite.visible = false;
@@ -283,6 +283,14 @@ var View = /** @class */ (function () {
             this.getOption("cyan", team) +
             this.getOption("orange", team) +
             this.getOption("pink", team) +
+            this.getOption("darkred", team) +
+            this.getOption("darkyellow", team) +
+            this.getOption("darkblue", team) +
+            this.getOption("darkgreen", team) +
+            this.getOption("darkpurple", team) +
+            this.getOption("darkcyan", team) +
+            this.getOption("darkorange", team) +
+            this.getOption("darkpink", team) +
             this.getOption("random", team) +
             "</select>";
     };

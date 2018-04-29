@@ -82,8 +82,12 @@ var LobbyManager = (function () {
         }
     };
     LobbyManager.clientHost = function (client, data) {
-        if (!data || !data.username) {
+        if (!data || !data.username || typeof data.username !== "string") {
             client.emit('failed', 'no username provided');
+            return;
+        }
+        if (data.username.length > 20) {
+            client.emit('failed', 'Username was to long (max 20 chars)');
             return;
         }
         var lobby_id = LobbyManager.newLobby();
@@ -138,8 +142,12 @@ var SessionMap = (function () {
         this.joined = 0;
     }
     SessionMap.prototype.newSession = function (client, data, isHost) {
-        if (!data || !data.username) {
+        if (!data || !data.username || typeof data.username !== "string") {
             client.emit('failed', 'no username');
+            return;
+        }
+        if (data.username.length > 20) {
+            client.emit('failed', 'Username was to long (max 20 chars)');
             return;
         }
         var session_id = UUID();

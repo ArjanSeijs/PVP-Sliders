@@ -125,8 +125,12 @@ class LobbyManager {
      * @param data
      */
     static clientHost(client: Socket, data: any) {
-        if (!data || !data.username) {
+        if (!data || !data.username || typeof data.username !== "string") {
             client.emit('failed', 'no username provided');
+            return;
+        }
+        if (data.username.length > 20) {
+            client.emit('failed', 'Username was to long (max 20 chars)');
             return;
         }
 
@@ -207,10 +211,15 @@ class SessionMap {
      * @return {string} the session id
      */
     newSession(client: Socket, data: any, isHost?: boolean): string {
-        if (!data || !data.username) {
+        if (!data || !data.username || typeof data.username !== "string") {
             client.emit('failed', 'no username');
             return;
         }
+        if (data.username.length > 20) {
+            client.emit('failed', 'Username was to long (max 20 chars)');
+            return;
+        }
+
         let session_id = UUID();
         if (this.joined === 0 || isHost) this.lobby.setHost(session_id);
         let ids = [{name: data.username, id: this.nextId++, ready: false, team: "random"}];
