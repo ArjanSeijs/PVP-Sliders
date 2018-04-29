@@ -85,7 +85,12 @@ var View = /** @class */ (function () {
         this.canvas.renderer.view.style.display = "block";
         this.canvas.renderer.autoResize = true;
         this.canvas.renderer.resize(this.screen_width, this.screen_height);
-        PIXI.loader.add(images).load(function () { return _this.load(onload); });
+        PIXI.loader.add(images).load(function () {
+            var loginDiv = document.getElementById("login");
+            if (loginDiv)
+                loginDiv.style.display = '';
+            _this.load(onload);
+        });
         document.body.appendChild(this.canvas.view);
     }
     View.prototype.load = function (onload) {
@@ -99,9 +104,6 @@ var View = /** @class */ (function () {
             lobbyDiv.value = lobby ? lobby : "";
         this.loaded = true;
         view.loading(false);
-        var loginDiv = document.getElementById("login");
-        if (loginDiv)
-            loginDiv.style.display = '';
         if (onload)
             onload();
     };

@@ -60,11 +60,10 @@
 }
 
 .lobby {
-    margin: 100px auto 100px auto;
-    min-width: 500px;
-    min-height: 500px;
-    width: 30%;
-    height: 30%;
+    display: inline-block;
+    margin: 50px auto 50px auto;
+    min-width: 40%;
+    min-height: calc(80% - 100px);
     background-color: #fff6;
     border: 10px solid #000;
 }

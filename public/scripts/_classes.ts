@@ -123,7 +123,12 @@ class View {
         this.canvas.renderer.view.style.display = "block";
         this.canvas.renderer.autoResize = true;
         this.canvas.renderer.resize(this.screen_width, this.screen_height);
-        PIXI.loader.add(images).load(() => this.load(onload));
+        PIXI.loader.add(images).load(() => {
+                let loginDiv = document.getElementById("login");
+                if (loginDiv) loginDiv.style.display = '';
+                this.load(onload)
+            }
+        );
         document.body.appendChild(this.canvas.view);
     }
 
@@ -139,9 +144,6 @@ class View {
 
         this.loaded = true;
         view.loading(false);
-
-        let loginDiv = document.getElementById("login");
-        if (loginDiv) loginDiv.style.display = '';
 
         if (onload) onload();
     }

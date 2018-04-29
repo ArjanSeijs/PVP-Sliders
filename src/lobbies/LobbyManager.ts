@@ -26,6 +26,7 @@ const logger = winston.createLogger({
         myFormat
     ),
     transports: [
+        new (winston.transports.Console)(),
         new (winston.transports.File)({
             filename: 'logs/lobby.log',
             maxFiles: '300',
@@ -939,14 +940,27 @@ class Lobby {
         return this.id
     }
 
+    /**
+     * 
+     * @return {boolean}
+     */
     isPublic(): boolean {
         return this.password === "";
     }
 
+    /**
+     * 
+     * @param data
+     * @return {boolean}
+     */
     isJoinable(data: any): boolean {
         return this.state === State.Joining && this._session_map.calcJoined() + (!!data.multiplayer ? 2 : 1) <= this.board.metadata.playerAmount
     }
 
+    /**
+     * 
+     * @return {{width: number, height: number, tiles: {x: number, y: number, tile_type: string}[][]}}
+     */
     getBoard(): { width: number; height: number; tiles: { x: number; y: number; tile_type: string }[][] } {
         return this.board ? this.board.toJson() : null;
     }

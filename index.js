@@ -10,7 +10,7 @@ const app = express();
 const port = process.argv[2] || 3000;
 
 app.use('/', express.static(path.join(__dirname, '/public/views')));
-app.use('/assets', express.static(path.join(__dirname, '/public/assets')));
+app.use('/assets', express.static(path.join(__dirname, '/public/assets'), {etag: true}));
 app.use('/images', express.static(path.join(__dirname, '/public/images')));
 app.use('/scripts', express.static(path.join(__dirname, '/public/scripts')));
 app.use('/stylesheets', express.static(path.join(__dirname, '/public/stylesheets')));

@@ -15,6 +15,7 @@ var myFormat = format.printf(function (info) {
 var logger = winston.createLogger({
     format: format.combine(format.label({ label: 'LobbyManager' }), format.timestamp(), myFormat),
     transports: [
+        new (winston.transports.Console)(),
         new (winston.transports.File)({
             filename: 'logs/lobby.log',
             maxFiles: '300',

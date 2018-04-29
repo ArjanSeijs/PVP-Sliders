@@ -225,7 +225,7 @@ function save() {
     }
     maps[name] = encodeMap();
     alert("Map saved!");
-    Cookies.set("maps", maps, { expires: Number.MAX_VALUE });
+    Cookies.set("maps", maps, { expires: 100 * 365 });
 }
 function load() {
     var name = prompt("Load as", "save1");
@@ -249,7 +249,7 @@ function removeSave() {
     var name = prompt("Remove map:", "save1");
     if (maps[name]) {
         delete maps[name];
-        Cookies.set("maps", maps, { expires: Number.MAX_VALUE });
+        Cookies.set("maps", maps, { expires: 100 * 365 });
         return;
     }
     alert("Map removed");
