@@ -1,7 +1,7 @@
 import * as io from "socket.io"
 import {Server, Socket} from "socket.io"
 import * as crypto from "crypto"
-import {isNullOrUndefined, isString} from "util";
+import {isNullOrUndefined, isNumber, isString} from "util";
 import * as winston from "winston";
 import UUIDv4 = require("uuid/v4");
 
@@ -101,7 +101,7 @@ class LobbyManager {
      * @param {*} data The data send on the socket.
      */
     static clientJoin(client: Socket, data: any) {
-        if (!data || (typeof data.lobby !== "string") || (data.lobby !== "" && !LobbyManager.lobbies[data.lobby])) {
+        if (!data || !data.lobby || !isString(data.lobby) || (data.lobby !== "" && !LobbyManager.lobbies[data.lobby])) {
             client.emit('failed', 'lobby does not exist');
         } else {
             logger.info(`Client ${client.id} joined a lobby.`);
@@ -125,7 +125,7 @@ class LobbyManager {
      * @param data
      */
     static clientHost(client: Socket, data: any) {
-        if (!data || !data.username || typeof data.username !== "string") {
+        if (!data || !data.username || !isString(data.username)) {
             client.emit('failed', 'no username provided');
             return;
         }
@@ -138,7 +138,8 @@ class LobbyManager {
         if (!lobby_id) client.emit('failed', 'something went wrong with creating the lobby');
 
         let lobby = LobbyManager.getLobby(lobby_id);
-        if (data.password) lobby.setPassword(data.password);
+        if (data.password && isString(data.password)) lobby.setPassword(data.password);
+        if (data.password && !isString(data.password)) client.emit('failed', 'Warning password was not a string no password set!');
 
         let session_id = lobby.join(client, data, true);
         lobby.setHost(session_id);
@@ -211,7 +212,7 @@ class SessionMap {
      * @return {string} the session id
      */
     newSession(client: Socket, data: any, isHost?: boolean): string {
-        if (!data || !data.username || typeof data.username !== "string") {
+        if (!data || !data.username || !isString(data.username)) {
             client.emit('failed', 'no username');
             return;
         }
@@ -282,7 +283,9 @@ class SessionMap {
      * @return {boolean}
      */
     verifyId(data: any): boolean {
-        if (!data || !data.session_id || isNullOrUndefined(data.id)) return false;
+        if (!data || !data.session_id ||
+            !isString(data.session_id) ||
+            isNullOrUndefined(data.id) || !isNumber(data.id)) return false;
         if (!this.sessions[data.session_id]) return false;
         return this.sessions[data.session_id].ids.filter(x => x.id === data.id).length !== 0;
     }
@@ -581,7 +584,7 @@ class Lobby {
         client.on('password', function (data) {
             logger.info(`Client ${client.id} send "password" with data ${JSON.stringify(data)}`);
 
-            if (!data || !data.password || !data.session_id) return;
+            if (!data || !data.password || !data.session_id || !isString(data.session_id)) return;
             safe(() => {
                 if (!that.isHost(data.session_id)) {
                     client.emit('failed', 'Only host can change password');
@@ -616,6 +619,9 @@ class Lobby {
             client.emit('failed', "Incorrect session and id");
             return;
         }
+        if (!data.id || !isNumber(data.id)) return;
+        if (!data.direction || !isString(data.direction)) return;
+
         let id = data.id;
         let direction = Direction.from(data.direction);
         this.game.move(id, direction);
@@ -627,12 +633,12 @@ class Lobby {
      * @param data
      */
     readyToggle(client: Socket, data: any) {
-        if (!data || !data.session_id || !this._session_map.getSessions()[data.session_id]) {
+        if (!data || !data.session_id || !isString(data.session_id) || !this._session_map.getSessions()[data.session_id]) {
             client.emit('failed', 'invalid session_id');
             return;
         }
 
-        this._session_map.toggleReady(data.session_id, data.ready === true);
+        this._session_map.toggleReady(data.session_id, !!data.ready);
 
         LobbyManager.socket.in(this.id).emit('players', this._session_map.getJoined());
     }
@@ -643,15 +649,16 @@ class Lobby {
      * @param data
      */
     teamChange(client: Socket, data: any) {
-        if (!data || !data.session_id || !this._session_map.getSessions()[data.session_id]) {
+        if (!data || !data.session_id || !isString(data.session_id) || !this._session_map.getSessions()[data.session_id]) {
             client.emit('failed', 'invalid session_id');
             return;
         }
-        // noinspection SuspiciousTypeOfGuard
-        if (typeof(data.team) !== "string") {
+
+        if (!isString(data.team)) {
             client.emit('failed', 'invalid team');
             return;
         }
+
         const teams = config.get("teams");
         if (teams.indexOf(data.team) < 0) {
             client.emit('failed', 'invalid team');
@@ -685,7 +692,7 @@ class Lobby {
      * @param data
      */
     start(client: Socket, data: any): void {
-        if (!data || !data.session_id || !this.isHost(data.session_id)) {
+        if (!data || !data.session_id || !isString(data.session_id) || !this.isHost(data.session_id)) {
             client.emit('failed', 'Only host can start');
             return;
         }
@@ -770,7 +777,7 @@ class Lobby {
         if (this.state !== State.Joining) {
             client.emit('failed', 'game already in progress');
         }
-        if (!data.session_id || !this.isHost(data.session_id)) {
+        if (!data.session_id || !isString(data.session_id) || !this.isHost(data.session_id)) {
             client.emit('failed', 'only host can change map');
             return;
         }
@@ -793,7 +800,7 @@ class Lobby {
             logger.info(`Client ${client.id} tried to change map but failed: ${info.message}`);
             client.emit('failed', info.message)
         } else {
-            let boardName = !!data.custom ? data.mapName : data.board;
+            let boardName = !!data.custom ? data.mapName.toString() : data.board;
 
             logger.info(`Client ${client.id} changed map to ${boardName}`);
 
@@ -808,7 +815,7 @@ class Lobby {
      */
     setLevel(board: string | string[], players?: number): { success: boolean, message?: string } {
         let oldBoard = this.board;
-        if (typeof board === "string") {
+        if (isString(board)) {
             this.board = BoardParser.getBoard(board);
             if (this.board === null) {
                 return {success: false, message: "Could not find file"};
@@ -838,7 +845,7 @@ class Lobby {
      * @param data
      */
     setOptions(client: Socket, data: any): void {
-        if (!data.session_id || !this.isHost(data.session_id)) {
+        if (!data.session_id || !isString(data.session_id) || !this.isHost(data.session_id)) {
             client.emit('failed', 'only host can change options');
             return;
         }
@@ -900,11 +907,11 @@ class Lobby {
      * @param data
      */
     kick(client: Socket, data: any) {
-        if (!data.session_id || !this.isHost(data.session_id)) {
+        if (!data.session_id || !isString(data.session_id) || !this.isHost(data.session_id)) {
             client.emit('failed', 'only host can kick players');
             return;
         }
-        if (!isNullOrUndefined(data.id) && typeof data.id === "number") {
+        if (!isNullOrUndefined(data.id) && isNumber(data.id)) {
             this._session_map.kick(data.id);
         }
     }
@@ -930,7 +937,7 @@ class Lobby {
     }
 
     isJoinable(data: any): boolean {
-        return this.state === State.Joining && this._session_map.calcJoined() + (data.multiplayer ? 2 : 1) <= this.board.metadata.playerAmount
+        return this.state === State.Joining && this._session_map.calcJoined() + (!!data.multiplayer ? 2 : 1) <= this.board.metadata.playerAmount
     }
 
     getBoard(): { width: number; height: number; tiles: { x: number; y: number; tile_type: string }[][] } {

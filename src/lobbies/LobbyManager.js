@@ -62,7 +62,7 @@ var LobbyManager = (function () {
         return new Buffer(crypto.randomBytes(6)).toString("base64");
     };
     LobbyManager.clientJoin = function (client, data) {
-        if (!data || (typeof data.lobby !== "string") || (data.lobby !== "" && !LobbyManager.lobbies[data.lobby])) {
+        if (!data || !data.lobby || !util_1.isString(data.lobby) || (data.lobby !== "" && !LobbyManager.lobbies[data.lobby])) {
             client.emit('failed', 'lobby does not exist');
         }
         else {
@@ -82,7 +82,7 @@ var LobbyManager = (function () {
         }
     };
     LobbyManager.clientHost = function (client, data) {
-        if (!data || !data.username || typeof data.username !== "string") {
+        if (!data || !data.username || !util_1.isString(data.username)) {
             client.emit('failed', 'no username provided');
             return;
         }
@@ -94,8 +94,10 @@ var LobbyManager = (function () {
         if (!lobby_id)
             client.emit('failed', 'something went wrong with creating the lobby');
         var lobby = LobbyManager.getLobby(lobby_id);
-        if (data.password)
+        if (data.password && util_1.isString(data.password))
             lobby.setPassword(data.password);
+        if (data.password && !util_1.isString(data.password))
+            client.emit('failed', 'Warning password was not a string no password set!');
         var session_id = lobby.join(client, data, true);
         lobby.setHost(session_id);
         LobbyManager.joined[client.id] = { client: client, lobby: lobby_id };
@@ -142,7 +144,7 @@ var SessionMap = (function () {
         this.joined = 0;
     }
     SessionMap.prototype.newSession = function (client, data, isHost) {
-        if (!data || !data.username || typeof data.username !== "string") {
+        if (!data || !data.username || !util_1.isString(data.username)) {
             client.emit('failed', 'no username');
             return;
         }
@@ -189,7 +191,9 @@ var SessionMap = (function () {
         return this.joined;
     };
     SessionMap.prototype.verifyId = function (data) {
-        if (!data || !data.session_id || util_1.isNullOrUndefined(data.id))
+        if (!data || !data.session_id ||
+            !util_1.isString(data.session_id) ||
+            util_1.isNullOrUndefined(data.id) || !util_1.isNumber(data.id))
             return false;
         if (!this.sessions[data.session_id])
             return false;
@@ -425,7 +429,7 @@ var Lobby = (function () {
         });
         client.on('password', function (data) {
             logger.info("Client " + client.id + " send \"password\" with data " + JSON.stringify(data));
-            if (!data || !data.password || !data.session_id)
+            if (!data || !data.password || !data.session_id || !util_1.isString(data.session_id))
                 return;
             safe(function () {
                 if (!that.isHost(data.session_id)) {
@@ -449,24 +453,28 @@ var Lobby = (function () {
             client.emit('failed', "Incorrect session and id");
             return;
         }
+        if (!data.id || !util_1.isNumber(data.id))
+            return;
+        if (!data.direction || !util_1.isString(data.direction))
+            return;
         var id = data.id;
         var direction = Direction.from(data.direction);
         this.game.move(id, direction);
     };
     Lobby.prototype.readyToggle = function (client, data) {
-        if (!data || !data.session_id || !this._session_map.getSessions()[data.session_id]) {
+        if (!data || !data.session_id || !util_1.isString(data.session_id) || !this._session_map.getSessions()[data.session_id]) {
             client.emit('failed', 'invalid session_id');
             return;
         }
-        this._session_map.toggleReady(data.session_id, data.ready === true);
+        this._session_map.toggleReady(data.session_id, !!data.ready);
         LobbyManager.socket.in(this.id).emit('players', this._session_map.getJoined());
     };
     Lobby.prototype.teamChange = function (client, data) {
-        if (!data || !data.session_id || !this._session_map.getSessions()[data.session_id]) {
+        if (!data || !data.session_id || !util_1.isString(data.session_id) || !this._session_map.getSessions()[data.session_id]) {
             client.emit('failed', 'invalid session_id');
             return;
         }
-        if (typeof (data.team) !== "string") {
+        if (!util_1.isString(data.team)) {
             client.emit('failed', 'invalid team');
             return;
         }
@@ -493,7 +501,7 @@ var Lobby = (function () {
         }, 5000);
     };
     Lobby.prototype.start = function (client, data) {
-        if (!data || !data.session_id || !this.isHost(data.session_id)) {
+        if (!data || !data.session_id || !util_1.isString(data.session_id) || !this.isHost(data.session_id)) {
             client.emit('failed', 'Only host can start');
             return;
         }
@@ -559,7 +567,7 @@ var Lobby = (function () {
         if (this.state !== State.Joining) {
             client.emit('failed', 'game already in progress');
         }
-        if (!data.session_id || !this.isHost(data.session_id)) {
+        if (!data.session_id || !util_1.isString(data.session_id) || !this.isHost(data.session_id)) {
             client.emit('failed', 'only host can change map');
             return;
         }
@@ -584,14 +592,14 @@ var Lobby = (function () {
             client.emit('failed', info.message);
         }
         else {
-            var boardName = !!data.custom ? data.mapName : data.board;
+            var boardName = !!data.custom ? data.mapName.toString() : data.board;
             logger.info("Client " + client.id + " changed map to " + boardName);
             LobbyManager.socket.in(this.id).emit('map', { boardName: boardName, board: this.board.toJson() });
         }
     };
     Lobby.prototype.setLevel = function (board, players) {
         var oldBoard = this.board;
-        if (typeof board === "string") {
+        if (util_1.isString(board)) {
             this.board = BoardParser.getBoard(board);
             if (this.board === null) {
                 return { success: false, message: "Could not find file" };
@@ -616,7 +624,7 @@ var Lobby = (function () {
         return { success: true };
     };
     Lobby.prototype.setOptions = function (client, data) {
-        if (!data.session_id || !this.isHost(data.session_id)) {
+        if (!data.session_id || !util_1.isString(data.session_id) || !this.isHost(data.session_id)) {
             client.emit('failed', 'only host can change options');
             return;
         }
@@ -650,11 +658,11 @@ var Lobby = (function () {
         delete LobbyManager.lobbies[this.id];
     };
     Lobby.prototype.kick = function (client, data) {
-        if (!data.session_id || !this.isHost(data.session_id)) {
+        if (!data.session_id || !util_1.isString(data.session_id) || !this.isHost(data.session_id)) {
             client.emit('failed', 'only host can kick players');
             return;
         }
-        if (!util_1.isNullOrUndefined(data.id) && typeof data.id === "number") {
+        if (!util_1.isNullOrUndefined(data.id) && util_1.isNumber(data.id)) {
             this._session_map.kick(data.id);
         }
     };
@@ -668,7 +676,7 @@ var Lobby = (function () {
         return this.password === "";
     };
     Lobby.prototype.isJoinable = function (data) {
-        return this.state === State.Joining && this._session_map.calcJoined() + (data.multiplayer ? 2 : 1) <= this.board.metadata.playerAmount;
+        return this.state === State.Joining && this._session_map.calcJoined() + (!!data.multiplayer ? 2 : 1) <= this.board.metadata.playerAmount;
     };
     Lobby.prototype.getBoard = function () {
         return this.board ? this.board.toJson() : null;
