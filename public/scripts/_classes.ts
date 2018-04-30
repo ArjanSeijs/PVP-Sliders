@@ -261,7 +261,7 @@ class View {
             entity.text = new PIXI.Text(entity.name, {
                 fontFamily: '"Lucida Sans Unicode", "Lucida Grande", sans-serif',
                 fontSize: 16,
-                fill: 0xDDDDDD,
+                fill: 0x0000FF,
                 align: 'center',
             });
             entity.sprite.width = entity.sprite.height = this.size;
@@ -274,7 +274,7 @@ class View {
     }
 
     updatePos() {
-        if(!client || !client.getGame()) return;
+        if (!client || !client.getGame()) return;
         let speed = 30;
         let width = client.getGame().board.width;
         let height = client.getGame().board.height;
@@ -327,7 +327,7 @@ class View {
     showLobby(multi: boolean) {
         this.hideAll();
 
-        document.getElementById("startbtn").style.display = 'none'
+        if (!this.isHost) document.getElementById("startbtn").style.display = 'none';
         document.getElementById("game-lobby").style.display = '';
         document.getElementById('wrapper').style.display = '';
 
@@ -446,6 +446,13 @@ class View {
         (document.getElementById('selected-map') as HTMLDivElement).innerHTML = 'Map: ' + data.boardName;
         (document.getElementById('player-total') as HTMLSpanElement).innerHTML = data.board.players;
     }
+
+    showStarting(b: boolean) {
+        let elm = document.getElementById('starting');
+        if (!elm) return;
+        if (b) elm.style.display = '';
+        else elm.style.display = 'none';
+    }
 }
 
 class Client implements ClientInterface {
@@ -464,7 +471,27 @@ class Client implements ClientInterface {
         this.game = data.game;
         view.displayGame();
         view.makeSprites();
-        this.timer = setInterval(() => view.updatePos(), 15);
+        view.showStarting(true);
+
+        let timeout = data.start - new Date().getTime();
+        let interval = null;
+
+        if (timeout > 0) interval = setInterval(() => this.count(data.start), 10);
+
+        setTimeout(() => {
+            if (interval) clearInterval(interval);
+
+            this.timer = setInterval(() => view.updatePos(), 15);
+            view.showStarting(false);
+        }, timeout > 0 ? timeout : 10);
+    }
+
+    count(start: number) {
+        let elm = document.getElementById("count") as HTMLDivElement;
+        if (!elm) return;
+        let i = Math.floor((start - new Date().getTime()) / 1000);
+        if (i !== 0) elm.innerHTML = i.toString();
+        else elm.innerHTML = "GO!";
     }
 
     stop(entity: any) {

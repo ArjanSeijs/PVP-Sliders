@@ -739,6 +739,7 @@ class Lobby {
         this.interval = {
             tick: setInterval(function () {
                 try {
+                    if (that.state !== State.InProgress) return;
                     if (that.game.isFinished()) that.stop();
                     let now = new Date().getTime();
                     that.game.gameTick((now - that.interval.time), tickRate);
@@ -758,8 +759,9 @@ class Lobby {
             time: new Date().getTime()
         };
 
-        this.state = State.InProgress;
-        LobbyManager.socket.in(this.id).emit('start', {game: this.game.toJson()});
+        this.state = State.Starting;
+        setTimeout(() => this.state = State.InProgress, 5000);
+        LobbyManager.socket.in(this.id).emit('start', {game: this.game.toJson(), start: new Date().getTime() + 5000});
 
         logger.info(`Game in ${this.id} has loaded`);
 

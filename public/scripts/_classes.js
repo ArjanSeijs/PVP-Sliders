@@ -209,7 +209,7 @@ var View = /** @class */ (function () {
             entity.text = new PIXI.Text(entity.name, {
                 fontFamily: '"Lucida Sans Unicode", "Lucida Grande", sans-serif',
                 fontSize: 16,
-                fill: 0xDDDDDD,
+                fill: 0x0000FF,
                 align: 'center',
             });
             entity.sprite.width = entity.sprite.height = this.size;
@@ -270,7 +270,8 @@ var View = /** @class */ (function () {
     };
     View.prototype.showLobby = function (multi) {
         this.hideAll();
-        document.getElementById("startbtn").style.display = 'none';
+        if (!this.isHost)
+            document.getElementById("startbtn").style.display = 'none';
         document.getElementById("game-lobby").style.display = '';
         document.getElementById('wrapper').style.display = '';
         this.resize();
@@ -379,6 +380,15 @@ var View = /** @class */ (function () {
         document.getElementById('selected-map').innerHTML = 'Map: ' + data.boardName;
         document.getElementById('player-total').innerHTML = data.board.players;
     };
+    View.prototype.showStarting = function (b) {
+        var elm = document.getElementById('starting');
+        if (!elm)
+            return;
+        if (b)
+            elm.style.display = '';
+        else
+            elm.style.display = 'none';
+    };
     return View;
 }());
 var Client = /** @class */ (function () {
@@ -387,10 +397,31 @@ var Client = /** @class */ (function () {
         this.id_p2 = { id: -1, ready: false };
     }
     Client.prototype.start = function (data) {
+        var _this = this;
         this.game = data.game;
         view.displayGame();
         view.makeSprites();
-        this.timer = setInterval(function () { return view.updatePos(); }, 15);
+        view.showStarting(true);
+        var timeout = data.start - new Date().getTime();
+        var interval = null;
+        if (timeout > 0)
+            interval = setInterval(function () { return _this.count(data.start); }, 10);
+        setTimeout(function () {
+            if (interval)
+                clearInterval(interval);
+            _this.timer = setInterval(function () { return view.updatePos(); }, 15);
+            view.showStarting(false);
+        }, timeout > 0 ? timeout : 10);
+    };
+    Client.prototype.count = function (start) {
+        var elm = document.getElementById("count");
+        if (!elm)
+            return;
+        var i = Math.floor((start - new Date().getTime()) / 1000);
+        if (i !== 0)
+            elm.innerHTML = i.toString();
+        else
+            elm.innerHTML = "GO!";
     };
     Client.prototype.stop = function (entity) {
         entity.direction = { x: 0, y: 0, string: "NONE" };

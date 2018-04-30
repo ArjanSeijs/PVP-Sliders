@@ -530,6 +530,7 @@ var Lobby = (function () {
         logger.info("Start game in lobby " + this.id);
     };
     Lobby.prototype.loadGame = function () {
+        var _this = this;
         var that = this;
         if ((this._session_map.calcJoined() < 2 && !this.options.bots) || util_1.isNullOrUndefined(this.board))
             return false;
@@ -541,6 +542,8 @@ var Lobby = (function () {
         this.interval = {
             tick: setInterval(function () {
                 try {
+                    if (that.state !== State.InProgress)
+                        return;
                     if (that.game.isFinished())
                         that.stop();
                     var now = new Date().getTime();
@@ -559,8 +562,9 @@ var Lobby = (function () {
             }, updateRate),
             time: new Date().getTime()
         };
-        this.state = State.InProgress;
-        LobbyManager.socket.in(this.id).emit('start', { game: this.game.toJson() });
+        this.state = State.Starting;
+        setTimeout(function () { return _this.state = State.InProgress; }, 5000);
+        LobbyManager.socket.in(this.id).emit('start', { game: this.game.toJson(), start: new Date().getTime() + 5000 });
         logger.info("Game in " + this.id + " has loaded");
         return true;
     };

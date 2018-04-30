@@ -124,7 +124,7 @@
     color: #ffa500;
 }
 
-.pink  {
+.pink {
     color: #ff77dc;
 }
 
@@ -237,6 +237,16 @@
     background-color: #999a9a;
 }
 
+.starting {
+    font-size: 10em;
+    color: #0000ff;
+    z-index: 1;
+    position: absolute;
+    bottom: 50%;
+    width: 400px;
+    left: calc(50% - 200px);
+    margin: 0 auto 0 auto;
+}
 
 #loading {
     position: absolute;
@@ -251,6 +261,7 @@
     right: 10px;
     top: 10px;
 }
+
 /* Editor */
 .helper {
     position: absolute;
