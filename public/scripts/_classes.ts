@@ -313,12 +313,21 @@ class View {
         document.getElementById('maps').style.display = '';
         document.getElementById('botsBox').style.display = '';
         document.getElementById("changePassword").style.display = '';
+        document.getElementById("startbtn").style.display = '';
         this.isHost = true;
+    }
+
+    showLogin() {
+        this.hideAll();
+        this.isHost = false;
+        document.getElementById("login").style.display = '';
+        document.getElementById('wrapper').style.display = '';
     }
 
     showLobby(multi: boolean) {
         this.hideAll();
 
+        document.getElementById("startbtn").style.display = 'none'
         document.getElementById("game-lobby").style.display = '';
         document.getElementById('wrapper').style.display = '';
 

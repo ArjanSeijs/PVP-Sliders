@@ -105,9 +105,13 @@ var SocketHandler = /** @class */ (function () {
         view.loading(true);
         this.socket.emit('password', { session_id: this.session_id, password: value });
     };
+    SocketHandler.prototype.disconnect = function () {
+        this.socket.disconnect();
+    };
     return SocketHandler;
 }());
-window.onload = function () {
+window.onload = init;
+function init() {
     socketListener = new SocketHandler();
     client = new Client();
     Util.setFormData(Cookies.get("username"), Cookies.get("multiplayer"), Cookies.get("lobby"), Cookies.get("password"));
@@ -117,7 +121,8 @@ window.onload = function () {
     var elm = document.getElementById("bots");
     if (elm)
         elm.checked = false;
-};
+}
+;
 function selectMaps() {
     var maps = Cookies.getJSON("maps");
     var select = document.getElementById("mapselect");
@@ -249,6 +254,15 @@ function _loadBase64() {
     socketListener.sendMap(value, true, "(Custom)");
 }
 function _leave() {
-    window.location.reload();
+    if (socketListener)
+        socketListener.disconnect();
+    socketListener = new SocketHandler();
+    client = new Client();
+    Util.setFormData(Cookies.get("username"), Cookies.get("multiplayer"), Cookies.get("lobby"), Cookies.get("password"));
+    selectMaps();
+    var elm = document.getElementById("bots");
+    if (elm)
+        elm.checked = false;
+    view.showLogin();
 }
 //# sourceMappingURL=_client.js.map

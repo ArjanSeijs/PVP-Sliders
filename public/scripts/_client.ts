@@ -128,9 +128,15 @@ class SocketHandler {
         view.loading(true);
         this.socket.emit('password', {session_id: this.session_id, password: value});
     }
+
+    disconnect() {
+        this.socket.disconnect();
+    }
 }
 
-window.onload = function () {
+window.onload = init;
+
+function init() {
     socketListener = new SocketHandler();
     client = new Client();
     Util.setFormData(Cookies.get("username"), Cookies.get("multiplayer"), Cookies.get("lobby"), Cookies.get("password"));
@@ -303,7 +309,14 @@ function _loadBase64() {
 }
 
 function _leave() {
-    window.location.reload();
+    if(socketListener) socketListener.disconnect();
+    socketListener = new SocketHandler();
+    client = new Client();
+    Util.setFormData(Cookies.get("username"), Cookies.get("multiplayer"), Cookies.get("lobby"), Cookies.get("password"));
+    selectMaps();
+    let elm = document.getElementById("bots") as HTMLInputElement;
+    if (elm) elm.checked = false;
+    view.showLogin();
 }
 
 

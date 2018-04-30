@@ -259,10 +259,18 @@ var View = /** @class */ (function () {
         document.getElementById('maps').style.display = '';
         document.getElementById('botsBox').style.display = '';
         document.getElementById("changePassword").style.display = '';
+        document.getElementById("startbtn").style.display = '';
         this.isHost = true;
+    };
+    View.prototype.showLogin = function () {
+        this.hideAll();
+        this.isHost = false;
+        document.getElementById("login").style.display = '';
+        document.getElementById('wrapper').style.display = '';
     };
     View.prototype.showLobby = function (multi) {
         this.hideAll();
+        document.getElementById("startbtn").style.display = 'none';
         document.getElementById("game-lobby").style.display = '';
         document.getElementById('wrapper').style.display = '';
         this.resize();
