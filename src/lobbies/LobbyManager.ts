@@ -460,7 +460,7 @@ class Lobby {
     private board: Board;
     private boardName: string;
 
-    private interval: { update: Timer, tick: Timer };
+    private interval: { update: Timer, tick: Timer, time: number };
 
     private readonly _session_map: SessionMap;
     private state: State;
@@ -740,7 +740,9 @@ class Lobby {
             tick: setInterval(function () {
                 try {
                     if (that.game.isFinished()) that.stop();
-                    that.game.gameTick(-1);
+                    let now = new Date().getTime();
+                    that.game.gameTick((now - that.interval.time), tickRate);
+                    that.interval.time = now;
                 } catch (e) {
                     LobbyManager.socket.in(that.id).emit('failed', 'something went wrong');
 
@@ -752,7 +754,8 @@ class Lobby {
             }, tickRate),
             update: setInterval(function () {
                 LobbyManager.socket.in(that.id).emit("update", that.game.entitiesJson());
-            }, updateRate)
+            }, updateRate),
+            time: new Date().getTime()
         };
 
         this.state = State.InProgress;
@@ -941,7 +944,7 @@ class Lobby {
     }
 
     /**
-     * 
+     *
      * @return {boolean}
      */
     isPublic(): boolean {
@@ -949,7 +952,7 @@ class Lobby {
     }
 
     /**
-     * 
+     *
      * @param data
      * @return {boolean}
      */
@@ -958,7 +961,7 @@ class Lobby {
     }
 
     /**
-     * 
+     *
      * @return {{width: number, height: number, tiles: {x: number, y: number, tile_type: string}[][]}}
      */
     getBoard(): { width: number; height: number; tiles: { x: number; y: number; tile_type: string }[][] } {

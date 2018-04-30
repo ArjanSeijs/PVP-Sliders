@@ -6,16 +6,17 @@ var CollisionHandler = (function () {
     function CollisionHandler(game) {
         this.game = game;
     }
-    CollisionHandler.prototype.collisions = function (tps) {
+    CollisionHandler.prototype.collisions = function (ms, interval) {
+        var factor = ms / interval;
         var entities = this.game.entities;
         for (var key in entities) {
             if (entities.hasOwnProperty(key)) {
                 var entity = entities[key];
-                this.handleCollisions(entity, 30);
+                this.handleCollisions(entity, config.get("speed"), factor);
             }
         }
     };
-    CollisionHandler.prototype.handleCollisions = function (entity, speed) {
+    CollisionHandler.prototype.handleCollisions = function (entity, speed, factor) {
         var entities = this.game.entities;
         var dir = entity.direction.curr;
         if (dir === Direction.None)
@@ -23,16 +24,16 @@ var CollisionHandler = (function () {
         for (var key in entities) {
             if (entities.hasOwnProperty(key)) {
                 var other = entities[key];
-                this.collisionCheck(entity, other, speed);
+                this.collisionCheck(entity, other, speed, factor);
             }
         }
     };
-    CollisionHandler.prototype.collisionCheck = function (entity, other, speed) {
+    CollisionHandler.prototype.collisionCheck = function (entity, other, speed, factor) {
         if (entity === other)
             return;
         var dir = entity.direction.curr;
-        var newX = entity.pos.x + dir.x * speed;
-        var newY = entity.pos.y + dir.y * speed;
+        var newX = entity.pos.x + dir.x * speed * factor;
+        var newY = entity.pos.y + dir.y * speed * factor;
         if (other.collides(entity, newX, newY)) {
             if (other.team === entity.team && other.collidesNow(entity, newX, newY)) {
                 this.bounce(entity, other, speed);
@@ -99,30 +100,31 @@ var CollisionHandler = (function () {
         else {
         }
     };
-    CollisionHandler.prototype.movement = function (tps) {
+    CollisionHandler.prototype.movement = function (ms, interval) {
+        var factor = ms / interval;
         var entities = this.game.entities;
         for (var key in entities) {
             if (entities.hasOwnProperty(key)) {
                 var entity = entities[key];
-                this.handleMove(entity, config.get("speed"));
+                this.handleMove(entity, config.get("speed"), factor);
             }
         }
     };
-    CollisionHandler.prototype.handleMove = function (entity, speed) {
+    CollisionHandler.prototype.handleMove = function (entity, speed, factor) {
         entity.updateDir();
-        if (this.isFree(entity, speed) && !this.isStop(entity, speed)) {
+        if (this.isFree(entity, speed, factor) && !this.isStop(entity, speed, factor)) {
             var dir = entity.direction.curr;
-            entity.pos.x += dir.x * speed;
-            entity.pos.y += dir.y * speed;
+            entity.pos.x += dir.x * speed * factor;
+            entity.pos.y += dir.y * speed * factor;
         }
         else {
             entity.stop();
         }
     };
-    CollisionHandler.prototype.isFree = function (entity, speed) {
+    CollisionHandler.prototype.isFree = function (entity, speed, factor) {
         var dir = entity.direction.curr;
-        var newX = entity.pos.x + dir.x * speed;
-        var newY = entity.pos.y + dir.y * speed;
+        var newX = entity.pos.x + dir.x * speed * factor;
+        var newY = entity.pos.y + dir.y * speed * factor;
         if (!this.inBounds(newX, newY, entity))
             return false;
         return this.isFreeAt(entity, speed, newX, newY);
@@ -141,11 +143,11 @@ var CollisionHandler = (function () {
                 return true;
         }
     };
-    CollisionHandler.prototype.isStop = function (entity, speed) {
+    CollisionHandler.prototype.isStop = function (entity, speed, factor) {
         var cellSize = 100;
         var dir = entity.direction.curr;
-        var newX = entity.pos.x + dir.x * speed;
-        var newY = entity.pos.y + dir.y * speed;
+        var newX = entity.pos.x + dir.x * speed * factor;
+        var newY = entity.pos.y + dir.y * speed * factor;
         if (!this.inBounds(newX, newY, entity))
             return false;
         var tile = null;

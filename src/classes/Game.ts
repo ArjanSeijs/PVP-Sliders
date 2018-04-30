@@ -49,10 +49,11 @@ class Game implements ToJson {
 
     /**
      *
-     * @param {number} tps
+     * @param {number} ms The amount of ms since last tick.
+     * @param {number} interval The goal interval.
      */
-    gameTick(tps: number) {
-        this.collisionManager.collisions(tps);
+    gameTick(ms: number, interval: number) {
+        this.collisionManager.collisions(ms, interval);
 
         for (let key in this.entities) {
             if (!this.entities.hasOwnProperty(key)) continue;
@@ -65,7 +66,7 @@ class Game implements ToJson {
             entity.gameTick();
         }
 
-        this.collisionManager.movement(tps);
+        this.collisionManager.movement(ms, interval);
     }
 
     /**

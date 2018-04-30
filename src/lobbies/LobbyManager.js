@@ -543,7 +543,9 @@ var Lobby = (function () {
                 try {
                     if (that.game.isFinished())
                         that.stop();
-                    that.game.gameTick(-1);
+                    var now = new Date().getTime();
+                    that.game.gameTick((now - that.interval.time), tickRate);
+                    that.interval.time = now;
                 }
                 catch (e) {
                     LobbyManager.socket.in(that.id).emit('failed', 'something went wrong');
@@ -554,7 +556,8 @@ var Lobby = (function () {
             }, tickRate),
             update: setInterval(function () {
                 LobbyManager.socket.in(that.id).emit("update", that.game.entitiesJson());
-            }, updateRate)
+            }, updateRate),
+            time: new Date().getTime()
         };
         this.state = State.InProgress;
         LobbyManager.socket.in(this.id).emit('start', { game: this.game.toJson() });

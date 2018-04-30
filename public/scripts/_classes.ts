@@ -274,6 +274,7 @@ class View {
     }
 
     updatePos() {
+        if(!client || !client.getGame()) return;
         let speed = 30;
         let width = client.getGame().board.width;
         let height = client.getGame().board.height;

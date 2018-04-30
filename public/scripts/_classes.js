@@ -221,6 +221,8 @@ var View = /** @class */ (function () {
         }
     };
     View.prototype.updatePos = function () {
+        if (!client || !client.getGame())
+            return;
         var speed = 30;
         var width = client.getGame().board.width;
         var height = client.getGame().board.height;

@@ -21,8 +21,8 @@ var Game = (function () {
             entity.move(direction);
         }
     };
-    Game.prototype.gameTick = function (tps) {
-        this.collisionManager.collisions(tps);
+    Game.prototype.gameTick = function (ms, interval) {
+        this.collisionManager.collisions(ms, interval);
         for (var key in this.entities) {
             if (!this.entities.hasOwnProperty(key))
                 continue;
@@ -32,7 +32,7 @@ var Game = (function () {
             }
             entity.gameTick();
         }
-        this.collisionManager.movement(tps);
+        this.collisionManager.movement(ms, interval);
     };
     Game.prototype.end = function (winners) {
         this.state = State.Finished;

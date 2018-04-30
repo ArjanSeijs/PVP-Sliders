@@ -19,16 +19,18 @@ class CollisionHandler {
 
     /**
      * Handle all the collisions.
-     * @param {number} tps The ticks per second.
+     * @param {number} ms The time in ms since last tick
+     * @param interval The goal interval
      */
-    collisions(tps: number): void {
+    collisions(ms: number, interval: number): void {
+        const factor = ms / interval;
         const entities = this.game.entities;
         for (let key in entities) {
             if (entities.hasOwnProperty(key)) {
                 /** @type Entity */
                 let entity = entities[key];
                 //TODO Speed
-                this.handleCollisions(entity, 30);
+                this.handleCollisions(entity, config.get("speed"), factor);
             }
         }
     }
@@ -37,8 +39,9 @@ class CollisionHandler {
      *
      * @param {Entity} entity
      * @param {number} speed
+     * @param factor
      */
-    private handleCollisions(entity: Entity, speed: number): void {
+    private handleCollisions(entity: Entity, speed: number, factor: number): void {
         const entities = this.game.entities;
 
         let dir = entity.direction.curr;
@@ -47,7 +50,7 @@ class CollisionHandler {
             if (entities.hasOwnProperty(key)) {
                 /** @type Entity */
                 let other = entities[key];
-                this.collisionCheck(entity, other, speed);
+                this.collisionCheck(entity, other, speed, factor);
             }
         }
     }
@@ -57,14 +60,15 @@ class CollisionHandler {
      * @param {Entity} entity
      * @param {Entity} other
      * @param {number} speed
+     * @param factor
      */
-    private collisionCheck(entity: Entity, other: Entity, speed: number) {
+    private collisionCheck(entity: Entity, other: Entity, speed: number, factor: number) {
         if (entity === other) return;
 
         let dir = entity.direction.curr;
         //TODO Depends ons TPS
-        let newX = entity.pos.x + dir.x * speed;
-        let newY = entity.pos.y + dir.y * speed;
+        let newX = entity.pos.x + dir.x * speed * factor;
+        let newY = entity.pos.y + dir.y * speed * factor;
 
         if (other.collides(entity, newX, newY)) {
             if (other.team === entity.team && other.collidesNow(entity, newX, newY)) {
@@ -150,14 +154,16 @@ class CollisionHandler {
 
     /**
      * Move all the entities.
-     * @param {number} tps
+     * @param {number} ms Time since last interval.
+     * @param {number} interval The goal interval.
      */
-    movement(tps: number) {
+    movement(ms: number, interval: number) {
+        const factor = ms / interval;
         const entities = this.game.entities;
         for (let key in entities) {
             if (entities.hasOwnProperty(key)) {
                 let entity = entities[key];
-                this.handleMove(entity, config.get("speed"));
+                this.handleMove(entity, config.get("speed"), factor);
             }
         }
     }
@@ -166,15 +172,16 @@ class CollisionHandler {
      * Update the position of the entity if it is able to move.
      * @param {Entity} entity
      * @param {Number} speed
+     * @param factor
      */
-    handleMove(entity: Entity, speed: number) {
+    handleMove(entity: Entity, speed: number, factor: number) {
         entity.updateDir();
         //TODO Depends on TPS
         //TODO Binary search over speed?
-        if (this.isFree(entity, speed) && !this.isStop(entity, speed)) {
+        if (this.isFree(entity, speed, factor) && !this.isStop(entity, speed, factor)) {
             let dir = entity.direction.curr;
-            entity.pos.x += dir.x * speed;
-            entity.pos.y += dir.y * speed;
+            entity.pos.x += dir.x * speed * factor;
+            entity.pos.y += dir.y * speed * factor;
         } else {
             entity.stop();
         }
@@ -184,14 +191,15 @@ class CollisionHandler {
      * Checks if the next position is in bounds and there is no wall.
      * @param {Entity} entity
      * @param {number} speed
+     * @param factor
      * @return {boolean}
      */
-    isFree(entity: Entity, speed: number): boolean {
+    isFree(entity: Entity, speed: number, factor : number): boolean {
         let dir = entity.direction.curr;
 
         //TODO Depends ons TPS
-        let newX = entity.pos.x + dir.x * speed;
-        let newY = entity.pos.y + dir.y * speed;
+        let newX = entity.pos.x + dir.x * speed * factor;
+        let newY = entity.pos.y + dir.y * speed * factor;
 
         if (!this.inBounds(newX, newY, entity)) return false;
         return this.isFreeAt(entity, speed, newX, newY);
@@ -225,15 +233,16 @@ class CollisionHandler {
      * Checks if the entity will collide with a stop tile.
      * @param {Entity} entity
      * @param {number} speed
+     * @param factor
      * @return {boolean}
      */
-    private isStop(entity: Entity, speed: number): boolean {
+    private isStop(entity: Entity, speed: number, factor : number): boolean {
         const cellSize = 100;
         let dir = entity.direction.curr;
 
         //TODO Depends ons TPS
-        let newX = entity.pos.x + dir.x * speed;
-        let newY = entity.pos.y + dir.y * speed;
+        let newX = entity.pos.x + dir.x * speed * factor;
+        let newY = entity.pos.y + dir.y * speed * factor;
 
         if (!this.inBounds(newX, newY, entity)) return false;
         let tile: Tile = null;
