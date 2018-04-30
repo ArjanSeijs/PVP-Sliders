@@ -114,6 +114,9 @@ window.onload = function () {
     view = new View(null, "assets/block.png", "assets/background.png", "assets/player_blue.png", "assets/player_green.png", "assets/player_red.png", "assets/player_yellow.png", "assets/player_purple.png", "assets/player_cyan.png", "assets/player_orange.png", "assets/player_pink.png", "assets/player_darkblue.png", "assets/player_darkgreen.png", "assets/player_darkred.png", "assets/player_darkyellow.png", "assets/player_darkpurple.png", "assets/player_darkcyan.png", "assets/player_darkorange.png", "assets/player_darkpink.png", "assets/board_background.png", "assets/stop.png");
     view.loading(true);
     selectMaps();
+    var elm = document.getElementById("bots");
+    if (elm)
+        elm.checked = false;
 };
 function selectMaps() {
     var maps = Cookies.getJSON("maps");
@@ -126,6 +129,7 @@ function selectMaps() {
             "<option value=\"Palooza\" selected=\"selected\">Palooza</option>\n" +
             "<option value=\"vertical\">Vertical</option>\n" +
             "<option value=\"DontStopMeNow\">Don't Stop Me Now</option>\n" +
+            "<option value=\"MsHyde\">Ms Hyde</option>\n" +
             "<option value=\"IsThisRealLife\">Is this real life?</option>";
     if (!maps)
         return;

@@ -10,7 +10,7 @@ class SocketHandler {
         this.socket.on('start', (data) => this.onStart(data));
         this.socket.on('update', (data) => this.onUpdate(data));
         this.socket.on('failed', (data, refresh) => this.onFailed(data, refresh));
-        this.socket.on('info',(data) => this.onInfo(data));
+        this.socket.on('info', (data) => this.onInfo(data));
         this.socket.on('joined', (data) => this.onJoined(data));
         this.socket.on('restart', (data) => this.onRestart(data));
         this.socket.on('players', (data) => this.onPlayers(data));
@@ -156,6 +156,8 @@ window.onload = function () {
         "assets/stop.png");
     view.loading(true);
     selectMaps();
+    let elm = document.getElementById("bots") as HTMLInputElement;
+    if (elm) elm.checked = false;
 };
 
 function selectMaps() {
@@ -169,6 +171,7 @@ function selectMaps() {
         "<option value=\"Palooza\" selected=\"selected\">Palooza</option>\n" +
         "<option value=\"vertical\">Vertical</option>\n" +
         "<option value=\"DontStopMeNow\">Don't Stop Me Now</option>\n" +
+        "<option value=\"MsHyde\">Ms Hyde</option>\n" +
         "<option value=\"IsThisRealLife\">Is this real life?</option>";
     if (!maps) return;
     Object.keys(maps).forEach(((map, index, array) => {
@@ -296,7 +299,7 @@ function _password() {
 
 function _loadBase64() {
     let value = prompt("Give the encoded string to parse");
-    socketListener.sendMap(value,true,"(Custom)");
+    socketListener.sendMap(value, true, "(Custom)");
 }
 
 function _leave() {

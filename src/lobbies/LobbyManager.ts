@@ -663,13 +663,13 @@ class Lobby {
         }
 
         if (!isString(data.team)) {
-            client.emit('failed', 'invalid team');
+            client.emit('failed', 'invalid team, team should be string');
             return;
         }
 
         const teams = config.get("teams");
         if (teams.indexOf(data.team) < 0) {
-            client.emit('failed', 'invalid team');
+            client.emit('failed', 'invalid team, team not found');
             return
         }
         this._session_map.setTeam(data.session_id, data.team, data.player === 0 ? 0 : 1);
@@ -691,7 +691,7 @@ class Lobby {
             safe(() => {
                 that.restart();
             })
-        }, 5000);
+        }, 2000);
     }
 
     /**
@@ -729,7 +729,7 @@ class Lobby {
      */
     loadGame(): boolean {
         let that = this;
-        if (this._session_map.calcJoined() < 2 || isNullOrUndefined(this.board)) return false;
+        if ((this._session_map.calcJoined() < 2 && !this.options.bots) || isNullOrUndefined(this.board)) return false;
 
         this.game = GameParser.create(this.board, this._session_map.calcJoined(), this._session_map.getSessions(), this.options);
         if (this.game === null) return false;

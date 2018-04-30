@@ -8,7 +8,8 @@ let config = {};
  * @return {*}
  */
 module.exports.get = function (variable) {
-    return config[variable]
+    //TODO better copy method.
+    return JSON.parse(JSON.stringify(config[variable]));
 };
 
 /**

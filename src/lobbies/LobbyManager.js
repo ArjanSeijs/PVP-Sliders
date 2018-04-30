@@ -482,12 +482,12 @@ var Lobby = (function () {
             return;
         }
         if (!util_1.isString(data.team)) {
-            client.emit('failed', 'invalid team');
+            client.emit('failed', 'invalid team, team should be string');
             return;
         }
         var teams = config.get("teams");
         if (teams.indexOf(data.team) < 0) {
-            client.emit('failed', 'invalid team');
+            client.emit('failed', 'invalid team, team not found');
             return;
         }
         this._session_map.setTeam(data.session_id, data.team, data.player === 0 ? 0 : 1);
@@ -505,7 +505,7 @@ var Lobby = (function () {
             safe(function () {
                 that.restart();
             });
-        }, 5000);
+        }, 2000);
     };
     Lobby.prototype.start = function (client, data) {
         if (!data || !data.session_id || !util_1.isString(data.session_id) || !this.isHost(data.session_id)) {
@@ -531,7 +531,7 @@ var Lobby = (function () {
     };
     Lobby.prototype.loadGame = function () {
         var that = this;
-        if (this._session_map.calcJoined() < 2 || util_1.isNullOrUndefined(this.board))
+        if ((this._session_map.calcJoined() < 2 && !this.options.bots) || util_1.isNullOrUndefined(this.board))
             return false;
         this.game = GameParser.create(this.board, this._session_map.calcJoined(), this._session_map.getSessions(), this.options);
         if (this.game === null)
