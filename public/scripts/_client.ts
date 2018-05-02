@@ -84,7 +84,7 @@ class SocketHandler {
     }
 
     sendReady(ready: boolean): void {
-        this.socket.emit('ready', {session_id: this.session_id, ready: ready});
+        this.socket.emit('ready', {session_id: this.session_id});
     }
 
     sendJoin(data: {}): void {

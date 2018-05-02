@@ -237,7 +237,7 @@ var SessionMap = (function () {
         }
         return joined;
     };
-    SessionMap.prototype.toggleReady = function (session_id, ready) {
+    SessionMap.prototype.setReady = function (session_id, ready) {
         if (!this.sessions[session_id])
             return;
         for (var _i = 0, _a = this.sessions[session_id].ids; _i < _a.length; _i++) {
@@ -491,7 +491,7 @@ var Lobby = (function () {
             client.emit('failed', 'invalid session_id');
             return;
         }
-        this._session_map.toggleReady(data.session_id, !!data.ready);
+        this._session_map.setReady(data.session_id, true);
         LobbyManager.socket.in(this.id).emit('players', this._session_map.getJoined());
     };
     Lobby.prototype.teamChange = function (client, data) {

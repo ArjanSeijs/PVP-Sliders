@@ -356,7 +356,7 @@ var View = /** @class */ (function () {
         document.getElementById("player-amount").innerHTML = data.length;
     };
     View.prototype.clearCanvas = function () {
-        while (this.canvas.stage.children.length > 0)
+        while (this.canvas.stage.chiildren.length > 0)
             this.canvas.stage.removeChildAt(this.canvas.stage.children.length - 1);
         this.canvas.stage.addChild(Util.loadImage("background.png"));
     };

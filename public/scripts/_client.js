@@ -70,7 +70,7 @@ var SocketHandler = /** @class */ (function () {
         client.end();
     };
     SocketHandler.prototype.sendReady = function (ready) {
-        this.socket.emit('ready', { session_id: this.session_id, ready: ready });
+        this.socket.emit('ready', { session_id: this.session_id });
     };
     SocketHandler.prototype.sendJoin = function (data) {
         this.socket.emit('join', data);

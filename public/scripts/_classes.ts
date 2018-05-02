@@ -420,7 +420,7 @@ class View {
     }
 
     clearCanvas() {
-        while (this.canvas.stage.children.length > 0) this.canvas.stage.removeChildAt(this.canvas.stage.children.length - 1);
+        while (this.canvas.stage.chiildren.length > 0) this.canvas.stage.removeChildAt(this.canvas.stage.children.length - 1);
         this.canvas.stage.addChild(Util.loadImage("background.png"));
     }
 

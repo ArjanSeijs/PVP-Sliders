@@ -231,7 +231,7 @@ class SessionMap {
             client.emit('failed', 'Username was to long (max 30 chars)');
             return;
         }
-        
+
         if (!this.checkName(data.username)) {
             client.emit('failed', 'Somebody with that username already joined');
             return;
@@ -345,7 +345,7 @@ class SessionMap {
      * @param {string} session_id
      * @param {boolean} ready
      */
-    toggleReady(session_id: string, ready: boolean): void {
+    setReady(session_id: string, ready: boolean): void {
         if (!this.sessions[session_id]) return;
         for (let x of this.sessions[session_id].ids) {
             x.ready = ready;
@@ -672,7 +672,7 @@ class Lobby {
             return;
         }
 
-        this._session_map.toggleReady(data.session_id, !!data.ready);
+        this._session_map.setReady(data.session_id, true);
 
         LobbyManager.socket.in(this.id).emit('players', this._session_map.getJoined());
     }
