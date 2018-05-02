@@ -58,7 +58,7 @@ var BoardParser = (function () {
         for (var y = 0; y < height; y++) {
             for (var x = 0; x < width; x++) {
                 var c = strings[y].charAt(x);
-                if ('0123456789ABCDEF'.indexOf(c) !== -1) {
+                if ('0123456789ABCDEFabcdef'.indexOf(c) !== -1) {
                     var player = parseInt(c, 16);
                     mapData[player] = { x: x, y: y };
                     if (player + 1 > playerAmount) {

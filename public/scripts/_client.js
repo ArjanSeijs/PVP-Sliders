@@ -135,7 +135,8 @@ function selectMaps() {
             "<option value=\"vertical\">Vertical</option>\n" +
             "<option value=\"DontStopMeNow\">Don't Stop Me Now</option>\n" +
             "<option value=\"MsHyde\">Ms Hyde</option>\n" +
-            "<option value=\"IsThisRealLife\">Is this real life?</option>";
+            "<option value=\"IsThisRealLife\">Is this real life?</option>" +
+            "<option value=\"Suicide\">Suicide</option>";
     if (!maps)
         return;
     Object.keys(maps).forEach((function (map, index, array) {

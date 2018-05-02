@@ -178,7 +178,8 @@ function selectMaps() {
         "<option value=\"vertical\">Vertical</option>\n" +
         "<option value=\"DontStopMeNow\">Don't Stop Me Now</option>\n" +
         "<option value=\"MsHyde\">Ms Hyde</option>\n" +
-        "<option value=\"IsThisRealLife\">Is this real life?</option>";
+        "<option value=\"IsThisRealLife\">Is this real life?</option>" +
+        "<option value=\"Suicide\">Suicide</option>";
     if (!maps) return;
     Object.keys(maps).forEach(((map, index, array) => {
         select.innerHTML += '<option data-custom=true value="(Custom) ' + map + '">(Custom) ' + map + '</option>'
@@ -309,7 +310,7 @@ function _loadBase64() {
 }
 
 function _leave() {
-    if(socketListener) socketListener.disconnect();
+    if (socketListener) socketListener.disconnect();
     socketListener = new SocketHandler();
     client = new Client();
     Util.setFormData(Cookies.get("username"), Cookies.get("multiplayer"), Cookies.get("lobby"), Cookies.get("password"));

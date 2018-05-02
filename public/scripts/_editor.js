@@ -190,6 +190,9 @@ function encodeMap() {
         }
         string += "\n";
     }
+    if (players >= 16) {
+        alert("Warning max of 16 players adding more will result in in some players disappearing in the actual game");
+    }
     console.log("--- Map ---");
     console.log(string);
     return btoa(string);
@@ -202,7 +205,7 @@ function decodeMap(map) {
     for (var y = 0; y < height; y++) {
         for (var x = 0; x < width; x++) {
             var c = strings[y].charAt(x);
-            if ('0123456789ABCDEF'.indexOf(c) !== -1) {
+            if ('0123456789ABCDEFabcdef'.indexOf(c) !== -1) {
                 game.board.tiles[x][y].tile_type = "player";
             }
             else if (c === '#') {

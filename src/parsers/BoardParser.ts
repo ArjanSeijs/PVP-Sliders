@@ -92,7 +92,7 @@ class BoardParser {
         for (let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {
                 const c = strings[y].charAt(x);
-                if ('0123456789ABCDEF'.indexOf(c) !== -1) {
+                if ('0123456789ABCDEFabcdef'.indexOf(c) !== -1) {
                     let player = parseInt(c, 16);
                     mapData[player] = {x: x, y: y};
                     if (player + 1 > playerAmount) {
