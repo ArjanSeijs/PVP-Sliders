@@ -402,16 +402,14 @@ var Client = /** @class */ (function () {
         view.displayGame();
         view.makeSprites();
         view.showStarting(true);
-        var timeout = data.start - new Date().getTime();
-        var interval = null;
-        if (timeout > 0)
-            interval = setInterval(function () { return _this.count(data.start); }, 10);
+        var date = new Date().getTime() + 5000;
+        var interval = setInterval(function () { return _this.count(date); }, 10);
         setTimeout(function () {
             if (interval)
                 clearInterval(interval);
             _this.timer = setInterval(function () { return view.updatePos(); }, 15);
             view.showStarting(false);
-        }, timeout > 0 ? timeout : 10);
+        }, 5000);
     };
     Client.prototype.count = function (start) {
         var elm = document.getElementById("count");

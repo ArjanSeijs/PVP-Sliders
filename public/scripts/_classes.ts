@@ -473,17 +473,15 @@ class Client implements ClientInterface {
         view.makeSprites();
         view.showStarting(true);
 
-        let timeout = data.start - new Date().getTime();
-        let interval = null;
-
-        if (timeout > 0) interval = setInterval(() => this.count(data.start), 10);
+        let date = new Date().getTime() + 5000;
+        let interval = setInterval(() => this.count(date), 10);
 
         setTimeout(() => {
             if (interval) clearInterval(interval);
 
             this.timer = setInterval(() => view.updatePos(), 15);
             view.showStarting(false);
-        }, timeout > 0 ? timeout : 10);
+        }, 5000);
     }
 
     count(start: number) {
