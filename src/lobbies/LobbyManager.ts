@@ -187,8 +187,12 @@ class LobbyManager {
     }
 }
 
+interface Session {
+    ids: { id: number, name: string, ready: boolean, team: string }[]
+}
+
 interface Sessions {
-    [index: string]: { ids: { id: number, name: string, ready: boolean, team: string }[] }
+    [index: string]: Session
 }
 
 class SessionMap {
@@ -221,10 +225,18 @@ class SessionMap {
             client.emit('failed', 'no username');
             return;
         }
-        if (data.username.length > 20) {
-            client.emit('failed', 'Username was to long (max 20 chars)');
+        data.username = data.username.trim();
+
+        if (data.username.length > 30) {
+            client.emit('failed', 'Username was to long (max 30 chars)');
             return;
         }
+        
+        if (!this.checkName(data.username)) {
+            client.emit('failed', 'Somebody with that username already joined');
+            return;
+        }
+
 
         let session_id = UUID();
         if (this.joined === 0 || isHost) this.lobby.setHost(session_id);
@@ -251,6 +263,20 @@ class SessionMap {
         });
 
         return session_id;
+    }
+
+
+    checkName(name: string): boolean {
+        for (let key in this.sessions) {
+            if (!this.sessions.hasOwnProperty(key)) continue;
+            for (let i = 0; i < this.sessions[key].ids.length; i++) {
+                let player = this.sessions[key].ids[i];
+                if (player.name === name) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     /**

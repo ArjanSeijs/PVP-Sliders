@@ -153,8 +153,13 @@ var SessionMap = (function () {
             client.emit('failed', 'no username');
             return;
         }
-        if (data.username.length > 20) {
-            client.emit('failed', 'Username was to long (max 20 chars)');
+        data.username = data.username.trim();
+        if (data.username.length > 30) {
+            client.emit('failed', 'Username was to long (max 30 chars)');
+            return;
+        }
+        if (!this.checkName(data.username)) {
+            client.emit('failed', 'Somebody with that username already joined');
             return;
         }
         var session_id = UUID();
@@ -178,6 +183,19 @@ var SessionMap = (function () {
             isHost: !!isHost
         });
         return session_id;
+    };
+    SessionMap.prototype.checkName = function (name) {
+        for (var key in this.sessions) {
+            if (!this.sessions.hasOwnProperty(key))
+                continue;
+            for (var i = 0; i < this.sessions[key].ids.length; i++) {
+                var player = this.sessions[key].ids[i];
+                if (player.name === name) {
+                    return false;
+                }
+            }
+        }
+        return true;
     };
     SessionMap.prototype.removeSession = function (client) {
         if (!this.isJoined(client.id))
