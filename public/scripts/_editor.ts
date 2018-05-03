@@ -272,8 +272,12 @@ function load() {
 function listSaves() {
     let maps = Cookies.getJSON("maps");
     console.log(maps);
-    let saved = Object.keys(maps).reduce((pv, cv, ci, arr) => pv + cv + ",", "Maps:\n");
-    alert(saved);
+    if(maps) {
+        let saved = Object.keys(maps).reduce((pv, cv, ci, arr) => pv + cv + ",", "Maps:\n");
+        alert(saved);
+    } else {
+        alert("No saves!")
+    }
 }
 
 function removeSave() {

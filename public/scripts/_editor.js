@@ -244,8 +244,13 @@ function load() {
 function listSaves() {
     var maps = Cookies.getJSON("maps");
     console.log(maps);
-    var saved = Object.keys(maps).reduce(function (pv, cv, ci, arr) { return pv + cv + ","; }, "Maps:\n");
-    alert(saved);
+    if (maps) {
+        var saved = Object.keys(maps).reduce(function (pv, cv, ci, arr) { return pv + cv + ","; }, "Maps:\n");
+        alert(saved);
+    }
+    else {
+        alert("No saves!");
+    }
 }
 function removeSave() {
     var maps = Cookies.getJSON("maps");
