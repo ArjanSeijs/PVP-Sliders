@@ -6,7 +6,7 @@ class SocketHandler {
     private session_id: string;
 
     constructor() {
-        this.socket = io(Util.getUrl(),<any>{ wsEngine: 'ws' });
+        this.socket = io(Util.getUrl(), <any>{wsEngine: 'ws'});
         this.socket.on('start', (data) => this.onStart(data));
         this.socket.on('update', (data) => this.onUpdate(data));
         this.socket.on('failed', (data, refresh) => this.onFailed(data, refresh));
@@ -16,6 +16,7 @@ class SocketHandler {
         this.socket.on('players', (data) => this.onPlayers(data));
         this.socket.on('map', (data) => this.onMapChange(data));
         this.socket.on('end', (data) => this.onEnd(data));
+        this.socket.on('chat', (data) => this.onChat(data));
     }
 
     onStart(data: any): void {
@@ -31,8 +32,8 @@ class SocketHandler {
 
     onFailed(data: any, refresh: boolean): void {
         alert(data);
-        if (refresh) location.reload();
         view.loading(false);
+        if (refresh) _leave();
     }
 
     onInfo(data: any): void {
@@ -83,6 +84,11 @@ class SocketHandler {
         client.end();
     }
 
+    onChat(data: any) {
+        console.log(data);
+        view.addChat(data);
+    }
+
     sendReady(ready: boolean): void {
         this.socket.emit('ready', {session_id: this.session_id});
     }
@@ -129,6 +135,11 @@ class SocketHandler {
         this.socket.emit('password', {session_id: this.session_id, password: value});
     }
 
+
+    sendChat(text: string) {
+        this.socket.emit('chat', {session_id: this.session_id, text: text});
+    }
+
     disconnect() {
         this.socket.disconnect();
     }
@@ -164,7 +175,21 @@ function init() {
     selectMaps();
     let elm = document.getElementById("bots") as HTMLInputElement;
     if (elm) elm.checked = false;
-};
+    initChat();
+}
+
+function initChat() {
+    let elm = document.getElementById("chat-box") as HTMLInputElement;
+    elm.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+            let text = elm.value;
+            elm.value = "";
+            socketListener.sendChat(text);
+        }
+    }, false);
+
+
+}
 
 function selectMaps() {
     let maps = Cookies.getJSON("maps");
@@ -319,5 +344,9 @@ function _leave() {
     if (elm) elm.checked = false;
     view.showLogin();
 }
+
+window.onclick = ev => {
+    console.log(`x:${ev.clientX} y:${ev.clientY}`);
+};
 
 

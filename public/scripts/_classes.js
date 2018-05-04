@@ -250,6 +250,7 @@ var View = /** @class */ (function () {
     View.prototype.hideAll = function () {
         document.getElementById("login").style.display = 'none';
         document.getElementById("game-lobby").style.display = 'none';
+        document.getElementById("chatWrapper").style.display = 'none';
         document.getElementById('wrapper').style.display = 'none';
         document.getElementById('winners').style.display = 'none';
     };
@@ -274,6 +275,7 @@ var View = /** @class */ (function () {
             document.getElementById("startbtn").style.display = 'none';
         document.getElementById("game-lobby").style.display = '';
         document.getElementById('wrapper').style.display = '';
+        document.getElementById("chatWrapper").style.display = '';
         this.resize();
     };
     View.prototype.showWin = function (winners) {
@@ -319,7 +321,10 @@ var View = /** @class */ (function () {
         var isready = "<i class=\"fas fa-check-square\"></i>";
         var notready = "<i class=\"fas fa-times-circle\"></i>";
         var string = "<li class='playerItem'>";
-        string += "<div class=\"listName\">" + name + "</div>";
+        if (player !== null)
+            string += "<div class=\"listName\"><b>" + name + "</b></div>";
+        else
+            string += "<div class=\"listName\">" + name + "</div>";
         if (player !== null)
             string += "<div class=\"listTeam " + team + "bg\">" + this.getSelect(team, player) + "</div>";
         else
@@ -354,6 +359,7 @@ var View = /** @class */ (function () {
         string += "</ol>";
         document.getElementById("players").innerHTML = string;
         document.getElementById("player-amount").innerHTML = data.length;
+        this.resize(this.board);
     };
     View.prototype.clearCanvas = function () {
         while (this.canvas.stage.children.length > 0)
@@ -388,6 +394,14 @@ var View = /** @class */ (function () {
             elm.style.display = '';
         else
             elm.style.display = 'none';
+    };
+    View.prototype.addChat = function (data) {
+        var chat = "<div class=\"comment\"><div class=\"author\"><i class=\"fas fa-comments\"></i>&nbsp;" + data.user + "</div><div class=\"message\">" + data.text + "</div></div>";
+        var elm = document.getElementById("comment_box");
+        if (!elm)
+            return;
+        elm.innerHTML += chat;
+        elm.scrollTop = elm.scrollHeight;
     };
     return View;
 }());

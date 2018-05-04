@@ -333,6 +333,11 @@ var SessionMap = (function () {
             }
         }
     };
+    SessionMap.prototype.getUser = function (session_id) {
+        if (!this.sessions[session_id])
+            return null;
+        return this.sessions[session_id].ids[0].name;
+    };
     return SessionMap;
 }());
 var State;
@@ -463,6 +468,12 @@ var Lobby = (function () {
                 }
                 that.setPassword(data.password, client);
             });
+        });
+        client.on('chat', function (data) {
+            logger.info("Client " + client.id + " send \"chat\" with data " + JSON.stringify(data));
+            if (!data)
+                return;
+            that.chat(client, data);
         });
         client.join(this.id);
     };
@@ -697,6 +708,16 @@ var Lobby = (function () {
         if (!util_1.isNullOrUndefined(data.id) && util_1.isNumber(data.id)) {
             this._session_map.kick(data.id);
         }
+    };
+    Lobby.prototype.chat = function (client, data) {
+        if (!data || !data.session_id || !data.text || !util_1.isString(data.session_id) || !util_1.isString(data.text))
+            return;
+        var user = this._session_map.getUser(data.session_id);
+        if (user === null)
+            return;
+        var text = data.text.length < 300 ? data.text : data.text.substr(0, 300);
+        logger.info("Sending chat in " + this.id + " with message: " + text);
+        LobbyManager.socket.in(this.id).emit('chat', { user: user, text: text });
     };
     Lobby.prototype.getSessionMap = function () {
         return this._session_map;

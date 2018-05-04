@@ -12,6 +12,7 @@ var SocketHandler = /** @class */ (function () {
         this.socket.on('players', function (data) { return _this.onPlayers(data); });
         this.socket.on('map', function (data) { return _this.onMapChange(data); });
         this.socket.on('end', function (data) { return _this.onEnd(data); });
+        this.socket.on('chat', function (data) { return _this.onChat(data); });
     }
     SocketHandler.prototype.onStart = function (data) {
         view.hideAll();
@@ -24,9 +25,9 @@ var SocketHandler = /** @class */ (function () {
     };
     SocketHandler.prototype.onFailed = function (data, refresh) {
         alert(data);
-        if (refresh)
-            location.reload();
         view.loading(false);
+        if (refresh)
+            _leave();
     };
     SocketHandler.prototype.onInfo = function (data) {
         alert(data);
@@ -69,6 +70,10 @@ var SocketHandler = /** @class */ (function () {
         view.displayPlayers(data.entities);
         client.end();
     };
+    SocketHandler.prototype.onChat = function (data) {
+        console.log(data);
+        view.addChat(data);
+    };
     SocketHandler.prototype.sendReady = function (ready) {
         this.socket.emit('ready', { session_id: this.session_id });
     };
@@ -105,6 +110,9 @@ var SocketHandler = /** @class */ (function () {
         view.loading(true);
         this.socket.emit('password', { session_id: this.session_id, password: value });
     };
+    SocketHandler.prototype.sendChat = function (text) {
+        this.socket.emit('chat', { session_id: this.session_id, text: text });
+    };
     SocketHandler.prototype.disconnect = function () {
         this.socket.disconnect();
     };
@@ -121,8 +129,18 @@ function init() {
     var elm = document.getElementById("bots");
     if (elm)
         elm.checked = false;
+    initChat();
 }
-;
+function initChat() {
+    var elm = document.getElementById("chat-box");
+    elm.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+            var text = elm.value;
+            elm.value = "";
+            socketListener.sendChat(text);
+        }
+    }, false);
+}
 function selectMaps() {
     var maps = Cookies.getJSON("maps");
     var select = document.getElementById("mapselect");
@@ -266,4 +284,7 @@ function _leave() {
         elm.checked = false;
     view.showLogin();
 }
+window.onclick = function (ev) {
+    console.log("x:" + ev.clientX + " y:" + ev.clientY);
+};
 //# sourceMappingURL=_client.js.map

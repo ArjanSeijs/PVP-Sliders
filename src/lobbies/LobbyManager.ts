@@ -69,7 +69,7 @@ class LobbyManager {
      */
     static init(server): void {
         logger.info("LobbyManager initialized!");
-        LobbyManager.socket = io(server,<any>{ wsEngine: 'ws' });
+        LobbyManager.socket = io(server, <any>{wsEngine: 'ws'});
         LobbyManager.socket.on('connection', function (client: Socket) {
 
             logger.info(`Client ${client.id} connected! from ${client.handshake.address}`);
@@ -471,6 +471,11 @@ class SessionMap {
             }
         }
     }
+
+    getUser(session_id: string) {
+        if(!this.sessions[session_id]) return null;
+        return this.sessions[session_id].ids[0].name;
+    }
 }
 
 enum State {
@@ -626,6 +631,12 @@ class Lobby {
                 }
                 that.setPassword(data.password, client);
             })
+        });
+        client.on('chat', function (data) {
+            logger.info(`Client ${client.id} send "chat" with data ${JSON.stringify(data)}`);
+
+            if (!data) return;
+            that.chat(client, data);
         });
 
         //Join the namespace.
@@ -953,6 +964,15 @@ class Lobby {
         if (!isNullOrUndefined(data.id) && isNumber(data.id)) {
             this._session_map.kick(data.id);
         }
+    }
+
+    chat(client: Socket, data: any) {
+        if (!data || !data.session_id || !data.text || !isString(data.session_id) || !isString(data.text)) return;
+        let user = this._session_map.getUser(data.session_id);
+        if(user === null) return;
+        let text = data.text.length < 300 ? data.text : data.text.substr(0, 300);
+        logger.info(`Sending chat in ${this.id} with message: ${text}`);
+        LobbyManager.socket.in(this.id).emit('chat', {user: user, text: text});
     }
 
     /**

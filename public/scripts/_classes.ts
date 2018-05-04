@@ -303,6 +303,7 @@ class View {
     hideAll() {
         document.getElementById("login").style.display = 'none';
         document.getElementById("game-lobby").style.display = 'none';
+        document.getElementById("chatWrapper").style.display = 'none';
         document.getElementById('wrapper').style.display = 'none';
         document.getElementById('winners').style.display = 'none';
     }
@@ -330,6 +331,7 @@ class View {
         if (!this.isHost) document.getElementById("startbtn").style.display = 'none';
         document.getElementById("game-lobby").style.display = '';
         document.getElementById('wrapper').style.display = '';
+        document.getElementById("chatWrapper").style.display = '';
 
         this.resize();
     }
@@ -379,7 +381,8 @@ class View {
         const notready = "<i class=\"fas fa-times-circle\"></i>";
 
         let string = "<li class='playerItem'>";
-        string += `<div class="listName">${name}</div>`;
+        if (player !== null) string += `<div class="listName"><b>${name}</b></div>`;
+        else string += `<div class="listName">${name}</div>`;
 
         if (player !== null) string += `<div class="listTeam ${team}bg">${this.getSelect(team, player)}</div>`;
         else string += `<div class="listTeam ${team}bg">${team}</div>`;
@@ -417,6 +420,8 @@ class View {
         string += "</ol>";
         document.getElementById("players").innerHTML = string;
         document.getElementById("player-amount").innerHTML = data.length;
+
+        this.resize(this.board);
     }
 
     clearCanvas() {
@@ -453,6 +458,15 @@ class View {
         if (b) elm.style.display = '';
         else elm.style.display = 'none';
     }
+
+    addChat(data: any) {
+        const chat = `<div class="comment"><div class="author"><i class="fas fa-comments"></i>&nbsp;${data.user}</div><div class="message">${data.text}</div></div>`
+        let elm = document.getElementById("comment_box");
+        if (!elm) return;
+        elm.innerHTML += chat;
+        elm.scrollTop = elm.scrollHeight;   
+    }
+
 }
 
 class Client implements ClientInterface {
