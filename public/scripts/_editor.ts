@@ -135,7 +135,6 @@ window.onload = function () {
     game.board = initialBoard();
     view = new View(() => view.resize(),
         "assets/block.png",
-        "assets/background.png",
         "assets/player_blue.png",
         "assets/player_green.png",
         "assets/player_red.png",

@@ -123,7 +123,7 @@ function init() {
     socketListener = new SocketHandler();
     client = new Client();
     Util.setFormData(Cookies.get("username"), Cookies.get("multiplayer"), Cookies.get("lobby"), Cookies.get("password"));
-    view = new View(null, "assets/block.png", "assets/background.png", "assets/player_blue.png", "assets/player_green.png", "assets/player_red.png", "assets/player_yellow.png", "assets/player_purple.png", "assets/player_cyan.png", "assets/player_orange.png", "assets/player_pink.png", "assets/player_darkblue.png", "assets/player_darkgreen.png", "assets/player_darkred.png", "assets/player_darkyellow.png", "assets/player_darkpurple.png", "assets/player_darkcyan.png", "assets/player_darkorange.png", "assets/player_darkpink.png", "assets/board_background.png", "assets/stop.png");
+    view = new View(null, "assets/block.png", "assets/player_blue.png", "assets/player_green.png", "assets/player_red.png", "assets/player_yellow.png", "assets/player_purple.png", "assets/player_cyan.png", "assets/player_orange.png", "assets/player_pink.png", "assets/player_darkblue.png", "assets/player_darkgreen.png", "assets/player_darkred.png", "assets/player_darkyellow.png", "assets/player_darkpurple.png", "assets/player_darkcyan.png", "assets/player_darkorange.png", "assets/player_darkpink.png", "assets/board_background.png", "assets/stop.png");
     view.loading(true);
     selectMaps();
     var elm = document.getElementById("bots");

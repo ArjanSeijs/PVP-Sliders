@@ -19,8 +19,9 @@ class Util {
      * @return {PIXI.Sprite}
      */
     static loadImage(image: string): Sprite {
-        let texture = PIXI.loader.resources["assets/" + image].texture;
-        return new PIXI.Sprite(texture);
+        let resource = PIXI.loader.resources["assets/" + image];
+        if (!resource) return null;
+        return new PIXI.Sprite(resource.texture);
     }
 
     /**
@@ -127,16 +128,27 @@ class View {
                 let loginDiv = document.getElementById("login");
                 if (loginDiv) loginDiv.style.display = '';
                 document.body.appendChild(this.canvas.view);
-                this.load(onload)
+                this.load(onload);
+                PIXI.loader.add("assets/background.png").load(() => {
+                    let background = Util.loadImage("background.png");
+                    if (background) {
+                        background.width = this.screen_width;
+                        background.height = this.screen_height;
+                        this.canvas.stage.addChild(background);
+                    }
+                    document.body.style.background = "";
+                })
             }
         );
     }
 
     load(onload?: () => void): void {
         let background = Util.loadImage("background.png");
-        background.width = this.screen_width;
-        background.height = this.screen_height;
-        this.canvas.stage.addChild(background);
+        if (background) {
+            background.width = this.screen_width;
+            background.height = this.screen_height;
+            this.canvas.stage.addChild(background);
+        }
 
         let lobby = Util.getParameterByName("id", window.location.href);
         let lobbyDiv = (document.getElementById('lobby') as HTMLInputElement);

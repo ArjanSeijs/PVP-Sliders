@@ -18,8 +18,10 @@ var Util = /** @class */ (function () {
      * @return {PIXI.Sprite}
      */
     Util.loadImage = function (image) {
-        var texture = PIXI.loader.resources["assets/" + image].texture;
-        return new PIXI.Sprite(texture);
+        var resource = PIXI.loader.resources["assets/" + image];
+        if (!resource)
+            return null;
+        return new PIXI.Sprite(resource.texture);
     };
     /**
      * Gets the data of the user form.
@@ -91,13 +93,24 @@ var View = /** @class */ (function () {
                 loginDiv.style.display = '';
             document.body.appendChild(_this.canvas.view);
             _this.load(onload);
+            PIXI.loader.add("assets/background.png").load(function () {
+                var background = Util.loadImage("background.png");
+                if (background) {
+                    background.width = _this.screen_width;
+                    background.height = _this.screen_height;
+                    _this.canvas.stage.addChild(background);
+                }
+                document.body.style.background = "";
+            });
         });
     }
     View.prototype.load = function (onload) {
         var background = Util.loadImage("background.png");
-        background.width = this.screen_width;
-        background.height = this.screen_height;
-        this.canvas.stage.addChild(background);
+        if (background) {
+            background.width = this.screen_width;
+            background.height = this.screen_height;
+            this.canvas.stage.addChild(background);
+        }
         var lobby = Util.getParameterByName("id", window.location.href);
         var lobbyDiv = document.getElementById('lobby');
         if (lobbyDiv)

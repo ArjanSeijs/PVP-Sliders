@@ -152,7 +152,6 @@ function init() {
     client = new Client();
     Util.setFormData(Cookies.get("username"), Cookies.get("multiplayer"), Cookies.get("lobby"), Cookies.get("password"));
     view = new View(null, "assets/block.png",
-        "assets/background.png",
         "assets/player_blue.png",
         "assets/player_green.png",
         "assets/player_red.png",
@@ -269,7 +268,7 @@ function _ready() {
 }
 
 function _setTeam(elm: HTMLSelectElement, i: number) {
-    socketListener.sendTeam(elm.value, i)
+    socketListener.sendTeam(elm.value, i);
     view.loading(true);
 }
 

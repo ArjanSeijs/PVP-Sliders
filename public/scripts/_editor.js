@@ -113,7 +113,7 @@ function addTiles(board) {
 window.onload = function () {
     client = new MockClient();
     game.board = initialBoard();
-    view = new View(function () { return view.resize(); }, "assets/block.png", "assets/background.png", "assets/player_blue.png", "assets/player_green.png", "assets/player_red.png", "assets/player_yellow.png", "assets/board_background.png", "assets/stop.png");
+    view = new View(function () { return view.resize(); }, "assets/block.png", "assets/player_blue.png", "assets/player_green.png", "assets/player_red.png", "assets/player_yellow.png", "assets/board_background.png", "assets/stop.png");
 };
 function toggleType(tile) {
     var types = ["none", "wall", "stop", "player"];
