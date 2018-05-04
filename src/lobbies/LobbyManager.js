@@ -39,7 +39,7 @@ var LobbyManager = (function () {
     }
     LobbyManager.init = function (server) {
         logger.info("LobbyManager initialized!");
-        LobbyManager.socket = io(server);
+        LobbyManager.socket = io(server, { wsEngine: 'ws' });
         LobbyManager.socket.on('connection', function (client) {
             logger.info("Client " + client.id + " connected! from " + client.handshake.address);
             client.on('join', function (data) {
@@ -67,11 +67,11 @@ var LobbyManager = (function () {
         return new Buffer(crypto.randomBytes(6)).toString("base64");
     };
     LobbyManager.clientJoin = function (client, data) {
-        if (!data || !data.lobby || !util_1.isString(data.lobby) || (data.lobby !== "" && !LobbyManager.lobbies[data.lobby])) {
+        if (!data || util_1.isNullOrUndefined(data.lobby) || !util_1.isString(data.lobby) || (data.lobby !== "" && !LobbyManager.lobbies[data.lobby])) {
             client.emit('failed', 'lobby does not exist');
         }
         else {
-            logger.info("Client " + client.id + " joined a lobby.");
+            logger.info("Client " + client.id + " is joining a lobby.");
             var lobbyId = data.lobby;
             if (lobbyId === "")
                 lobbyId = LobbyManager.randomLobby(data);

@@ -69,7 +69,7 @@ class LobbyManager {
      */
     static init(server): void {
         logger.info("LobbyManager initialized!");
-        LobbyManager.socket = io(server);
+        LobbyManager.socket = io(server,<any>{ wsEngine: 'ws' });
         LobbyManager.socket.on('connection', function (client: Socket) {
 
             logger.info(`Client ${client.id} connected! from ${client.handshake.address}`);
@@ -106,10 +106,10 @@ class LobbyManager {
      * @param {*} data The data send on the socket.
      */
     static clientJoin(client: Socket, data: any) {
-        if (!data || !data.lobby || !isString(data.lobby) || (data.lobby !== "" && !LobbyManager.lobbies[data.lobby])) {
+        if (!data || isNullOrUndefined(data.lobby) || !isString(data.lobby) || (data.lobby !== "" && !LobbyManager.lobbies[data.lobby])) {
             client.emit('failed', 'lobby does not exist');
         } else {
-            logger.info(`Client ${client.id} joined a lobby.`);
+            logger.info(`Client ${client.id} is joining a lobby.`);
             let lobbyId = data.lobby;
             if (lobbyId === "") lobbyId = LobbyManager.randomLobby(data);
             if (lobbyId === null) {

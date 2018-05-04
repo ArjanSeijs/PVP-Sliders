@@ -2,7 +2,7 @@ var socketListener;
 var SocketHandler = /** @class */ (function () {
     function SocketHandler() {
         var _this = this;
-        this.socket = io(Util.getUrl());
+        this.socket = io(Util.getUrl(), { wsEngine: 'ws' });
         this.socket.on('start', function (data) { return _this.onStart(data); });
         this.socket.on('update', function (data) { return _this.onUpdate(data); });
         this.socket.on('failed', function (data, refresh) { return _this.onFailed(data, refresh); });

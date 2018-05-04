@@ -6,7 +6,7 @@ class SocketHandler {
     private session_id: string;
 
     constructor() {
-        this.socket = io(Util.getUrl());
+        this.socket = io(Util.getUrl(),<any>{ wsEngine: 'ws' });
         this.socket.on('start', (data) => this.onStart(data));
         this.socket.on('update', (data) => this.onUpdate(data));
         this.socket.on('failed', (data, refresh) => this.onFailed(data, refresh));
