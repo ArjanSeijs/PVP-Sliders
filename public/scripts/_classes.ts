@@ -126,10 +126,10 @@ class View {
         PIXI.loader.add(images).load(() => {
                 let loginDiv = document.getElementById("login");
                 if (loginDiv) loginDiv.style.display = '';
+                document.body.appendChild(this.canvas.view);
                 this.load(onload)
             }
         );
-        document.body.appendChild(this.canvas.view);
     }
 
     load(onload?: () => void): void {

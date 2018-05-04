@@ -89,9 +89,9 @@ var View = /** @class */ (function () {
             var loginDiv = document.getElementById("login");
             if (loginDiv)
                 loginDiv.style.display = '';
+            document.body.appendChild(_this.canvas.view);
             _this.load(onload);
         });
-        document.body.appendChild(this.canvas.view);
     }
     View.prototype.load = function (onload) {
         var background = Util.loadImage("background.png");
