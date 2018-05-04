@@ -464,7 +464,7 @@ class View {
         let elm = document.getElementById("comment_box");
         if (!elm) return;
         elm.innerHTML += chat;
-        elm.scrollTop = elm.scrollHeight;   
+        elm.scrollTop = elm.scrollHeight;
     }
 
 }
