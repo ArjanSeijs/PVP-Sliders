@@ -602,6 +602,25 @@ var Client = /** @class */ (function () {
     Client.prototype.isLocal = function (id) {
         return id === this.id_p1.id || id === this.id_p2.id;
     };
+    Client.prototype.move = function (id, direction) {
+        var directions = {
+            NONE: { x: 0, y: 0 },
+            NORTH: { x: 0, y: -1 },
+            SOUTH: { x: 0, y: 1 },
+            WEST: { x: 1, y: 0 },
+            EAST: { x: -1, y: 0 }
+        };
+        for (var _i = 0, _a = this.game.entities; _i < _a.length; _i++) {
+            var entity = _a[_i];
+            if (entity.id === id) {
+                entity.direction = {
+                    string: direction,
+                    x: directions[direction].x,
+                    y: directions[direction].y
+                };
+            }
+        }
+    };
     return Client;
 }());
 //# sourceMappingURL=_classes.js.map

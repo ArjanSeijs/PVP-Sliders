@@ -4,6 +4,7 @@ import Sprite = PIXI.Sprite;
 let view: View;
 let client: ClientInterface;
 let enableNames = true;
+
 class Util {
     /**
      * Gets the url with the path removed
@@ -91,6 +92,7 @@ interface ClientInterface {
 
     isLocal(id: number): boolean
 
+    move(id: number, direction: string): void;
 }
 
 class View {
@@ -680,5 +682,24 @@ class Client implements ClientInterface {
 
     isLocal(id: number): boolean {
         return id === this.id_p1.id || id === this.id_p2.id;
+    }
+
+    move(id: number, direction: string) {
+        const directions = {
+            NONE: {x: 0, y: 0},
+            NORTH: {x: 0, y: -1},
+            SOUTH: {x: 0, y: 1},
+            WEST: {x: 1, y: 0},
+            EAST: {x: -1, y: 0}
+        };
+        for (let entity of this.game.entities) {
+            if (entity.id === id) {
+                entity.direction = {
+                    string: direction,
+                    x: directions[direction].x,
+                    y: directions[direction].y
+                }
+            }
+        }
     }
 }

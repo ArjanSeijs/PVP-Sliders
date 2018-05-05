@@ -41,6 +41,8 @@ var MockClient = /** @class */ (function () {
     MockClient.prototype.isLocal = function (id) {
         return false;
     };
+    MockClient.prototype.move = function (id, direction) {
+    };
     return MockClient;
 }());
 function initialBoard(width, height) {

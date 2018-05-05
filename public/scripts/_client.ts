@@ -115,6 +115,7 @@ class SocketHandler {
 
     sendMove(id: number, direction: string): void {
         this.socket.emit('move', {session_id: this.session_id, id: id, direction: direction})
+        client.move(id,direction);
     }
 
     sendOptions(options: { bots: boolean }) {

@@ -94,6 +94,7 @@ var SocketHandler = /** @class */ (function () {
     };
     SocketHandler.prototype.sendMove = function (id, direction) {
         this.socket.emit('move', { session_id: this.session_id, id: id, direction: direction });
+        client.move(id, direction);
     };
     SocketHandler.prototype.sendOptions = function (options) {
         this.socket.emit('options', { session_id: this.session_id, options: options });
