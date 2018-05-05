@@ -692,9 +692,11 @@ class Client implements ClientInterface {
             WEST: {x: 1, y: 0},
             EAST: {x: -1, y: 0}
         };
-        for (let entity of this.game.entities) {
-            if (entity.id === id) {
-                entity.direction = {
+        if(!this.game) return;
+        for (let key in this.game.entities) {
+            if(!this.game.entities.hasOwnProperty(key)) continue;
+            if (this.game.entities[key].id === id) {
+                this.game.entities[key].direction = {
                     string: direction,
                     x: directions[direction].x,
                     y: directions[direction].y

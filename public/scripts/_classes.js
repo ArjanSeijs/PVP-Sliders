@@ -610,10 +610,13 @@ var Client = /** @class */ (function () {
             WEST: { x: 1, y: 0 },
             EAST: { x: -1, y: 0 }
         };
-        for (var _i = 0, _a = this.game.entities; _i < _a.length; _i++) {
-            var entity = _a[_i];
-            if (entity.id === id) {
-                entity.direction = {
+        if (!this.game)
+            return;
+        for (var key in this.game.entities) {
+            if (!this.game.entities.hasOwnProperty(key))
+                continue;
+            if (this.game.entities[key].id === id) {
+                this.game.entities[key].direction = {
                     string: direction,
                     x: directions[direction].x,
                     y: directions[direction].y
