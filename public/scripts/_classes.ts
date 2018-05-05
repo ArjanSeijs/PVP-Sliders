@@ -127,14 +127,16 @@ class View {
         PIXI.loader.add(images).load(() => {
                 let loginDiv = document.getElementById("login");
                 if (loginDiv) loginDiv.style.display = '';
+
                 document.body.appendChild(this.canvas.view);
                 this.load(onload);
+
                 PIXI.loader.add("assets/background.png").load(() => {
                     let background = Util.loadImage("background.png");
                     if (background) {
                         background.width = this.screen_width;
                         background.height = this.screen_height;
-                        this.canvas.stage.addChild(background);
+                        this.canvas.stage.addChildAt(background, 0);
                     }
                     document.body.style.background = "";
                 })

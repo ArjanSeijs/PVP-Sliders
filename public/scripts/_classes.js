@@ -98,7 +98,7 @@ var View = /** @class */ (function () {
                 if (background) {
                     background.width = _this.screen_width;
                     background.height = _this.screen_height;
-                    _this.canvas.stage.addChild(background);
+                    _this.canvas.stage.addChildAt(background, 0);
                 }
                 document.body.style.background = "";
             });
