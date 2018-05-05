@@ -966,6 +966,11 @@ class Lobby {
         }
     }
 
+    /**
+     * Send a chat message to everyone.
+     * @param {SocketIO.Socket} client
+     * @param data
+     */
     chat(client: Socket, data: any) {
         if (!data || !data.session_id || !data.text || !isString(data.session_id) || !isString(data.text)) return;
         let user = this._session_map.getUser(data.session_id);

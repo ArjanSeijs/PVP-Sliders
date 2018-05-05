@@ -137,8 +137,8 @@ class Entity implements ToJson {
 
     gameTick() {
         //All childeren should call super.gameTick()
-        this.lastMove++;
-        if (this.lastMove > 300) {
+        if (this.direction.curr === Direction.None) this.lastMove++;
+        if (this.lastMove > config.get("moveTime")) {
             this.move(Direction.random());
         }
     }

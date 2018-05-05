@@ -3,7 +3,7 @@ import Sprite = PIXI.Sprite;
 
 let view: View;
 let client: ClientInterface;
-
+let enableNames = true;
 class Util {
     /**
      * Gets the url with the path removed
@@ -202,14 +202,16 @@ class View {
     displayPlayers(entities: any) {
         for (let key in client.getGame().entities) {
             if (!client.getGame().entities.hasOwnProperty(key)) continue;
+
             let entity = client.getGame().entities[key];
+
             if (!entity.sprite || !entity.text) continue;
             if (entities[key]) {
                 entity.pos = entities[key].pos;
                 entity.direction = entities[key].direction;
 
                 entity.sprite.visible = true;
-                entity.text.visible = true;
+                entity.text.visible = enableNames;
 
                 entity.sprite.x = this.offsetX + (entity.pos.x / 100) * this.size;
                 entity.sprite.y = this.offsetY + (entity.pos.y / 100) * this.size;
@@ -289,7 +291,9 @@ class View {
 
     updatePos() {
         if (!client || !client.getGame()) return;
+        //TODO get speed from server.
         let speed = 30;
+
         let width = client.getGame().board.width;
         let height = client.getGame().board.height;
 

@@ -2,6 +2,7 @@ var Application = PIXI.Application;
 var Sprite = PIXI.Sprite;
 var view;
 var client;
+var enableNames = true;
 var Util = /** @class */ (function () {
     function Util() {
     }
@@ -163,7 +164,7 @@ var View = /** @class */ (function () {
                 entity.pos = entities[key].pos;
                 entity.direction = entities[key].direction;
                 entity.sprite.visible = true;
-                entity.text.visible = true;
+                entity.text.visible = enableNames;
                 entity.sprite.x = this.offsetX + (entity.pos.x / 100) * this.size;
                 entity.sprite.y = this.offsetY + (entity.pos.y / 100) * this.size;
                 entity.text.x = this.offsetX + (entity.pos.x / 100) * this.size + (0.5 * this.size);
@@ -236,6 +237,7 @@ var View = /** @class */ (function () {
     View.prototype.updatePos = function () {
         if (!client || !client.getGame())
             return;
+        //TODO get speed from server.
         var speed = 30;
         var width = client.getGame().board.width;
         var height = client.getGame().board.height;

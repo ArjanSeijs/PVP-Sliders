@@ -284,7 +284,4 @@ function _leave() {
         elm.checked = false;
     view.showLogin();
 }
-window.onclick = function (ev) {
-    console.log("x:" + ev.clientX + " y:" + ev.clientY);
-};
 //# sourceMappingURL=_client.js.map

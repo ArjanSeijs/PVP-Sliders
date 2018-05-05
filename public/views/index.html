@@ -2,18 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>PVP-Sliders</title>
+    <title>Sliding Battles</title>
     <script src="../scripts/socket.io.js"></script>
     <script src="../scripts/pixi.min.js"></script>
     <script src="../scripts/js.cookies.js"></script>
     <script src="../scripts/_classes.js"></script>
     <script src="../scripts/_client.js"></script>
-    <link rel="icon" href="../images/sliders.ico" type="image/x-icon" />
+    <link rel="icon" href="../images/sliders.ico" type="image/x-icon"/>
     <link href="stylesheets/style.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.10/css/all.css"
           integrity="sha384-+d0P83n9kaQMCwj8F4RJB66tzIwOKmrdb46+porD/OvrJ+37WqIM7UoBtwHO6Nlg" crossorigin="anonymous">
 </head>
-<body style="margin: 0; padding: 0; background-repeat: no-repeat; background-size: cover" onresize="_resize()" background="../assets/background.png" >
+<body style="margin: 0; padding: 0; background-repeat: no-repeat; background-size: cover" onresize="_resize()"
+      background="../assets/background.png">
 <div id="wrapper" class="wrapper">
     <div id="login" class="login" style="display: none;">
         <label>Username:<br>
@@ -36,7 +37,11 @@
         <label>
             <input class="button" type="button" value="Host Lobby" onclick="_host()">
         </label>
-        <span class="editor"> <a class="clickable" href="editor.html" target="_blank"> <i class="fas fa-edit">&nbsp;</i></a></span>
+
+        <a class="clickable" href="editor.html" target="_blank"> <i class="fas fa-edit">&nbsp;</i></a>
+        <a class="clickable" href="tutorial.html" target="_blank"> <i class="fas fa-question-circle"> </i></a>
+        <span class="editor">
+        </span>
     </div>
 
     <div id="game-lobby" class="lobby" style="display: none">

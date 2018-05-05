@@ -343,9 +343,3 @@ function _leave() {
     if (elm) elm.checked = false;
     view.showLogin();
 }
-
-window.onclick = ev => {
-    console.log(`x:${ev.clientX} y:${ev.clientY}`);
-};
-
-

@@ -5,6 +5,7 @@
   "EPSILON": 5,
   "tickRate": 15,
   "updateRate": 60,
+  "moveTime": 650,
   "teams": [
     "red",
     "green",
