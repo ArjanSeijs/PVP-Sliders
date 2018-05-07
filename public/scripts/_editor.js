@@ -43,6 +43,11 @@ var MockClient = /** @class */ (function () {
     };
     MockClient.prototype.move = function (id, direction) {
     };
+    MockClient.prototype.setKeys = function (p1, p2) {
+    };
+    MockClient.prototype.getDirection = function (key) {
+        return "";
+    };
     return MockClient;
 }());
 function initialBoard(width, height) {

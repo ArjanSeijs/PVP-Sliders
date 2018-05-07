@@ -64,6 +64,13 @@ class MockClient implements ClientInterface {
 
     move(id: number, direction: string): void {
     }
+
+    setKeys(p1: { up: string; down: string; left: string; right: string }, p2: { up: string; down: string; left: string; right: string }): void {
+    }
+
+    getDirection(key: string): string {
+        return "";
+    }
 }
 
 function initialBoard(width?: number, height?: number) {

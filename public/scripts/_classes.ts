@@ -86,6 +86,8 @@ interface ClientInterface {
 
     getId(key: string): number
 
+    getDirection(key: string): string;
+
     setReady(data: any): void;
 
     reset(): void;
@@ -93,6 +95,8 @@ interface ClientInterface {
     isLocal(id: number): boolean
 
     move(id: number, direction: string): void;
+
+    setKeys(p1: Keys, p2: Keys): void
 }
 
 class View {
@@ -165,6 +169,10 @@ class View {
     }
 
     resize(board?: any) {
+        this.screen_width = window.innerWidth;
+        this.screen_height = window.innerHeight;
+        this.canvas.renderer.resize(this.screen_width, this.screen_height);
+        
         if (!this.loaded) return;
         if (!client.getGame() && !board && !this.board) {
             this.load();
@@ -176,9 +184,6 @@ class View {
 
         let width = board.width;
         let height = board.height;
-
-        this.screen_width = window.innerWidth;
-        this.screen_height = window.innerHeight;
         //44 of 1080 pixel is width of border.
         this.paddingX = 44 / 1080 * Math.min(this.screen_width, this.screen_height);
         this.paddingY = 44 / 1080 * Math.min(this.screen_width, this.screen_height);
@@ -190,8 +195,6 @@ class View {
         this.offsetY = ((this.screen_height - 2 * this.paddingY) - height * this.size) / 2 + this.paddingY;
 
         while (this.canvas.stage.children.length > 0) this.canvas.stage.removeChildAt(this.canvas.stage.children.length - 1);
-
-        this.canvas.renderer.resize(this.screen_width, this.screen_height);
 
         this.load();
         this.displayGame(board);
@@ -489,16 +492,33 @@ class View {
 
 }
 
+interface Keys {
+    up: string,
+    down: string,
+    left: string,
+    right: string
+}
+
 class Client implements ClientInterface {
     private game: any;
     private board: any;
     private id_p1: { id: number, ready: boolean };
     private id_p2: { id: number, ready: boolean };
     private timer: any;
+    private readonly keys: Keys[];
 
     constructor() {
         this.id_p1 = {id: -1, ready: false};
         this.id_p2 = {id: -1, ready: false};
+        let defaultKeys = [
+            {up: "w", down: "s", left: "a", right: "d"},
+            {up: "arrowup", down: "arrowdown", left: "arrowleft", right: "arrowright"}
+        ];
+        let keys = <Keys[]> Cookies.getJSON("keys");
+        if (!keys) {
+            Cookies.set("keys", defaultKeys);
+        }
+        this.keys = keys;
     }
 
     start(data: any) {
@@ -655,16 +675,37 @@ class Client implements ClientInterface {
         let id2 = this.id_p2.id;
         if (id2 === -1) id2 = id1;
         switch (key) {
-            case "w":
-            case "a":
-            case "s":
-            case "d":
+            case this.keys[0].up:
+            case this.keys[0].down:
+            case this.keys[0].left:
+            case this.keys[0].right:
                 return id1;
-            case "arrowleft":
-            case "arrowright":
-            case "arrowup":
-            case "arrowdown":
+            case this.keys[1].up:
+            case this.keys[1].down:
+            case this.keys[1].left:
+            case this.keys[1].right:
                 return id2;
+            default:
+                return null;
+        }
+    }
+
+
+    getDirection(key: string): string {
+        switch (key) {
+            case this.keys[0].up :
+            case this.keys[1].up :
+                return "NORTH";
+
+            case this.keys[0].down :
+            case this.keys[1].down :
+                return "SOUTH";
+            case this.keys[0].left :
+            case this.keys[1].left :
+                return "WEST";
+            case this.keys[0].right :
+            case this.keys[1].right :
+                return "EAST";
             default:
                 return null;
         }
@@ -692,9 +733,9 @@ class Client implements ClientInterface {
             WEST: {x: 1, y: 0},
             EAST: {x: -1, y: 0}
         };
-        if(!this.game) return;
+        if (!this.game) return;
         for (let key in this.game.entities) {
-            if(!this.game.entities.hasOwnProperty(key)) continue;
+            if (!this.game.entities.hasOwnProperty(key)) continue;
             if (this.game.entities[key].id === id) {
                 this.game.entities[key].direction = {
                     string: direction,
@@ -702,6 +743,24 @@ class Client implements ClientInterface {
                     y: directions[direction].y
                 }
             }
+        }
+    }
+
+    setKeys(p1: Keys, p2: Keys): void {
+        if (p1) {
+            this.keys[0].down = p1.down ? p1.down : this.keys[0].down;
+            this.keys[0].up = p1.up ? p1.up : this.keys[0].up;
+            this.keys[0].left = p1.left ? p1.left : this.keys[0].left;
+            this.keys[0].right = p1.right ? p1.right : this.keys[0].right;
+        }
+        if (p2) {
+            this.keys[1].down = p2.down ? p2.down : this.keys[1].down;
+            this.keys[1].up = p2.up ? p2.up : this.keys[1].up;
+            this.keys[1].left = p2.left ? p2.left : this.keys[1].left;
+            this.keys[1].right = p2.right ? p2.right : this.keys[1].right;
+        }
+        if (p1 || p2) {
+            Cookies.set("keys", this.keys);
         }
     }
 }

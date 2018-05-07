@@ -16,6 +16,24 @@
 <body style="margin: 0; padding: 0; background-repeat: no-repeat; background-size: cover" onresize="_resize()"
       background="../assets/background.png">
 <div id="wrapper" class="wrapper">
+
+    <div id="settings" class="settings" style="display: none; z-index: 2">
+        <i class="fas fa-window-close clickable" style="color: #a00000; position: relative; float: right"
+           onclick="_showSettings(false)">&nbsp;</i>
+        <h1>Player1</h1>
+        <button class="key" onclick="_changeKey(0,'up')">Up</button>
+        <button class="key" onclick="_changeKey(0,'down')">Down</button>
+        <button class="key" onclick="_changeKey(0,'left')">Left</button>
+        <button class="key" onclick="_changeKey(0,'right')">Right</button>
+        <div id="press0">&nbsp;</div>
+        <h1>Player2</h1>
+        <button class="key" onclick="_changeKey(1,'up')">Up</button>
+        <button class="key" onclick="_changeKey(1,'down')">Down</button>
+        <button class="key" onclick="_changeKey(1,'left')">Left</button>
+        <button class="key" onclick="_changeKey(1,'right')">Right</button>
+        <div id="press1">&nbsp;</div>
+    </div>
+
     <div id="login" class="login" style="display: none;">
         <label>Username:<br>
             <input id="username" type="text">
@@ -38,8 +56,9 @@
             <input class="button" type="button" value="Host Lobby" onclick="_host()">
         </label>
 
-        <a class="clickable" href="editor.html" target="_blank"> <i class="fas fa-edit">&nbsp;</i></a>
+        <span class="clickable" onclick="_showSettings(true)"><i class="fas fa-cogs">&nbsp;</i></span>
         <a class="clickable" href="tutorial.html" target="_blank"> <i class="fas fa-question-circle"> </i></a>
+        <a class="clickable" href="editor.html" target="_blank"> <i class="fas fa-edit">&nbsp;</i></a>
         <span class="editor">
         </span>
     </div>

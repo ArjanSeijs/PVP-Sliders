@@ -122,6 +122,9 @@ var View = /** @class */ (function () {
             onload();
     };
     View.prototype.resize = function (board) {
+        this.screen_width = window.innerWidth;
+        this.screen_height = window.innerHeight;
+        this.canvas.renderer.resize(this.screen_width, this.screen_height);
         if (!this.loaded)
             return;
         if (!client.getGame() && !board && !this.board) {
@@ -135,8 +138,6 @@ var View = /** @class */ (function () {
         this.board = board;
         var width = board.width;
         var height = board.height;
-        this.screen_width = window.innerWidth;
-        this.screen_height = window.innerHeight;
         //44 of 1080 pixel is width of border.
         this.paddingX = 44 / 1080 * Math.min(this.screen_width, this.screen_height);
         this.paddingY = 44 / 1080 * Math.min(this.screen_width, this.screen_height);
@@ -145,7 +146,6 @@ var View = /** @class */ (function () {
         this.offsetY = ((this.screen_height - 2 * this.paddingY) - height * this.size) / 2 + this.paddingY;
         while (this.canvas.stage.children.length > 0)
             this.canvas.stage.removeChildAt(this.canvas.stage.children.length - 1);
-        this.canvas.renderer.resize(this.screen_width, this.screen_height);
         this.load();
         this.displayGame(board);
         if (client.getGame()) {
@@ -424,6 +424,15 @@ var Client = /** @class */ (function () {
     function Client() {
         this.id_p1 = { id: -1, ready: false };
         this.id_p2 = { id: -1, ready: false };
+        var defaultKeys = [
+            { up: "w", down: "s", left: "a", right: "d" },
+            { up: "arrowup", down: "arrowdown", left: "arrowleft", right: "arrowright" }
+        ];
+        var keys = Cookies.getJSON("keys");
+        if (!keys) {
+            Cookies.set("keys", defaultKeys);
+        }
+        this.keys = keys;
     }
     Client.prototype.start = function (data) {
         var _this = this;
@@ -576,16 +585,34 @@ var Client = /** @class */ (function () {
         if (id2 === -1)
             id2 = id1;
         switch (key) {
-            case "w":
-            case "a":
-            case "s":
-            case "d":
+            case this.keys[0].up:
+            case this.keys[0].down:
+            case this.keys[0].left:
+            case this.keys[0].right:
                 return id1;
-            case "arrowleft":
-            case "arrowright":
-            case "arrowup":
-            case "arrowdown":
+            case this.keys[1].up:
+            case this.keys[1].down:
+            case this.keys[1].left:
+            case this.keys[1].right:
                 return id2;
+            default:
+                return null;
+        }
+    };
+    Client.prototype.getDirection = function (key) {
+        switch (key) {
+            case this.keys[0].up:
+            case this.keys[1].up:
+                return "NORTH";
+            case this.keys[0].down:
+            case this.keys[1].down:
+                return "SOUTH";
+            case this.keys[0].left:
+            case this.keys[1].left:
+                return "WEST";
+            case this.keys[0].right:
+            case this.keys[1].right:
+                return "EAST";
             default:
                 return null;
         }
@@ -622,6 +649,23 @@ var Client = /** @class */ (function () {
                     y: directions[direction].y
                 };
             }
+        }
+    };
+    Client.prototype.setKeys = function (p1, p2) {
+        if (p1) {
+            this.keys[0].down = p1.down ? p1.down : this.keys[0].down;
+            this.keys[0].up = p1.up ? p1.up : this.keys[0].up;
+            this.keys[0].left = p1.left ? p1.left : this.keys[0].left;
+            this.keys[0].right = p1.right ? p1.right : this.keys[0].right;
+        }
+        if (p2) {
+            this.keys[1].down = p2.down ? p2.down : this.keys[1].down;
+            this.keys[1].up = p2.up ? p2.up : this.keys[1].up;
+            this.keys[1].left = p2.left ? p2.left : this.keys[1].left;
+            this.keys[1].right = p2.right ? p2.right : this.keys[1].right;
+        }
+        if (p1 || p2) {
+            Cookies.set("keys", this.keys);
         }
     };
     return Client;

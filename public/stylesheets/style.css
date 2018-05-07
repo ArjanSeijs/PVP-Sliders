@@ -71,6 +71,20 @@
     position: relative;
 }
 
+.settings {
+    z-index: 2;
+    background-color: #fff6;
+    border: 10px solid black;
+    float: left;
+    position: absolute;
+}
+
+.key {
+    margin: 0;
+    border: 1px solid black;
+    background-color: #e7e7e7;
+}
+
 #chatWrapper {
     position: absolute;
     top: 0;

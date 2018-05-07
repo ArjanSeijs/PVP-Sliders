@@ -210,26 +210,46 @@ function selectMaps() {
     }));
 }
 
+let keyHandler = null;
 window.onkeypress = function (e) {
     move(e.key);
+    if (keyHandler) keyHandler(e.key);
 };
+
+
+function _changeKey(player: number, direction: string) {
+    const forbidden = ["escape", "f1", "f2", "f3", "f4", "f5", "f11", "alt", "ctrl", "shift", "backspace", "enter"];
+    let elm = document.getElementById("press" + player);
+    if (elm) elm.innerHTML = "Press key";
+
+    keyHandler = function (key) {
+        let keys1: any = {};
+        let keys2: any = {};
+        if (forbidden.indexOf(key.toLowerCase()) > -1) {
+            if (elm) elm.innerHTML = "&nbsp;";
+            return;
+        }
+
+        if (player === 0) {
+            keys1[direction] = key.toLowerCase();
+        } else {
+            keys2[direction] = key.toLowerCase();
+        }
+
+        alert("Key set to:" + key.toLowerCase());
+        if (elm) elm.innerHTML = "&nbsp;";
+        client.setKeys(keys1, keys2);
+        keyHandler = null;
+    }
+}
 
 function move(key) {
     if (!client || !client.getGame() || !socketListener) return;
     key = key.toLowerCase();
-    const dirMap = {
-        "w": "NORTH",
-        "a": "WEST",
-        "s": "SOUTH",
-        "d": "EAST",
-        "arrowleft": "WEST",
-        "arrowright": "EAST",
-        "arrowup": "NORTH",
-        "arrowdown": "SOUTH",
-    };
     let id = client.getId(key);
-    if (id === null || !dirMap[key]) return;
-    socketListener.sendMove(id, dirMap[key]);
+    let direction = client.getDirection(key);
+    if (id === null || !direction) return;
+    socketListener.sendMove(id, direction);
 };
 
 function _map(elm: HTMLSelectElement) {
@@ -342,4 +362,30 @@ function _leave() {
     let elm = document.getElementById("bots") as HTMLInputElement;
     if (elm) elm.checked = false;
     view.showLogin();
+}
+
+function _settings() {
+    let p1 = {
+        up: prompt("up p1"),
+        down: prompt("down p1"),
+        left: prompt("left p1"),
+        right: prompt("right p1")
+    };
+    let p2 = {
+        up: prompt("up p2"),
+        down: prompt("down p2"),
+        left: prompt("left p2"),
+        right: prompt("right p2")
+    };
+    client.setKeys(p1, p2);
+}
+
+function _showSettings(show: boolean) {
+    let elm = document.getElementById('settings');
+    if (!elm) return;
+    if (show) {
+        elm.style.display = '';
+    } else {
+        elm.style.display = 'none';
+    }
 }
