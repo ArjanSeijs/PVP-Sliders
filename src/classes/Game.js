@@ -16,9 +16,13 @@ var Game = (function () {
         this.state = State.NotStarted;
     }
     Game.prototype.move = function (id, direction) {
-        var entity = this.entities[id.toString()];
-        if (entity) {
-            entity.move(direction);
+        for (var key in this.entities) {
+            if (!this.entities.hasOwnProperty(key))
+                continue;
+            var entity = this.entities[key];
+            if (entity.id === id) {
+                entity.move(direction);
+            }
         }
     };
     Game.prototype.gameTick = function (ms, interval) {

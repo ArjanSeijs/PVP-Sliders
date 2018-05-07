@@ -41,9 +41,12 @@ class Game implements ToJson {
      * @param {Direction} direction
      */
     move(id: number, direction: Direction) {
-        let entity: Entity = this.entities[id.toString()];
-        if (entity) {
-            entity.move(direction)
+        for(let key in this.entities) {
+            if(!this.entities.hasOwnProperty(key)) continue;
+            let entity: Entity = this.entities[key];
+            if(entity.id === id) {
+                entity.move(direction)
+            }
         }
     }
 
