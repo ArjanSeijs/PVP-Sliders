@@ -1,3 +1,10 @@
+/*
+ * Welcome in this clusterfuck of code!
+ * Feel free to edit this code if you can figure out what it does.
+ * The link to the (small) documentation can be found in the variable 'api'
+ * Suggestions: <TODO> add place where people can post suggestions. (git?)
+ */
+
 import Application = PIXI.Application;
 import Sprite = PIXI.Sprite;
 
@@ -5,7 +12,11 @@ let view: View;
 let client: ClientInterface;
 let enableNames = true;
 
+/**
+ * Utility classes for loading stuff.
+ */
 class Util {
+
     /**
      * Gets the url with the path removed
      * @return {string}
@@ -37,6 +48,13 @@ class Util {
         return {username: username, multiplayer: multiplayer, lobby: lobby, password: password};
     }
 
+    /**
+     * Updates the login form data.
+     * @param username
+     * @param multiplayer
+     * @param lobby
+     * @param password
+     */
     static setFormData(username, multiplayer, lobby, password): void {
         const usernameElm = (document.getElementById("username") as HTMLInputElement);
         const multiplayerElm = (document.getElementById("multiplayer") as HTMLInputElement);
@@ -48,6 +66,10 @@ class Util {
         if (password) passwordElm.value = password;
     }
 
+    /**
+     * Gets the lobby options.
+     * @return {{bots: boolean}}
+     */
     static getOptions() {
         const bots = (document.getElementById("bots") as HTMLInputElement).checked;
         return {bots: bots};
@@ -65,6 +87,9 @@ class Util {
     }
 }
 
+/**
+ * The interface for the clientside.
+ */
 interface ClientInterface {
     start(data: any): void;
 

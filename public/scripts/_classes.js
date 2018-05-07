@@ -1,8 +1,17 @@
+/*
+ * Welcome in this clusterfuck of code!
+ * Feel free to edit this code if you can figure out what it does.
+ * The link to the (small) documentation can be found in the variable 'api'
+ * Suggestions: <TODO> add place where people can post suggestions. (git?)
+ */
 var Application = PIXI.Application;
 var Sprite = PIXI.Sprite;
 var view;
 var client;
 var enableNames = true;
+/**
+ * Utility classes for loading stuff.
+ */
 var Util = /** @class */ (function () {
     function Util() {
     }
@@ -35,6 +44,13 @@ var Util = /** @class */ (function () {
         var password = document.getElementById("password").value;
         return { username: username, multiplayer: multiplayer, lobby: lobby, password: password };
     };
+    /**
+     * Updates the login form data.
+     * @param username
+     * @param multiplayer
+     * @param lobby
+     * @param password
+     */
     Util.setFormData = function (username, multiplayer, lobby, password) {
         var usernameElm = document.getElementById("username");
         var multiplayerElm = document.getElementById("multiplayer");
@@ -49,6 +65,10 @@ var Util = /** @class */ (function () {
         if (password)
             passwordElm.value = password;
     };
+    /**
+     * Gets the lobby options.
+     * @return {{bots: boolean}}
+     */
     Util.getOptions = function () {
         var bots = document.getElementById("bots").checked;
         return { bots: bots };

@@ -169,8 +169,6 @@ window.onkeypress = function (e) {
             decodeMap(atob(base64));
             view.resize();
             break;
-        default:
-            console.log("Unknown key: " + key);
     }
 };
 function encodeMap() {
@@ -250,7 +248,6 @@ function load() {
 }
 function listSaves() {
     var maps = Cookies.getJSON("maps");
-    console.log(maps);
     if (maps) {
         var saved = Object.keys(maps).reduce(function (pv, cv, ci, arr) { return pv + cv + ","; }, "Maps:\n");
         alert(saved);
