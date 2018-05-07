@@ -662,6 +662,7 @@ class Client implements ClientInterface {
         let keys = <Keys[]> Cookies.getJSON("keys");
         if (!keys) {
             Cookies.set("keys", defaultKeys);
+            keys = defaultKeys;
         }
         this.keys = keys;
     }

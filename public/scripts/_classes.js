@@ -568,6 +568,7 @@ var Client = /** @class */ (function () {
         var keys = Cookies.getJSON("keys");
         if (!keys) {
             Cookies.set("keys", defaultKeys);
+            keys = defaultKeys;
         }
         this.keys = keys;
     }
