@@ -337,7 +337,7 @@ var View = /** @class */ (function () {
         var notready = "<i class=\"fas fa-times-circle\"></i>";
         var string = "<li class='playerItem'>";
         if (player !== null)
-            string += "<div class=\"listName\"><b>" + name + "</b></div>";
+            string += "<div class=\"listName\" style=\"text-decoration: underline\"><b>" + name + "</b></div>";
         else
             string += "<div class=\"listName\">" + name + "</div>";
         if (player !== null)

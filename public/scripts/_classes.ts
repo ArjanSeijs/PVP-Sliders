@@ -172,7 +172,7 @@ class View {
         this.screen_width = window.innerWidth;
         this.screen_height = window.innerHeight;
         this.canvas.renderer.resize(this.screen_width, this.screen_height);
-        
+
         if (!this.loaded) return;
         if (!client.getGame() && !board && !this.board) {
             this.load();
@@ -404,7 +404,7 @@ class View {
         const notready = "<i class=\"fas fa-times-circle\"></i>";
 
         let string = "<li class='playerItem'>";
-        if (player !== null) string += `<div class="listName"><b>${name}</b></div>`;
+        if (player !== null) string += `<div class="listName" style="text-decoration: underline"><b>${name}</b></div>`;
         else string += `<div class="listName">${name}</div>`;
 
         if (player !== null) string += `<div class="listTeam ${team}bg">${this.getSelect(team, player)}</div>`;
