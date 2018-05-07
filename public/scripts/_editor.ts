@@ -14,6 +14,9 @@ let game: Game = {
     }
 };
 
+/**
+ * This class implements a mock client so that the view class can be reused.
+ */
 class MockClient implements ClientInterface {
     canMove(entity: any, speed: number): void {
 
@@ -73,6 +76,12 @@ class MockClient implements ClientInterface {
     }
 }
 
+/**
+ * Creates a new board of the given width and height
+ * @param {number} width
+ * @param {number} height
+ * @return {{width: number, height: number, tiles: any[]}}
+ */
 function initialBoard(width?: number, height?: number) {
     if (!width) width = 4;
     if (!height) height = 4;
@@ -94,12 +103,18 @@ function initialBoard(width?: number, height?: number) {
     return board;
 }
 
+/**
+ * Decreases the width of the board with a minimum of 4
+ */
 function decreaseWidth() {
     if (game.board.width <= 4) return;
     game.board.width -= 1;
     view.resize();
 }
 
+/**
+ * Increases the width of the board with a maximum of 100
+ */
 function increaseWidth() {
     if (game.board.width >= 100) return;
     game.board.width += 1;
@@ -108,12 +123,18 @@ function increaseWidth() {
     view.resize();
 }
 
+/**
+ * Decrease the height of the board with a minimum of 4
+ */
 function decreaseHeight() {
     if (game.board.height <= 4) return;
     game.board.height -= 1;
     view.resize();
 }
 
+/**
+ * Increases the height of the board with a maximum of 100
+ */
 function increaseHeight() {
     if (game.board.height >= 100) return;
     game.board.height += 1;
@@ -122,6 +143,10 @@ function increaseHeight() {
     view.resize();
 }
 
+/**
+ * Add the tiles to the board if not yet defined.
+ * @param {{width: number, height: number, tiles: {x: number, y: number, tile_type: string}[][]}} board
+ */
 function addTiles(board: { width: number; height: number; tiles: { x: number; y: number; tile_type: string }[][] }) {
     let width = board.width;
     let height = board.height;
@@ -155,6 +180,10 @@ window.onload = function () {
 
 };
 
+/**
+ * Toggles between of the three types of the tile.
+ * @param {{x: number, y: number, tile_type: string}} tile
+ */
 function toggleType(tile: { x: number; y: number; tile_type: string }) {
     let types = ["none", "wall", "stop", "player"];
     let i = types.indexOf(tile.tile_type);
@@ -163,6 +192,10 @@ function toggleType(tile: { x: number; y: number; tile_type: string }) {
     tile.tile_type = types[i];
 }
 
+/**
+ * Execute the function by the given key.
+ * @param {KeyboardEvent} e
+ */
 window.onkeypress = function (e) {
     let key = e.key.toLowerCase();
     switch (key) {
@@ -197,13 +230,18 @@ window.onkeypress = function (e) {
             break;
         case "d":
             let base64 = prompt("Base64 encoding");
-            if(!base64) return;
+            if (!base64) return;
             decodeMap(atob(base64));
             view.resize();
             break;
     }
 };
 
+/**
+ * Encodes the current map into a base64 string.
+ * The decoded version is printed in the console.
+ * @return {string}
+ */
 function encodeMap() {
     let players = 0;
     let string = "";
@@ -224,7 +262,7 @@ function encodeMap() {
         }
         string += "\n";
     }
-    if(players >= 16) {
+    if (players >= 16) {
         alert("Warning max of 16 players adding more will result in in some players disappearing in the actual game");
     }
     console.log("--- Map ---");
@@ -232,6 +270,10 @@ function encodeMap() {
     return btoa(string);
 }
 
+/**
+ * Decode the map of the decoded!! string.
+ * @param {string} map
+ */
 function decodeMap(map: string) {
     let strings = map.split(/\r?\n/);
     const width = strings[0].length;
@@ -251,6 +293,9 @@ function decodeMap(map: string) {
     }
 }
 
+/**
+ * Save the current map in cookies.
+ */
 function save() {
     let name = prompt("Save as", "save1");
     let maps = Cookies.getJSON("maps");
@@ -261,9 +306,12 @@ function save() {
     }
     maps[name] = encodeMap();
     alert("Map saved!");
-    Cookies.set("maps", maps,{ expires: 100*365 })
+    Cookies.set("maps", maps, {expires: 100 * 365})
 }
 
+/**
+ * Load a map from the cookies.
+ */
 function load() {
     let name = prompt("Load as", "save1");
     let map = Cookies.getJSON("maps")[name];
@@ -276,9 +324,12 @@ function load() {
     view.resize();
 }
 
+/**
+ * Display a list of all the saves.
+ */
 function listSaves() {
     let maps = Cookies.getJSON("maps");
-    if(maps) {
+    if (maps) {
         let saved = Object.keys(maps).reduce((pv, cv, ci, arr) => pv + cv + ",", "Maps:\n");
         alert(saved);
     } else {
@@ -286,19 +337,26 @@ function listSaves() {
     }
 }
 
+/**
+ * Delete a given save.
+ */
 function removeSave() {
     let maps = Cookies.getJSON("maps");
     let name = prompt("Remove map:", "save1");
     if (maps[name]) {
         delete maps[name];
-        Cookies.set("maps", maps,{ expires: 100*365 });
+        Cookies.set("maps", maps, {expires: 100 * 365});
         return;
     }
     alert("Map removed");
 }
 
+/**
+ * Onclick determine the tile and toggle its type.
+ * @param {MouseEvent} e
+ */
 window.onclick = function (e) {
-    if(!game || !game.board) return;
+    if (!game || !game.board) return;
     let x = e.clientX;
     let y = e.clientY;
     let xPos = Math.floor((x - view.getValues().offsetX) / view.getValues().size);
@@ -309,6 +367,9 @@ window.onclick = function (e) {
     view.resize();
 };
 
+/**
+ * Resize the view.
+ */
 function resize() {
     view.resize();
 }

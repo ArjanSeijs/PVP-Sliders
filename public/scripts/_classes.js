@@ -2,7 +2,7 @@
  * Welcome in this clusterfuck of code!
  * Feel free to edit this code if you can figure out what it does.
  * The link to the (small) documentation can be found in the variable 'api'
- * Suggestions: <TODO> add place where people can post suggestions. (git?)
+ * Suggestions: https://github.com/SoapStuff/Sliding-Battles-Client/tree/master
  */
 var Application = PIXI.Application;
 var Sprite = PIXI.Sprite;
@@ -86,7 +86,15 @@ var Util = /** @class */ (function () {
     };
     return Util;
 }());
+/**
+ * The view class that handles all view related things.
+ */
 var View = /** @class */ (function () {
+    /**
+     * Create a new view.
+     * @param {() => void} onload, The function that is executed once all resources are loaded.
+     * @param {string} images all the images to load.
+     */
     function View(onload) {
         var images = [];
         for (var _i = 1; _i < arguments.length; _i++) {
@@ -125,6 +133,10 @@ var View = /** @class */ (function () {
             });
         });
     }
+    /**
+     * This method is called when all the resources are loaded.
+     * @param {() => void} onload The function to execute.
+     */
     View.prototype.load = function (onload) {
         var background = Util.loadImage("background.png");
         if (background) {
@@ -141,6 +153,11 @@ var View = /** @class */ (function () {
         if (onload)
             onload();
     };
+    /**
+     * This resizes the width and height of the background/, and the cellsize of the board. to fit the screen
+     * board : Board
+     * @param board
+     */
     View.prototype.resize = function (board) {
         this.screen_width = window.innerWidth;
         this.screen_height = window.innerHeight;
@@ -173,6 +190,11 @@ var View = /** @class */ (function () {
             this.displayPlayers(client.getGame().entities);
         }
     };
+    /**
+     * Display all the players
+     * Map(Entity)
+     * @param entities
+     */
     View.prototype.displayPlayers = function (entities) {
         for (var key in client.getGame().entities) {
             if (!client.getGame().entities.hasOwnProperty(key))
@@ -196,6 +218,11 @@ var View = /** @class */ (function () {
             }
         }
     };
+    /**
+     * Displays the board.
+     * board : Board
+     * @param board
+     */
     View.prototype.displayGame = function (board) {
         if (!board)
             board = client.getGame().board;
@@ -232,6 +259,10 @@ var View = /** @class */ (function () {
         }
         this.canvas.stage.addChild(graphics);
     };
+    /**
+     * Initializes the images and names for all the entities in client.getGame().entities
+     * and adds it to the canvas
+     */
     View.prototype.makeSprites = function () {
         var width = client.getGame().board.width;
         var height = client.getGame().board.height;
@@ -254,6 +285,10 @@ var View = /** @class */ (function () {
             this.canvas.stage.addChild(entity.text);
         }
     };
+    /**
+     * Updates the view of all clients given by the position and current
+     * movement direction.
+     */
     View.prototype.updatePos = function () {
         if (!client || !client.getGame())
             return;
@@ -282,6 +317,9 @@ var View = /** @class */ (function () {
             }
         }
     };
+    /**
+     * Hides all elements.
+     */
     View.prototype.hideAll = function () {
         document.getElementById("login").style.display = 'none';
         document.getElementById("game-lobby").style.display = 'none';
@@ -289,6 +327,10 @@ var View = /** @class */ (function () {
         document.getElementById('wrapper').style.display = 'none';
         document.getElementById('winners').style.display = 'none';
     };
+    /**
+     * Show the lobby as host
+     * @param {boolean} multi If local multiplayer
+     */
     View.prototype.showHost = function (multi) {
         this.hideAll();
         this.showLobby(multi);
@@ -298,12 +340,19 @@ var View = /** @class */ (function () {
         document.getElementById("startbtn").style.display = '';
         this.isHost = true;
     };
+    /**
+     * Show the login screen.
+     */
     View.prototype.showLogin = function () {
         this.hideAll();
         this.isHost = false;
         document.getElementById("login").style.display = '';
         document.getElementById('wrapper').style.display = '';
     };
+    /**
+     * Show the lobby screen
+     * @param {boolean} multi If multiplayer
+     */
     View.prototype.showLobby = function (multi) {
         this.hideAll();
         if (!this.isHost)
@@ -313,6 +362,11 @@ var View = /** @class */ (function () {
         document.getElementById("chatWrapper").style.display = '';
         this.resize();
     };
+    /**
+     * Display all the winners.
+     * winner : Map<Entity>
+     * @param {any[]} winners
+     */
     View.prototype.showWin = function (winners) {
         this.hideAll();
         document.getElementById('winners').style.display = '';
@@ -328,9 +382,21 @@ var View = /** @class */ (function () {
             document.getElementById('winners').innerHTML = "Draw";
         }
     };
+    /**
+     * Gets an option for the team-select box.
+     * @param {string} team
+     * @param {string} actualteam
+     * @return {string}
+     */
     View.prototype.getOption = function (team, actualteam) {
         return "<option value=" + team + " class=" + team + " " + (actualteam === team ? "selected" : "") + ">" + team + "</option>";
     };
+    /**
+     * Gets the team-select box.
+     * @param {string} team
+     * @param {number} player
+     * @return {string}
+     */
     View.prototype.getSelect = function (team, player) {
         return " <select class=\"select-style\" id=\"teamselect\" onchange=\"_setTeam(this," + player + ")\">" +
             this.getOption("red", team) +
@@ -352,6 +418,15 @@ var View = /** @class */ (function () {
             this.getOption("random", team) +
             "</select>";
     };
+    /**
+     * Gets a row of the player list.
+     * @param {string} name
+     * @param {string} team
+     * @param {boolean} ready
+     * @param {number} player
+     * @param {number} id
+     * @return {string}
+     */
     View.prototype.playerEntry = function (name, team, ready, player, id) {
         var isready = "<i class=\"fas fa-check-square\"></i>";
         var notready = "<i class=\"fas fa-times-circle\"></i>";
@@ -376,6 +451,11 @@ var View = /** @class */ (function () {
         string += "</li>";
         return string;
     };
+    /**
+     * Displays a table of all the players.
+     * data : Array<Player>
+     * @param data
+     */
     View.prototype.showPlayers = function (data) {
         var string = "<ol class='playerList'>";
         var isTrue = function (string) {
@@ -396,14 +476,25 @@ var View = /** @class */ (function () {
         document.getElementById("player-amount").innerHTML = data.length;
         this.resize(this.board);
     };
+    /**
+     * Clears the canvas and re-add the background
+     */
     View.prototype.clearCanvas = function () {
         while (this.canvas.stage.children.length > 0)
             this.canvas.stage.removeChildAt(this.canvas.stage.children.length - 1);
         this.canvas.stage.addChild(Util.loadImage("background.png"));
     };
+    /**
+     * Getter for the PIXI canvas.
+     * @return {PIXI.Application}
+     */
     View.prototype.getCanvas = function () {
         return this.canvas;
     };
+    /**
+     * Getter for the offset and the size.
+     * @return {{offsetX: number, offsetY: number, size: number}}
+     */
     View.prototype.getValues = function () {
         return {
             offsetX: this.offsetX,
@@ -411,16 +502,30 @@ var View = /** @class */ (function () {
             size: this.size
         };
     };
+    /**
+     * Set the loading display.
+     * @param {boolean} load
+     */
     View.prototype.loading = function (load) {
         var elm = document.getElementById("loading");
         if (!elm)
             return;
         elm.style.display = load ? "" : "none";
     };
+    /**
+     * Sets the board data name and the amount of players.
+     * data.boardName : string
+     * data.board : Board
+     * @param data
+     */
     View.prototype.boardData = function (data) {
         document.getElementById('selected-map').innerHTML = 'Map: ' + data.boardName;
         document.getElementById('player-total').innerHTML = data.board.players;
     };
+    /**
+     * Display the div that is used for the countdown.
+     * @param {boolean} b
+     */
     View.prototype.showStarting = function (b) {
         var elm = document.getElementById('starting');
         if (!elm)
@@ -430,6 +535,12 @@ var View = /** @class */ (function () {
         else
             elm.style.display = 'none';
     };
+    /**
+     * Adds a chat message.
+     * data.user : string - The user
+     * data.text : string - The message
+     * @param data
+     */
     View.prototype.addChat = function (data) {
         var chat = "<div class=\"comment\"><div class=\"author\"><i class=\"fas fa-comments\"></i>&nbsp;" + data.user + "</div><div class=\"message\">" + data.text + "</div></div>";
         var elm = document.getElementById("comment_box");
@@ -440,7 +551,13 @@ var View = /** @class */ (function () {
     };
     return View;
 }());
+/**
+ * The client holds information on the current game & board and the id's of the player.
+ */
 var Client = /** @class */ (function () {
+    /**
+     * Constructs a new client.
+     */
     function Client() {
         this.id_p1 = { id: -1, ready: false };
         this.id_p2 = { id: -1, ready: false };
@@ -454,6 +571,11 @@ var Client = /** @class */ (function () {
         }
         this.keys = keys;
     }
+    /**
+     * Starts the game, and shows the countdown.
+     * data.game : Game
+     * @param data
+     */
     Client.prototype.start = function (data) {
         var _this = this;
         this.game = data.game;
@@ -469,16 +591,25 @@ var Client = /** @class */ (function () {
             view.showStarting(false);
         }, 5000);
     };
-    Client.prototype.count = function (start) {
+    /**
+     * Shows the amount of seconds until the 'end'
+     * @param {number} end
+     */
+    Client.prototype.count = function (end) {
         var elm = document.getElementById("count");
         if (!elm)
             return;
-        var i = Math.floor((start - new Date().getTime()) / 1000);
+        var i = Math.floor((end - new Date().getTime()) / 1000);
         if (i !== 0)
             elm.innerHTML = i.toString();
         else
             elm.innerHTML = "GO!";
     };
+    /**
+     * Stops the entity, snaps the entity back to the grid.
+     * entity: Entity
+     * @param entity
+     */
     Client.prototype.stop = function (entity) {
         entity.direction = { x: 0, y: 0, string: "NONE" };
         var cellSize = 100; //TODO config.
@@ -489,6 +620,13 @@ var Client = /** @class */ (function () {
             y: y
         };
     };
+    /**
+     * Checks if the entity can move at the given position.
+     * entity : Entity
+     * @param entity
+     * @param {number} speed
+     * @return {boolean}
+     */
     Client.prototype.canMove = function (entity, speed) {
         var cellSize = 100;
         var dir = entity.direction;
@@ -521,6 +659,13 @@ var Client = /** @class */ (function () {
             console.warn(error);
         }
     };
+    /**
+     * Checks if an entity collides with a stop cell.
+     * entity : Entity
+     * @param entity
+     * @param {number} speed
+     * @return {boolean}
+     */
     Client.prototype.isStop = function (entity, speed) {
         var cellSize = 100;
         var dir = entity.direction;
@@ -566,6 +711,13 @@ var Client = /** @class */ (function () {
         }
         return false;
     };
+    /**
+     * Checks if the coordinates are in bounds.
+     * @param {number} newX
+     * @param {number} newY
+     * @param entity
+     * @return {boolean}
+     */
     Client.prototype.inBounds = function (newX, newY, entity) {
         //TODO config
         var cellSize = 100;
@@ -573,32 +725,65 @@ var Client = /** @class */ (function () {
             && newX + entity.size < this.game.board.width * cellSize
             && newY + entity.size < this.game.board.height * cellSize;
     };
+    /**
+     * Checks if the index of a tile is in bounds.
+     * @param {number} x
+     * @param {number} y
+     * @return {boolean}
+     */
     Client.prototype.indexInBounds = function (x, y) {
         return x >= 0 && y >= 0
             && x < this.game.board.width
             && y < this.game.board.height;
     };
+    /**
+     * Set the id's of the local players.
+     * data.ids : Array<number>
+     * @param data
+     */
     Client.prototype.setIds = function (data) {
         this.id_p1.id = data.ids[0].id;
         if (data.ids[1])
             this.id_p2.id = data.ids[1].id;
     };
+    /**
+     * Check if you currently are in a multiplayer game.
+     * @return {boolean}
+     */
     Client.prototype.isMulti = function () {
         return this.id_p2.id !== -1;
     };
+    /**
+     * Ends the game and stops the updates
+     */
     Client.prototype.end = function () {
         this.id_p1.ready = false;
         this.id_p2.ready = false;
         if (this.timer)
             clearInterval(this.timer);
     };
+    /**
+     * Getter for the game object
+     * returns Game.
+     * @return {any}
+     */
     Client.prototype.getGame = function () {
         return this.game;
     };
+    /**
+     * Toggles the ready status.
+     * @deprecated
+     * @return {boolean}
+     */
     Client.prototype.toggleReady = function () {
         this.id_p1.ready = this.id_p2.ready = !this.id_p1.ready;
         return this.id_p1.ready;
     };
+    /**
+     * Gets the player id from the given key.
+     * @param {string} key
+     * @return {number}
+     */
     Client.prototype.getId = function (key) {
         var id1 = this.id_p1.id;
         var id2 = this.id_p2.id;
@@ -619,6 +804,11 @@ var Client = /** @class */ (function () {
                 return null;
         }
     };
+    /**
+     * Gets the direction from the given key.
+     * @param {string} key
+     * @return {string}
+     */
     Client.prototype.getDirection = function (key) {
         switch (key) {
             case this.keys[0].up:
@@ -637,18 +827,36 @@ var Client = /** @class */ (function () {
                 return null;
         }
     };
+    /**
+     * From the data set the ready status of the client.
+     * data : Array<{id:number}>
+     * @param data
+     */
     Client.prototype.setReady = function (data) {
         for (var i = 0; i < data.length; i++) {
             if (data[i].id === this.id_p1.id)
                 this.id_p1.ready = this.id_p2.ready = data[i].ready;
         }
     };
+    /**
+     * Reset the game.
+     */
     Client.prototype.reset = function () {
         this.game = null;
     };
+    /**
+     * Check if the id is the id of a local player.
+     * @param {number} id
+     * @return {boolean}
+     */
     Client.prototype.isLocal = function (id) {
         return id === this.id_p1.id || id === this.id_p2.id;
     };
+    /**
+     * Move the entity in a given direction.
+     * @param {number} id
+     * @param {string} direction
+     */
     Client.prototype.move = function (id, direction) {
         var directions = {
             NONE: { x: 0, y: 0 },
@@ -671,6 +879,11 @@ var Client = /** @class */ (function () {
             }
         }
     };
+    /**
+     * Change the key settings.
+     * @param {Keys} p1
+     * @param {Keys} p2
+     */
     Client.prototype.setKeys = function (p1, p2) {
         if (p1) {
             this.keys[0].down = p1.down ? p1.down : this.keys[0].down;

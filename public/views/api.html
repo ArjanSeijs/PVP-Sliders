@@ -4,31 +4,50 @@
     <meta charset="UTF-8">
     <link rel="icon" href="../images/sliders.ico" type="image/x-icon"/>
     <title>API</title>
-    <style>
-
-        html, body {
-            height: 100%;
-        }
-
-        html {
-            display: table;
-            margin: auto;
-        }
-
-        body {
-            display: table-cell;
-            vertical-align: middle;
-            background-color: burlywood;
-        }
-
-        img {
-            margin: 10px auto 10px auto;
-        }
-    </style>
 </head>
 <body>
 <div class="wrapper">
-
+    <h1>Documentation</h1>
+    The generated docs can be found <a href="docs/index.html">here</a>
+    <h1>Interfaces</h1>
+    Here are some types declared for data send by the server.
+    <h2>Player</h2>
+    <code>
+        {string} name - The player name<br>
+        {string} team - The player team<br>
+        {boolean} ready - If the player is currently ready<br>
+        {number} id - The player id that is assigned to the entity on game-start<br>
+        {number} player - If it is local player 1 or local player 2
+    </code>
+    <h2>Entity</h2>
+    <code>
+        {number} size - The size of the entity <br>
+        {x:number,y:number} pos - The position of the entity <br>
+        {string} direction - One of the following directions: NORTH, SOUTH, EAST, WEST, NONE <br>
+        {number} id - The entity id <br>
+        {string} team - The entity team. <br>
+        {string} name - The entity name. <br>
+    </code>
+    <h2>Tile</h2>
+    Note, the x and y are not coordinates but indexes, to get the tile coordinates multiply index with the cellsize
+    (100)<br>
+    <code>
+        {string} tile_type - 'none' 'wall' 'stop' What kind of tile it is.<br>
+        {number} x - The x index of the tile<br>
+        {number} y - The y index of the tile<br>
+    </code>
+    <h2>Board</h2>
+    <code>
+        {number} players - The max amount of players<br>
+        {number} width - The board width<br>
+        {number} height - The board height<br>
+        {Tile[][]} tiles - The the double tile array, a tile at position x of y can be acces by tiles[x][y]
+    </code>
+    <h2>Game</h2>
+    <code>
+        {Board} board - The game board.<br>
+        {Map(Entity)} entities - A json object with as key the entity id and as value the entity.
+    </code>
 </div>
 </body>
 </html>

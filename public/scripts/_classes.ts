@@ -2,7 +2,7 @@
  * Welcome in this clusterfuck of code!
  * Feel free to edit this code if you can figure out what it does.
  * The link to the (small) documentation can be found in the variable 'api'
- * Suggestions: <TODO> add place where people can post suggestions. (git?)
+ * Suggestions: https://github.com/SoapStuff/Sliding-Battles-Client/tree/master
  */
 
 import Application = PIXI.Application;
@@ -124,6 +124,9 @@ interface ClientInterface {
     setKeys(p1: Keys, p2: Keys): void
 }
 
+/**
+ * The view class that handles all view related things.
+ */
 class View {
 
     private screen_width: number;
@@ -138,6 +141,11 @@ class View {
     private isHost: boolean;
     private loaded: boolean = false;
 
+    /**
+     * Create a new view.
+     * @param {() => void} onload, The function that is executed once all resources are loaded.
+     * @param {string} images all the images to load.
+     */
     constructor(onload: () => void, ...images: string[]) {
         this.screen_width = window.innerWidth;
         this.screen_height = window.innerHeight;
@@ -175,6 +183,10 @@ class View {
         );
     }
 
+    /**
+     * This method is called when all the resources are loaded.
+     * @param {() => void} onload The function to execute.
+     */
     load(onload?: () => void): void {
         let background = Util.loadImage("background.png");
         if (background) {
@@ -193,6 +205,11 @@ class View {
         if (onload) onload();
     }
 
+    /**
+     * This resizes the width and height of the background/, and the cellsize of the board. to fit the screen
+     * board : Board
+     * @param board
+     */
     resize(board?: any) {
         this.screen_width = window.innerWidth;
         this.screen_height = window.innerHeight;
@@ -229,6 +246,11 @@ class View {
         }
     }
 
+    /**
+     * Display all the players
+     * Map(Entity)
+     * @param entities
+     */
     displayPlayers(entities: any) {
         for (let key in client.getGame().entities) {
             if (!client.getGame().entities.hasOwnProperty(key)) continue;
@@ -255,6 +277,11 @@ class View {
         }
     }
 
+    /**
+     * Displays the board.
+     * board : Board
+     * @param board
+     */
     displayGame(board?: any) {
         if (!board) board = client.getGame().board;
 
@@ -295,6 +322,10 @@ class View {
         this.canvas.stage.addChild(graphics);
     }
 
+    /**
+     * Initializes the images and names for all the entities in client.getGame().entities
+     * and adds it to the canvas
+     */
     makeSprites() {
         let width = client.getGame().board.width;
         let height = client.getGame().board.height;
@@ -319,6 +350,10 @@ class View {
         }
     }
 
+    /**
+     * Updates the view of all clients given by the position and current
+     * movement direction.
+     */
     updatePos() {
         if (!client || !client.getGame()) return;
         //TODO get speed from server.
@@ -348,6 +383,9 @@ class View {
         }
     }
 
+    /**
+     * Hides all elements.
+     */
     hideAll() {
         document.getElementById("login").style.display = 'none';
         document.getElementById("game-lobby").style.display = 'none';
@@ -356,6 +394,10 @@ class View {
         document.getElementById('winners').style.display = 'none';
     }
 
+    /**
+     * Show the lobby as host
+     * @param {boolean} multi If local multiplayer
+     */
     showHost(multi: boolean) {
         this.hideAll();
         this.showLobby(multi);
@@ -366,6 +408,9 @@ class View {
         this.isHost = true;
     }
 
+    /**
+     * Show the login screen.
+     */
     showLogin() {
         this.hideAll();
         this.isHost = false;
@@ -373,6 +418,10 @@ class View {
         document.getElementById('wrapper').style.display = '';
     }
 
+    /**
+     * Show the lobby screen
+     * @param {boolean} multi If multiplayer
+     */
     showLobby(multi: boolean) {
         this.hideAll();
 
@@ -384,6 +433,11 @@ class View {
         this.resize();
     }
 
+    /**
+     * Display all the winners.
+     * winner : Map<Entity>
+     * @param {any[]} winners
+     */
     showWin(winners: any[]) {
         this.hideAll();
         document.getElementById('winners').style.display = '';
@@ -398,10 +452,22 @@ class View {
         }
     }
 
+    /**
+     * Gets an option for the team-select box.
+     * @param {string} team
+     * @param {string} actualteam
+     * @return {string}
+     */
     private getOption(team: string, actualteam: string) {
         return `<option value=${team} class=${team} ${(actualteam === team ? "selected" : "")}>${team}</option>`;
     }
 
+    /**
+     * Gets the team-select box.
+     * @param {string} team
+     * @param {number} player
+     * @return {string}
+     */
     private getSelect(team: string, player: number): string {
         return ` <select class="select-style" id="teamselect" onchange="_setTeam(this,${player})">` +
             this.getOption("red", team) +
@@ -424,6 +490,15 @@ class View {
             `</select>`
     }
 
+    /**
+     * Gets a row of the player list.
+     * @param {string} name
+     * @param {string} team
+     * @param {boolean} ready
+     * @param {number} player
+     * @param {number} id
+     * @return {string}
+     */
     private playerEntry(name: string, team: string, ready: boolean, player: number, id: number): string {
         const isready = "<i class=\"fas fa-check-square\"></i>";
         const notready = "<i class=\"fas fa-times-circle\"></i>";
@@ -447,6 +522,11 @@ class View {
         return string;
     }
 
+    /**
+     * Displays a table of all the players.
+     * data : Array<Player>
+     * @param data
+     */
     showPlayers(data: any) {
         let string = "<ol class='playerList'>";
 
@@ -472,15 +552,26 @@ class View {
         this.resize(this.board);
     }
 
+    /**
+     * Clears the canvas and re-add the background
+     */
     clearCanvas() {
         while (this.canvas.stage.children.length > 0) this.canvas.stage.removeChildAt(this.canvas.stage.children.length - 1);
         this.canvas.stage.addChild(Util.loadImage("background.png"));
     }
 
+    /**
+     * Getter for the PIXI canvas.
+     * @return {PIXI.Application}
+     */
     getCanvas(): Application {
         return this.canvas;
     }
 
+    /**
+     * Getter for the offset and the size.
+     * @return {{offsetX: number, offsetY: number, size: number}}
+     */
     getValues(): { offsetX: number, offsetY: number, size: number } {
         return {
             offsetX: this.offsetX,
@@ -489,17 +580,31 @@ class View {
         }
     }
 
+    /**
+     * Set the loading display.
+     * @param {boolean} load
+     */
     loading(load: boolean) {
         let elm = document.getElementById("loading") as HTMLDivElement;
         if (!elm) return;
         elm.style.display = load ? "" : "none";
     }
 
+    /**
+     * Sets the board data name and the amount of players.
+     * data.boardName : string
+     * data.board : Board
+     * @param data
+     */
     boardData(data: any) {
         (document.getElementById('selected-map') as HTMLDivElement).innerHTML = 'Map: ' + data.boardName;
         (document.getElementById('player-total') as HTMLSpanElement).innerHTML = data.board.players;
     }
 
+    /**
+     * Display the div that is used for the countdown.
+     * @param {boolean} b
+     */
     showStarting(b: boolean) {
         let elm = document.getElementById('starting');
         if (!elm) return;
@@ -507,6 +612,12 @@ class View {
         else elm.style.display = 'none';
     }
 
+    /**
+     * Adds a chat message.
+     * data.user : string - The user
+     * data.text : string - The message
+     * @param data
+     */
     addChat(data: any) {
         const chat = `<div class="comment"><div class="author"><i class="fas fa-comments"></i>&nbsp;${data.user}</div><div class="message">${data.text}</div></div>`
         let elm = document.getElementById("comment_box");
@@ -517,6 +628,9 @@ class View {
 
 }
 
+/**
+ * The interface for a key.
+ */
 interface Keys {
     up: string,
     down: string,
@@ -524,6 +638,9 @@ interface Keys {
     right: string
 }
 
+/**
+ * The client holds information on the current game & board and the id's of the player.
+ */
 class Client implements ClientInterface {
     private game: any;
     private board: any;
@@ -532,6 +649,9 @@ class Client implements ClientInterface {
     private timer: any;
     private readonly keys: Keys[];
 
+    /**
+     * Constructs a new client.
+     */
     constructor() {
         this.id_p1 = {id: -1, ready: false};
         this.id_p2 = {id: -1, ready: false};
@@ -546,6 +666,11 @@ class Client implements ClientInterface {
         this.keys = keys;
     }
 
+    /**
+     * Starts the game, and shows the countdown.
+     * data.game : Game
+     * @param data
+     */
     start(data: any) {
         this.game = data.game;
         view.displayGame();
@@ -563,14 +688,23 @@ class Client implements ClientInterface {
         }, 5000);
     }
 
-    count(start: number) {
+    /**
+     * Shows the amount of seconds until the 'end'
+     * @param {number} end
+     */
+    count(end: number) {
         let elm = document.getElementById("count") as HTMLDivElement;
         if (!elm) return;
-        let i = Math.floor((start - new Date().getTime()) / 1000);
+        let i = Math.floor((end - new Date().getTime()) / 1000);
         if (i !== 0) elm.innerHTML = i.toString();
         else elm.innerHTML = "GO!";
     }
 
+    /**
+     * Stops the entity, snaps the entity back to the grid.
+     * entity: Entity
+     * @param entity
+     */
     stop(entity: any) {
         entity.direction = {x: 0, y: 0, string: "NONE"};
         let cellSize = 100; //TODO config.
@@ -582,6 +716,13 @@ class Client implements ClientInterface {
         }
     }
 
+    /**
+     * Checks if the entity can move at the given position.
+     * entity : Entity
+     * @param entity
+     * @param {number} speed
+     * @return {boolean}
+     */
     canMove(entity: any, speed: number): boolean {
         const cellSize = 100;
         let dir = entity.direction;
@@ -613,7 +754,13 @@ class Client implements ClientInterface {
         }
     }
 
-
+    /**
+     * Checks if an entity collides with a stop cell.
+     * entity : Entity
+     * @param entity
+     * @param {number} speed
+     * @return {boolean}
+     */
     private isStop(entity: any, speed: number): boolean {
         const cellSize = 100;
         let dir = entity.direction;
@@ -657,6 +804,13 @@ class Client implements ClientInterface {
         return false;
     }
 
+    /**
+     * Checks if the coordinates are in bounds.
+     * @param {number} newX
+     * @param {number} newY
+     * @param entity
+     * @return {boolean}
+     */
     private inBounds(newX: number, newY: number, entity: any) {
         //TODO config
         const cellSize = 100;
@@ -665,36 +819,69 @@ class Client implements ClientInterface {
             && newY + entity.size < this.game.board.height * cellSize;
     }
 
+    /**
+     * Checks if the index of a tile is in bounds.
+     * @param {number} x
+     * @param {number} y
+     * @return {boolean}
+     */
     indexInBounds(x: number, y: number): boolean {
         return x >= 0 && y >= 0
             && x < this.game.board.width
             && y < this.game.board.height;
     }
 
+    /**
+     * Set the id's of the local players.
+     * data.ids : Array<number>
+     * @param data
+     */
     setIds(data: any): void {
         this.id_p1.id = data.ids[0].id;
         if (data.ids[1]) this.id_p2.id = data.ids[1].id;
     }
 
+    /**
+     * Check if you currently are in a multiplayer game.
+     * @return {boolean}
+     */
     isMulti(): boolean {
         return this.id_p2.id !== -1
     }
 
+    /**
+     * Ends the game and stops the updates
+     */
     end() {
         this.id_p1.ready = false;
         this.id_p2.ready = false;
         if (this.timer) clearInterval(this.timer);
     }
 
+    /**
+     * Getter for the game object
+     * returns Game.
+     * @return {any}
+     */
     getGame() {
         return this.game;
     }
 
+    /**
+     * Toggles the ready status.
+     * @deprecated
+     * @return {boolean}
+     */
     toggleReady() {
         this.id_p1.ready = this.id_p2.ready = !this.id_p1.ready;
         return this.id_p1.ready;
     }
 
+    /**
+     * Gets the player id from the given key.
+     * @param {string} key
+     * @return {number}
+     */
     getId(key: string): number {
         let id1 = this.id_p1.id;
         let id2 = this.id_p2.id;
@@ -716,12 +903,16 @@ class Client implements ClientInterface {
     }
 
 
+    /**
+     * Gets the direction from the given key.
+     * @param {string} key
+     * @return {string}
+     */
     getDirection(key: string): string {
         switch (key) {
             case this.keys[0].up :
             case this.keys[1].up :
                 return "NORTH";
-
             case this.keys[0].down :
             case this.keys[1].down :
                 return "SOUTH";
@@ -736,20 +927,38 @@ class Client implements ClientInterface {
         }
     }
 
+    /**
+     * From the data set the ready status of the client.
+     * data : Array<{id:number}>
+     * @param data
+     */
     setReady(data: any) {
         for (let i = 0; i < data.length; i++) {
             if (data[i].id === this.id_p1.id) this.id_p1.ready = this.id_p2.ready = data[i].ready;
         }
     }
 
+    /**
+     * Reset the game.
+     */
     reset(): void {
         this.game = null;
     }
 
+    /**
+     * Check if the id is the id of a local player.
+     * @param {number} id
+     * @return {boolean}
+     */
     isLocal(id: number): boolean {
         return id === this.id_p1.id || id === this.id_p2.id;
     }
 
+    /**
+     * Move the entity in a given direction.
+     * @param {number} id
+     * @param {string} direction
+     */
     move(id: number, direction: string) {
         const directions = {
             NONE: {x: 0, y: 0},
@@ -771,6 +980,11 @@ class Client implements ClientInterface {
         }
     }
 
+    /**
+     * Change the key settings.
+     * @param {Keys} p1
+     * @param {Keys} p2
+     */
     setKeys(p1: Keys, p2: Keys): void {
         if (p1) {
             this.keys[0].down = p1.down ? p1.down : this.keys[0].down;

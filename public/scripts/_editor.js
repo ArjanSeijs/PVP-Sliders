@@ -6,6 +6,9 @@ var game = {
         tiles: []
     }
 };
+/**
+ * This class implements a mock client so that the view class can be reused.
+ */
 var MockClient = /** @class */ (function () {
     function MockClient() {
     }
@@ -50,6 +53,12 @@ var MockClient = /** @class */ (function () {
     };
     return MockClient;
 }());
+/**
+ * Creates a new board of the given width and height
+ * @param {number} width
+ * @param {number} height
+ * @return {{width: number, height: number, tiles: any[]}}
+ */
 function initialBoard(width, height) {
     if (!width)
         width = 4;
@@ -72,12 +81,18 @@ function initialBoard(width, height) {
     }
     return board;
 }
+/**
+ * Decreases the width of the board with a minimum of 4
+ */
 function decreaseWidth() {
     if (game.board.width <= 4)
         return;
     game.board.width -= 1;
     view.resize();
 }
+/**
+ * Increases the width of the board with a maximum of 100
+ */
 function increaseWidth() {
     if (game.board.width >= 100)
         return;
@@ -86,12 +101,18 @@ function increaseWidth() {
     addTiles(game.board);
     view.resize();
 }
+/**
+ * Decrease the height of the board with a minimum of 4
+ */
 function decreaseHeight() {
     if (game.board.height <= 4)
         return;
     game.board.height -= 1;
     view.resize();
 }
+/**
+ * Increases the height of the board with a maximum of 100
+ */
 function increaseHeight() {
     if (game.board.height >= 100)
         return;
@@ -100,6 +121,10 @@ function increaseHeight() {
     addTiles(game.board);
     view.resize();
 }
+/**
+ * Add the tiles to the board if not yet defined.
+ * @param {{width: number, height: number, tiles: {x: number, y: number, tile_type: string}[][]}} board
+ */
 function addTiles(board) {
     var width = board.width;
     var height = board.height;
@@ -122,6 +147,10 @@ window.onload = function () {
     game.board = initialBoard();
     view = new View(function () { return view.resize(); }, "assets/block.png", "assets/player_blue.png", "assets/player_green.png", "assets/player_red.png", "assets/player_yellow.png", "assets/board_background.png", "assets/stop.png");
 };
+/**
+ * Toggles between of the three types of the tile.
+ * @param {{x: number, y: number, tile_type: string}} tile
+ */
 function toggleType(tile) {
     var types = ["none", "wall", "stop", "player"];
     var i = types.indexOf(tile.tile_type);
@@ -130,6 +159,10 @@ function toggleType(tile) {
     i = (i + 1) % types.length;
     tile.tile_type = types[i];
 }
+/**
+ * Execute the function by the given key.
+ * @param {KeyboardEvent} e
+ */
 window.onkeypress = function (e) {
     var key = e.key.toLowerCase();
     switch (key) {
@@ -171,6 +204,11 @@ window.onkeypress = function (e) {
             break;
     }
 };
+/**
+ * Encodes the current map into a base64 string.
+ * The decoded version is printed in the console.
+ * @return {string}
+ */
 function encodeMap() {
     var players = 0;
     var string = "";
@@ -202,6 +240,10 @@ function encodeMap() {
     console.log(string);
     return btoa(string);
 }
+/**
+ * Decode the map of the decoded!! string.
+ * @param {string} map
+ */
 function decodeMap(map) {
     var strings = map.split(/\r?\n/);
     var width = strings[0].length;
@@ -222,6 +264,9 @@ function decodeMap(map) {
         }
     }
 }
+/**
+ * Save the current map in cookies.
+ */
 function save() {
     var name = prompt("Save as", "save1");
     var maps = Cookies.getJSON("maps");
@@ -235,6 +280,9 @@ function save() {
     alert("Map saved!");
     Cookies.set("maps", maps, { expires: 100 * 365 });
 }
+/**
+ * Load a map from the cookies.
+ */
 function load() {
     var name = prompt("Load as", "save1");
     var map = Cookies.getJSON("maps")[name];
@@ -246,6 +294,9 @@ function load() {
     alert("Map loaded!");
     view.resize();
 }
+/**
+ * Display a list of all the saves.
+ */
 function listSaves() {
     var maps = Cookies.getJSON("maps");
     if (maps) {
@@ -256,6 +307,9 @@ function listSaves() {
         alert("No saves!");
     }
 }
+/**
+ * Delete a given save.
+ */
 function removeSave() {
     var maps = Cookies.getJSON("maps");
     var name = prompt("Remove map:", "save1");
@@ -266,6 +320,10 @@ function removeSave() {
     }
     alert("Map removed");
 }
+/**
+ * Onclick determine the tile and toggle its type.
+ * @param {MouseEvent} e
+ */
 window.onclick = function (e) {
     if (!game || !game.board)
         return;
@@ -279,6 +337,9 @@ window.onclick = function (e) {
     toggleType(tile);
     view.resize();
 };
+/**
+ * Resize the view.
+ */
 function resize() {
     view.resize();
 }

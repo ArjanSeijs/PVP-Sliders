@@ -2,7 +2,7 @@
  * Welcome in this clusterfuck of code!
  * Feel free to edit this code if you can figure out what it does.
  * The link to the (small) documentation can be found in the variable 'api'
- * Suggestions: <TODO> add place where people can post suggestions. (git?)
+ * Suggestions: https://github.com/SoapStuff/Sliding-Battles-Client/tree/master
  */
 
 let api = Util.getUrl() + "/api.html";
@@ -442,7 +442,7 @@ function _host(): void {
  * Send the ready status
  */
 function _ready() {
-    socketListener.sendReady(client.toggleReady());
+    socketListener.sendReady(true);
     view.loading(true);
 }
 
