@@ -580,6 +580,7 @@ var Client = /** @class */ (function () {
     Client.prototype.start = function (data) {
         var _this = this;
         this.game = data.game;
+        this.board = data.game.board;
         view.displayGame();
         view.makeSprites();
         view.showStarting(true);
@@ -901,6 +902,16 @@ var Client = /** @class */ (function () {
         if (p1 || p2) {
             Cookies.set("keys", this.keys);
         }
+    };
+    Client.prototype.updateGame = function (filler) {
+        if (!filler)
+            return;
+        for (var i = 0; i < filler.length; i++) {
+            var pos = filler[i];
+            var tile = this.board.tiles[pos.x][pos.y];
+            tile.tile_type = "wall";
+        }
+        view.resize(this.board);
     };
     return Client;
 }());

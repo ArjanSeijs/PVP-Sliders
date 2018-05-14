@@ -15,6 +15,12 @@ interface GameMode {
      * @param {Entity} other
      */
     onEnemyCollision(entity : Entity, other : Entity)
+
+    /**
+     * This event is fired when a entity collides when a new wall is placed.
+     * @param {Entity} entity
+     */
+    onNewWallCollision(entity: Entity)
 }
 
 export = GameMode

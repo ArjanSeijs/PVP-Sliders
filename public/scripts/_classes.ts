@@ -122,6 +122,8 @@ interface ClientInterface {
     move(id: number, direction: string): void;
 
     setKeys(p1: Keys, p2: Keys): void
+
+    updateGame(filler: any): void;
 }
 
 /**
@@ -674,6 +676,7 @@ class Client implements ClientInterface {
      */
     start(data: any) {
         this.game = data.game;
+        this.board = data.game.board;
         view.displayGame();
         view.makeSprites();
         view.showStarting(true);
@@ -1002,5 +1005,15 @@ class Client implements ClientInterface {
         if (p1 || p2) {
             Cookies.set("keys", this.keys);
         }
+    }
+
+    updateGame(filler: {x:number,y:number}[]): void {
+        if(!filler) return;
+        for (let i = 0; i < filler.length; i++) {
+            let pos = filler[i];
+            let tile = this.board.tiles[pos.x][pos.y];
+            tile.tile_type = "wall";
+        }
+        view.resize(this.board);
     }
 }

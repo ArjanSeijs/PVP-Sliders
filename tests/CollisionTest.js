@@ -8,7 +8,7 @@ var Assert = require("assert");
 var Direction = require("../src/classes/Direction");
 function repeatTicks(amount, game) {
     for (var i = 0; i < amount; i++) {
-        game.gameTick(-1);
+        game.gameTick(1, 1);
     }
 }
 Test.run({

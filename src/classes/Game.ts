@@ -5,6 +5,9 @@ import GameMode = require("../interfaces/GameMode");
 import Direction = require("./Direction");
 import Entity = require("./entities/Entity");
 import ToJson = require("../interfaces/ToJson");
+import Types = require("./Types");
+import config = require("../lib/config");
+
 
 interface EntityMap {
     [index: number]: Entity
@@ -24,112 +27,69 @@ class DefaultFillingBehaviour implements FillingBehaviour {
     //Adapted from https://www.geeksforgeeks.org/print-a-given-matrix-in-spiral-form/
     private readonly game: Game;
     private readonly updates: { x: number, y: number }[];
-
-    private endRowIndex: number;
-    private endColIndex: number;
-    private startRowIndex: number;
-    private startColIndex: number;
-    private iter: number;
-    private curDir: Direction;
+    private updateIndex: number;
+    private readonly list: { x: number, y: number }[];
+    private counter: number;
 
     constructor(game: Game) {
         this.game = game;
+        this.updateIndex = 0;
         this.updates = [];
-        this.endRowIndex = this.game.board.width - 1;
-        this.endColIndex = this.game.board.height - 1;
-        this.startRowIndex = 0;
-        this.startColIndex = 0;
-        this.iter = null;
-        this.curDir = Direction.East;
-    }
-
-    doFillAt(y: number, x: number) {
-        this.updates.push({x: x, y: y});
+        this.list = [];
+        this.generateSpiral(this.game.board.height, this.game.board.width);
+        this.counter = 0;
     }
 
     doFill(): void {
-        if (this.startRowIndex < this.endRowIndex && this.startColIndex < this.endColIndex) {
-            switch (this.curDir) {
-                case Direction.North:
-                    this.doFillNorth();
-                    break;
-                case Direction.South:
-                    this.doFillSouth();
-                    break;
-                case Direction.West:
-                    this.doFillWest();
-                    break;
-                case Direction.East:
-                    this.doFillEast();
-                    break;
+        if (this.updateIndex < this.list.length) {
+            if (this.counter === 0) {
+                let pos = this.list[this.updateIndex];
+                this.game.board.getTileAt(pos.x, pos.y).tile_type = Types.Wall;
+                this.updates.push(pos);
+                this.updateIndex++;
+            }
+            this.counter = (this.counter + 1) % config.get("removeInterval")
+        }
+    }
+
+    generateSpiral(endRowIndex: number, endColIndex: number) {
+        let iter, startRowIndex = 0, startColIndex = 0;
+        /*  startRowIndex - starting row index
+        endRowIndex - ending row index
+        startColIndex - starting column index
+        endColIndex - ending column index
+        iter - iterator
+        */
+
+        while (startRowIndex < endRowIndex && startColIndex < endColIndex) {
+            for (iter = startColIndex; iter < endColIndex; ++iter) {
+                this.list.push({x: iter, y: startRowIndex});
+            }
+            startRowIndex++;
+
+            for (iter = startRowIndex; iter < endRowIndex; ++iter) {
+                this.list.push({x: endColIndex - 1, y: iter});
+            }
+            endColIndex--;
+
+            if (startRowIndex < endRowIndex) {
+                for (iter = endColIndex - 1; iter >= startColIndex; --iter) {
+                    this.list.push({x: iter, y: endRowIndex - 1});
+                }
+                endRowIndex--;
+            }
+
+            if (startColIndex < endColIndex) {
+                for (iter = endRowIndex - 1; iter >= startRowIndex; --iter) {
+                    this.list.push({x: startColIndex, y: iter});
+                }
+                startColIndex++;
             }
         }
     }
 
     updateJson(): any {
         return this.updates;
-    }
-
-    private doFillEast() {
-        if (this.startRowIndex >= this.endRowIndex || this.startColIndex >= this.endColIndex) return;
-        if (this.iter === null) this.iter = this.startColIndex;
-        if (this.iter < this.endColIndex) {
-            this.doFillAt(this.startRowIndex, this.iter);
-            this.iter++;
-        } else {
-            this.startRowIndex++;
-            this.iter = null;
-            this.curDir = Direction.South;
-            this.doFillSouth();
-        }
-    }
-
-    private doFillSouth() {
-        if (this.startRowIndex >= this.endRowIndex || this.startColIndex >= this.endColIndex) return;
-        if (this.iter === null) this.iter = this.startRowIndex;
-        if (this.iter < this.endRowIndex) {
-            this.doFillAt(this.iter, this.endColIndex - 1);
-            this.iter++;
-        } else {
-            this.endColIndex--;
-            this.iter = null;
-            this.curDir = Direction.West;
-            this.doFillWest();
-        }
-    }
-
-    private doFillWest() {
-        if (this.startRowIndex >= this.endRowIndex || this.startColIndex >= this.endColIndex) return;
-        if (this.startRowIndex < this.endRowIndex) {
-            if (this.iter === null) this.iter = this.endColIndex - 1;
-            if (this.iter >= this.startColIndex) {
-                this.doFillAt(this.endRowIndex - 1, this.iter);
-                this.iter--;
-            } else {
-                this.endRowIndex--;
-                this.iter = null;
-                this.curDir = Direction.North;
-                this.doFillNorth();
-            }
-
-        }
-
-    }
-
-    private doFillNorth() {
-        if (this.startRowIndex >= this.endRowIndex || this.startColIndex >= this.endColIndex) return;
-        if (this.startColIndex < this.endColIndex) {
-            if (this.iter === null) this.iter = this.endRowIndex - 1;
-            if (this.iter >= this.startRowIndex) {
-                this.doFillAt(this.iter, this.startColIndex);
-                this.iter--;
-            } else {
-                this.startColIndex++;
-                this.iter = null;
-                this.curDir = Direction.East;
-                this.doFillEast();
-            }
-        }
     }
 }
 
@@ -249,7 +209,7 @@ class Game implements ToJson {
      * When you collide when one is placed you die.
      */
     initFill() {
-        this.filling = new DefaultFillingBehaviour(this);
+        if (!this.filling) this.filling = new DefaultFillingBehaviour(this);
     }
 
     static getFillingBehaviour(game: Game): FillingBehaviour {

@@ -473,7 +473,7 @@ class SessionMap {
     }
 
     getUser(session_id: string) {
-        if(!this.sessions[session_id]) return null;
+        if (!this.sessions[session_id]) return null;
         return this.sessions[session_id].ids[0].name;
     }
 }
@@ -490,6 +490,7 @@ class Lobby {
     private game: Game;
     private board: Board;
     private boardName: string;
+    private startTime: number;
 
     private interval: { update: Timer, tick: Timer, time: number };
 
@@ -569,14 +570,14 @@ class Lobby {
             });
         });
         client.on('move', function (data) {
-            logger.info(`Client ${client.id} send "move" with data ${JSON.stringify(data)}`);
+            // logger.info(`Client ${client.id} send "move" with data ${JSON.stringify(data)}`);
             if (!data) return;
             safe(() => {
                 that.move(client, data);
             });
         });
         client.on('ready', function (data) {
-            logger.info(`Client ${client.id} send "move" with ready ${JSON.stringify(data)}`);
+            logger.info(`Client ${client.id} send "ready" with ready ${JSON.stringify(data)}`);
             if (!data) return;
             safe(() => {
                 that.readyToggle(client, data);
@@ -781,6 +782,8 @@ class Lobby {
                     let now = new Date().getTime();
                     that.game.gameTick((now - that.interval.time), tickRate);
                     that.interval.time = now;
+                    if (that.startTime + config.get("removeTime") * 1000 < now)
+                        that.game.initFill();
                 } catch (e) {
                     LobbyManager.socket.in(that.id).emit('failed', 'something went wrong');
 
@@ -791,12 +794,17 @@ class Lobby {
                 }
             }, tickRate),
             update: setInterval(function () {
-                LobbyManager.socket.in(that.id).emit("update", that.game.entitiesJson());
+                LobbyManager.socket.in(that.id).emit("update", {
+                    entities:that.game.entitiesJson(),
+                    filler: that.game.filling ? that.game.filling.updateJson() : null
+                });
             }, updateRate),
             time: new Date().getTime()
         };
 
         this.state = State.Starting;
+        this.startTime = new Date().getTime();
+
         setTimeout(() => this.state = State.InProgress, 5000);
         LobbyManager.socket.in(this.id).emit('start', {game: this.game.toJson(), start: new Date().getTime() + 5000});
 
@@ -974,7 +982,7 @@ class Lobby {
     chat(client: Socket, data: any) {
         if (!data || !data.session_id || !data.text || !isString(data.session_id) || !isString(data.text)) return;
         let user = this._session_map.getUser(data.session_id);
-        if(user === null) return;
+        if (user === null) return;
         let text = data.text.length < 300 ? data.text : data.text.substr(0, 300);
         logger.info(`Sending chat in ${this.id} with message: ${text}`);
         LobbyManager.socket.in(this.id).emit('chat', {user: user, text: text});

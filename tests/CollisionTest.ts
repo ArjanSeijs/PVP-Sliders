@@ -8,7 +8,7 @@ const Direction = require("../src/classes/Direction");
 
 function repeatTicks(amount: number, game: Game) {
     for (let i = 0; i < amount; i++) {
-        game.gameTick(-1);
+        game.gameTick(1,1);
     }
 }
 

@@ -74,6 +74,9 @@ class MockClient implements ClientInterface {
     getDirection(key: string): string {
         return "";
     }
+
+    updateGame(filler: any): void {
+    }
 }
 
 /**

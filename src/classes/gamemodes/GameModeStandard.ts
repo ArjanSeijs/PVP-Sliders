@@ -34,7 +34,20 @@ class GameModeStandard implements GameMode {
      * @param {Entity} other
      */
     onEnemyCollision(entity: Entity, other: Entity): void {
-        other.dead = true;
+        other.kill();
+        this.checkEnd();
+    }
+
+    /**
+     * @inheritDoc
+     * @param {Entity} entity
+     */
+    onNewWallCollision(entity: Entity) {
+        entity.kill();
+        this.checkEnd();
+    }
+
+    private checkEnd() {
         let entities: Array<Entity> = Object.keys(this.game.entities).map(k => this.game.entities[k]).filter(e => !e.dead);
 
         if (entities.length === 0) {
@@ -49,7 +62,6 @@ class GameModeStandard implements GameMode {
         }
         this.game.end(entities);
     }
-
 }
 
 export = GameModeStandard;

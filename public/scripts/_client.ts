@@ -45,12 +45,15 @@ class SocketHandler {
     /**
      * This event is fired when an update is send by the server.
      * When the update is received, all the positions of the client are synced up again.
+     * It also received updates from the server which blocks changed into a wall.
      * If an entity died it will not be send again by the update.
-     * entities : Map<String, Entity>
+     * data.entities : Map<String, Entity>
+     * data.filler : Array<{x:number,y:number}>
      * @param entities the entities.
      */
-    onUpdate(entities: any): void {
-        view.displayPlayers(entities);
+    onUpdate(data: any): void {
+        view.displayPlayers(data.entities);
+        client.updateGame(data.filler);
     }
 
     /**

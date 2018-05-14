@@ -23,5 +23,7 @@
     "darkcyan",
     "darkorange",
     "darkpink"
-  ]
+  ],
+  "removeTime": 180,
+  "removeInterval": 20
 }

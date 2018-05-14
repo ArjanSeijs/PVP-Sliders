@@ -1,7 +1,8 @@
 "use strict";
 var CollisionManager = require("./CollisionManager");
 var GameModeStandard = require("./gamemodes/GameModeStandard");
-var Direction = require("./Direction");
+var Types = require("./Types");
+var config = require("../lib/config");
 var State;
 (function (State) {
     State[State["NotStarted"] = 0] = "NotStarted";
@@ -11,105 +12,50 @@ var State;
 var DefaultFillingBehaviour = (function () {
     function DefaultFillingBehaviour(game) {
         this.game = game;
+        this.updateIndex = 0;
         this.updates = [];
-        this.endRowIndex = this.game.board.width - 1;
-        this.endColIndex = this.game.board.height - 1;
-        this.startRowIndex = 0;
-        this.startColIndex = 0;
-        this.iter = null;
-        this.curDir = Direction.East;
+        this.list = [];
+        this.generateSpiral(this.game.board.height, this.game.board.width);
+        this.counter = 0;
     }
-    DefaultFillingBehaviour.prototype.doFillAt = function (y, x) {
-        this.updates.push({ x: x, y: y });
-    };
     DefaultFillingBehaviour.prototype.doFill = function () {
-        if (this.startRowIndex < this.endRowIndex && this.startColIndex < this.endColIndex) {
-            switch (this.curDir) {
-                case Direction.North:
-                    this.doFillNorth();
-                    break;
-                case Direction.South:
-                    this.doFillSouth();
-                    break;
-                case Direction.West:
-                    this.doFillWest();
-                    break;
-                case Direction.East:
-                    this.doFillEast();
-                    break;
+        if (this.updateIndex < this.list.length) {
+            if (this.counter === 0) {
+                var pos = this.list[this.updateIndex];
+                this.game.board.getTileAt(pos.x, pos.y).tile_type = Types.Wall;
+                this.updates.push(pos);
+                this.updateIndex++;
+            }
+            this.counter = (this.counter + 1) % config.get("removeInterval");
+        }
+    };
+    DefaultFillingBehaviour.prototype.generateSpiral = function (endRowIndex, endColIndex) {
+        var iter, startRowIndex = 0, startColIndex = 0;
+        while (startRowIndex < endRowIndex && startColIndex < endColIndex) {
+            for (iter = startColIndex; iter < endColIndex; ++iter) {
+                this.list.push({ x: iter, y: startRowIndex });
+            }
+            startRowIndex++;
+            for (iter = startRowIndex; iter < endRowIndex; ++iter) {
+                this.list.push({ x: endColIndex - 1, y: iter });
+            }
+            endColIndex--;
+            if (startRowIndex < endRowIndex) {
+                for (iter = endColIndex - 1; iter >= startColIndex; --iter) {
+                    this.list.push({ x: iter, y: endRowIndex - 1 });
+                }
+                endRowIndex--;
+            }
+            if (startColIndex < endColIndex) {
+                for (iter = endRowIndex - 1; iter >= startRowIndex; --iter) {
+                    this.list.push({ x: startColIndex, y: iter });
+                }
+                startColIndex++;
             }
         }
     };
     DefaultFillingBehaviour.prototype.updateJson = function () {
         return this.updates;
-    };
-    DefaultFillingBehaviour.prototype.doFillEast = function () {
-        if (this.startRowIndex >= this.endRowIndex || this.startColIndex >= this.endColIndex)
-            return;
-        if (this.iter === null)
-            this.iter = this.startColIndex;
-        if (this.iter < this.endColIndex) {
-            this.doFillAt(this.startRowIndex, this.iter);
-            this.iter++;
-        }
-        else {
-            this.startRowIndex++;
-            this.iter = null;
-            this.curDir = Direction.South;
-            this.doFillSouth();
-        }
-    };
-    DefaultFillingBehaviour.prototype.doFillSouth = function () {
-        if (this.startRowIndex >= this.endRowIndex || this.startColIndex >= this.endColIndex)
-            return;
-        if (this.iter === null)
-            this.iter = this.startRowIndex;
-        if (this.iter < this.endRowIndex) {
-            this.doFillAt(this.iter, this.endColIndex - 1);
-            this.iter++;
-        }
-        else {
-            this.endColIndex--;
-            this.iter = null;
-            this.curDir = Direction.West;
-            this.doFillWest();
-        }
-    };
-    DefaultFillingBehaviour.prototype.doFillWest = function () {
-        if (this.startRowIndex >= this.endRowIndex || this.startColIndex >= this.endColIndex)
-            return;
-        if (this.startRowIndex < this.endRowIndex) {
-            if (this.iter === null)
-                this.iter = this.endColIndex - 1;
-            if (this.iter >= this.startColIndex) {
-                this.doFillAt(this.endRowIndex - 1, this.iter);
-                this.iter--;
-            }
-            else {
-                this.endRowIndex--;
-                this.iter = null;
-                this.curDir = Direction.North;
-                this.doFillNorth();
-            }
-        }
-    };
-    DefaultFillingBehaviour.prototype.doFillNorth = function () {
-        if (this.startRowIndex >= this.endRowIndex || this.startColIndex >= this.endColIndex)
-            return;
-        if (this.startColIndex < this.endColIndex) {
-            if (this.iter === null)
-                this.iter = this.endRowIndex - 1;
-            if (this.iter >= this.startRowIndex) {
-                this.doFillAt(this.iter, this.startColIndex);
-                this.iter--;
-            }
-            else {
-                this.startColIndex++;
-                this.iter = null;
-                this.curDir = Direction.East;
-                this.doFillEast();
-            }
-        }
     };
     return DefaultFillingBehaviour;
 }());
@@ -174,7 +120,8 @@ var Game = (function () {
         return this.state === State.Finished;
     };
     Game.prototype.initFill = function () {
-        this.filling = new DefaultFillingBehaviour(this);
+        if (!this.filling)
+            this.filling = new DefaultFillingBehaviour(this);
     };
     Game.getFillingBehaviour = function (game) {
         return new DefaultFillingBehaviour(game);

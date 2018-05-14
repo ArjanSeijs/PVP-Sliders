@@ -51,6 +51,8 @@ var MockClient = /** @class */ (function () {
     MockClient.prototype.getDirection = function (key) {
         return "";
     };
+    MockClient.prototype.updateGame = function (filler) {
+    };
     return MockClient;
 }());
 /**

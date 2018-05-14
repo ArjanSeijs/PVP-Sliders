@@ -400,7 +400,6 @@ var Lobby = (function () {
             });
         });
         client.on('move', function (data) {
-            logger.info("Client " + client.id + " send \"move\" with data " + JSON.stringify(data));
             if (!data)
                 return;
             safe(function () {
@@ -408,7 +407,7 @@ var Lobby = (function () {
             });
         });
         client.on('ready', function (data) {
-            logger.info("Client " + client.id + " send \"move\" with ready " + JSON.stringify(data));
+            logger.info("Client " + client.id + " send \"ready\" with ready " + JSON.stringify(data));
             if (!data)
                 return;
             safe(function () {
@@ -578,6 +577,8 @@ var Lobby = (function () {
                     var now = new Date().getTime();
                     that.game.gameTick((now - that.interval.time), tickRate);
                     that.interval.time = now;
+                    if (that.startTime + config.get("removeTime") * 1000 < now)
+                        that.game.initFill();
                 }
                 catch (e) {
                     LobbyManager.socket.in(that.id).emit('failed', 'something went wrong');
@@ -587,11 +588,15 @@ var Lobby = (function () {
                 }
             }, tickRate),
             update: setInterval(function () {
-                LobbyManager.socket.in(that.id).emit("update", that.game.entitiesJson());
+                LobbyManager.socket.in(that.id).emit("update", {
+                    entities: that.game.entitiesJson(),
+                    filler: that.game.filling ? that.game.filling.updateJson() : null
+                });
             }, updateRate),
             time: new Date().getTime()
         };
         this.state = State.Starting;
+        this.startTime = new Date().getTime();
         setTimeout(function () { return _this.state = State.InProgress; }, 5000);
         LobbyManager.socket.in(this.id).emit('start', { game: this.game.toJson(), start: new Date().getTime() + 5000 });
         logger.info("Game in " + this.id + " has loaded");
