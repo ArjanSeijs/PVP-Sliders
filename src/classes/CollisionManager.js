@@ -28,6 +28,20 @@ var CollisionHandler = (function () {
             }
         }
     };
+    CollisionHandler.prototype.wallCollisions = function () {
+        var entities = this.game.entities;
+        var cellSize = config.get("cellSize");
+        for (var key in entities) {
+            if (entities.hasOwnProperty(key)) {
+                var entity = entities[key];
+                var x = Math.floor(entity.pos.x / cellSize);
+                var y = Math.floor(entity.pos.y / cellSize);
+                if (entity.direction.curr === Direction.None && this.game.board.getTileAt(x, y).tile_type === Types.Wall) {
+                    this.game.gameMode.onNewWallCollision(entity);
+                }
+            }
+        }
+    };
     CollisionHandler.prototype.collisionCheck = function (entity, other, speed, factor) {
         if (entity === other)
             return;
@@ -130,7 +144,7 @@ var CollisionHandler = (function () {
         return this.isFreeAt(entity, speed, newX, newY);
     };
     CollisionHandler.prototype.isFreeAt = function (entity, speed, newX, newY) {
-        var cellSize = 100;
+        var cellSize = config.get("cellSize");
         switch (entity.direction.curr) {
             case Direction.North:
             case Direction.West:

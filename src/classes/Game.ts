@@ -108,7 +108,7 @@ class Game implements ToJson {
      * @param {Board} board
      */
     constructor(board: Board) {
-        this.board = board;
+        this.board = board.clone();
         this.entities = {};
         this.collisionManager = new CollisionManager(this);
         this.gameMode = new GameModeStandard(this);
@@ -152,6 +152,16 @@ class Game implements ToJson {
         }
 
         this.collisionManager.movement(ms, interval);
+        this.collisionManager.wallCollisions();
+
+        for (let key in this.entities) {
+            if (!this.entities.hasOwnProperty(key)) continue;
+
+            let entity: Entity = this.entities[key];
+            if (entity.dead === true) {
+                delete this.entities[key];
+            }
+        }
     }
 
     /**

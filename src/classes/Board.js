@@ -27,6 +27,16 @@ var Board = (function () {
             tiles: this.tiles.map(function (x) { return x.map(function (y) { return y.toJson(); }); })
         };
     };
+    Board.prototype.clone = function () {
+        var board = new Board(this.width, this.height);
+        board.metadata = this.metadata;
+        for (var x = 0; x < board.width; x++) {
+            for (var y = 0; y < board.height; y++) {
+                board.tiles[x][y].tile_type = this.getTileAt(x, y).tile_type;
+            }
+        }
+        return board;
+    };
     return Board;
 }());
 module.exports = Board;

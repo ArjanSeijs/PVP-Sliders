@@ -56,6 +56,24 @@ class CollisionHandler {
     }
 
     /**
+     * If the player is not moving check if the current index is a wall.
+     */
+    wallCollisions() {
+        const entities = this.game.entities;
+        const cellSize = config.get("cellSize");
+        for (let key in entities) {
+            if (entities.hasOwnProperty(key)) {
+                let entity = entities[key];
+                let x = Math.floor(entity.pos.x / cellSize);
+                let y = Math.floor(entity.pos.y / cellSize);
+                if (entity.direction.curr === Direction.None && this.game.board.getTileAt(x, y).tile_type === Types.Wall) {
+                    this.game.gameMode.onNewWallCollision(entity);
+                }
+            }
+        }
+    }
+
+    /**
      *
      * @param {Entity} entity
      * @param {Entity} other
@@ -194,7 +212,7 @@ class CollisionHandler {
      * @param factor
      * @return {boolean}
      */
-    isFree(entity: Entity, speed: number, factor : number): boolean {
+    isFree(entity: Entity, speed: number, factor: number): boolean {
         let dir = entity.direction.curr;
 
         //TODO Depends ons TPS
@@ -215,7 +233,7 @@ class CollisionHandler {
      * @return {boolean}
      */
     isFreeAt(entity: Entity, speed: number, newX: number, newY: number): boolean {
-        const cellSize = 100;
+        const cellSize = config.get("cellSize");
         switch (entity.direction.curr) {
             case Direction.North:
             case Direction.West:
@@ -236,7 +254,7 @@ class CollisionHandler {
      * @param factor
      * @return {boolean}
      */
-    private isStop(entity: Entity, speed: number, factor : number): boolean {
+    private isStop(entity: Entity, speed: number, factor: number): boolean {
         const cellSize = 100;
         let dir = entity.direction.curr;
 

@@ -46,12 +46,21 @@ var Entity = (function () {
             y < yPos - this.size);
     };
     Entity.prototype.collides = function (entity, xPos, yPos) {
-        var x = this.pos.x + this.direction.curr.x * 30;
-        var y = this.pos.y + this.direction.curr.y * 30;
+        var x = this.pos.x + this.direction.curr.x * config.get("speed");
+        var y = this.pos.y + this.direction.curr.y * config.get("speed");
         return !(x > xPos + entity.size ||
             y > yPos + entity.size ||
             x < xPos - this.size ||
             y < yPos - this.size);
+    };
+    Entity.prototype.collidesWall = function (pos) {
+        var cellSize = config.get("cellSize");
+        var x = this.pos.x;
+        var y = this.pos.y;
+        return !(x > pos.x + cellSize ||
+            y > pos.y + cellSize ||
+            x < pos.x - this.size ||
+            y < pos.y - this.size);
     };
     Entity.prototype.toJson = function () {
         return {

@@ -86,7 +86,6 @@ class Entity implements ToJson {
      * @return {boolean}
      */
     collidesNow(entity: Entity, xPos: number, yPos: number): boolean {
-        //TODO SPEED
         let x = this.pos.x;
         let y = this.pos.y;
         return !(x > xPos + entity.size ||
@@ -104,12 +103,27 @@ class Entity implements ToJson {
      */
     collides(entity: Entity, xPos: number, yPos: number): boolean {
         //TODO SPEED
-        let x = this.pos.x + this.direction.curr.x * 30;
-        let y = this.pos.y + this.direction.curr.y * 30;
+        let x = this.pos.x + this.direction.curr.x * config.get("speed");
+        let y = this.pos.y + this.direction.curr.y * config.get("speed");
         return !(x > xPos + entity.size ||
             y > yPos + entity.size ||
             x < xPos - this.size ||
             y < yPos - this.size);
+    }
+
+    /**
+     * Checks if an collision occurs with a entity and a wall at a position.
+     * @param {{x: number, y: number}} pos
+     * @return {boolean}
+     */
+    collidesWall(pos: { x: number; y: number }) {
+        let cellSize = config.get("cellSize");
+        let x = this.pos.x;
+        let y = this.pos.y;
+        return !(x > pos.x + cellSize ||
+            y > pos.y + cellSize ||
+            x < pos.x - this.size ||
+            y < pos.y - this.size);
     }
 
 

@@ -61,7 +61,7 @@ var DefaultFillingBehaviour = (function () {
 }());
 var Game = (function () {
     function Game(board) {
-        this.board = board;
+        this.board = board.clone();
         this.entities = {};
         this.collisionManager = new CollisionManager(this);
         this.gameMode = new GameModeStandard(this);
@@ -92,6 +92,15 @@ var Game = (function () {
             entity.gameTick();
         }
         this.collisionManager.movement(ms, interval);
+        this.collisionManager.wallCollisions();
+        for (var key in this.entities) {
+            if (!this.entities.hasOwnProperty(key))
+                continue;
+            var entity = this.entities[key];
+            if (entity.dead === true) {
+                delete this.entities[key];
+            }
+        }
     };
     Game.prototype.end = function (winners) {
         this.state = State.Finished;

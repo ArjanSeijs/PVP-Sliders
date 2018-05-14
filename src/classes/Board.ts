@@ -63,6 +63,17 @@ class Board implements ToJson {
             tiles: this.tiles.map(x => x.map(y => y.toJson()))
         }
     }
+
+    clone(): Board {
+        let board = new Board(this.width, this.height);
+        board.metadata = this.metadata;
+        for (let x = 0; x < board.width; x++) {
+            for (let y = 0; y < board.height; y++) {
+                board.tiles[x][y].tile_type = this.getTileAt(x, y).tile_type;
+            }
+        }
+        return board;
+    }
 }
 
 export = Board;
